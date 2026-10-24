@@ -8,7 +8,7 @@ It is built for home sellers in the DC/Maryland/Virginia area. The AI runs on yo
 
 ## Status
 
-The app, grading, cost lookup, queue, PDF report and all guardrails are built and tested. **Not yet run against real Gemma 4**: that needs the demo machine (see [Setup](#setup-windows)). Items still to fill are listed in [`docs/decisions.md`](docs/decisions.md) under "Human must fill".
+The app, grading, cost lookup, queue, PDF report and all guardrails are built and tested. **Not yet run against real Gemma 4 on the Windows demo laptop.** The [Gate 0 runner](docs/gate0.md) includes licensed photos, streamed timing, production JSON checks, and controlled one-versus-four-worker benchmarks. Windows certification remains pending. Items still to fill are listed in [`docs/decisions.md`](docs/decisions.md) under "Human must fill".
 
 Screenshots: PLACEHOLDER (add after the first run on the demo machine).
 
@@ -58,24 +58,31 @@ Screenshots of each: PLACEHOLDER.
 
 ```powershell
 # 1. Python 3.11+ and Git are required. Install Ollama from ollama.com.
-# 2. Download the model. Use the smallest vision-capable Gemma 4 tag from the Ollama library:
-ollama pull <tag>
-$env:DISCLOSURE_MODEL = "<tag>"
-
-# 3. Get the code and start it
+# 2. Get the code and install dependencies.
 git clone https://github.com/ben-robles/disclosure
 cd disclosure
-python -m venv .venv
-.\.venv\Scripts\pip install -r requirements.txt
-.\run.ps1            # http://127.0.0.1:8000
-.\run.ps1 -Lan       # also prints a URL for a phone on the same Wi-Fi
+py -3.11 -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+# 3. Quit the Ollama tray app, then collect Gate 0 evidence.
+.\scripts\gate0_windows.ps1
 ```
 
-Check that Gemma sees images first: `.\.venv\Scripts\python scripts\gate0_ollama.py <tag> photo.jpg`.
+Complete [Gate 0](docs/gate0.md) first: quit the Ollama tray app, then run
+`.\scripts\gate0_windows.ps1` from the Windows checkout. It starts a local server,
+pulls `gemma4:e2b`, tests both licensed defect photos through the CLI, HTTP API and
+production analyzer, restarts the server for one/four workers, and saves raw evidence
+and draft reports in `data/gate0/<run>/`. Inspect image-specific replies before
+recording a pass. If E2B fails vision or latency, run once with `-Model gemma4:e4b`.
+After review, set `DISCLOSURE_MODEL` to the verified explicit tag and
+`DISCLOSURE_WORKERS` to the measured choice. Restart Ollama with matching
+`OLLAMA_NUM_PARALLEL`, then use `.\run.ps1` (localhost) or `.\run.ps1 -Lan`
+(prints a phone URL). The small direct check still works:
+`.\.venv\Scripts\python scripts\gate0_ollama.py <tag> photo.jpg`.
 
-Tested laptop specs, model size and measured latency per photo: PLACEHOLDER.
+Tested Windows specs, model size and measured latency per photo: pending;
+see [Gate 0](docs/gate0.md) and [environment status](docs/environment.md).
 
-Settings (environment variables): `DISCLOSURE_MODEL`, `DISCLOSURE_WORKERS` (photos analyzed at once, default 4; match Ollama's `OLLAMA_NUM_PARALLEL`), `DISCLOSURE_KEEP_ALIVE`, `DISCLOSURE_TIMEOUT_S`, `DISCLOSURE_DATA_DIR`.
+Settings (environment variables): `DISCLOSURE_MODEL`, `DISCLOSURE_WORKERS` (photos analyzed at once, default 1 pending Gate 0 measurements; match Ollama's `OLLAMA_NUM_PARALLEL`), `DISCLOSURE_KEEP_ALIVE`, `DISCLOSURE_TIMEOUT_S`, `DISCLOSURE_DATA_DIR`. Set the explicit verified model tag after reviewing Gate 0; the existing app model default is still unverified.
 
 Tests: `.\.venv\Scripts\python -m pytest`. To try the UI without Gemma: `.\.venv\Scripts\python -m tests.dev_server` (canned fake answers, http://127.0.0.1:8001).
 
@@ -104,7 +111,7 @@ The report is a companion document organized by the numbered questions of the [M
 
 ## Test photos and results
 
-PLACEHOLDER: add photos to `assets/test_photos/` with sources and licenses in `test_photos.csv`, then run `scripts\run_test_set.py`. Results go to `docs/test-results.md`.
+Two licensed Gate 0 photos are included with [attribution and expected visible details](assets/test_photos/ATTRIBUTION.md). The full adversarial set is still pending. Add its remaining photos with sources/licenses in `test_photos.csv`, then run `scripts\run_test_set.py`. Results go to `docs/test-results.md`; a two-photo run is not the full accuracy evaluation.
 
 ## The user
 

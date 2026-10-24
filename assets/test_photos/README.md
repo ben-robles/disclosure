@@ -1,6 +1,9 @@
 # Test photos
 
-Not added yet (needs the target machine and a license check per photo).
+Two licensed Gate 0 fixtures are included: a ceiling stain and spalling chimney bricks.
+See [ATTRIBUTION.md](ATTRIBUTION.md) for authors, licenses, modifications and expected
+visible details. These two photos are a vision smoke check; they do not complete the
+adversarial set below. Severity and urgency are not ground-truth inspection labels.
 
 Needed, all openly licensed (Wikimedia Commons CC, Unsplash/Pexels, or US government public domain: FEMA, HUD, EPA, NPS):
 

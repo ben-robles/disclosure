@@ -80,14 +80,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Disclosure" },
       { name: "description", content: "Seller-side home defect documentation" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Disclosure" },
+            { property: "og:title", content: "Disclosure" },
       { property: "og:description", content: "Seller-side home defect documentation" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      {
+        rel: "stylesheet",
+        href: "https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400..800;1,400..600&display=swap",
+      },
       {
         rel: "stylesheet",
         href: appCss,

@@ -67,6 +67,8 @@ class OllamaAnalyzer(DefectAnalyzer):
         self.base_url = (base_url or config.OLLAMA_URL).rstrip("/")
         self.model = model or config.MODEL
         self.timeout_s = timeout_s or config.INFERENCE_TIMEOUT_S
+        # Some tags (gemma4 on Ollama 0.40) reject `format` with HTTP 501; once seen, stop sending it.
+        self._use_format = True
 
     def _request(self, path, payload=None, timeout=5):
         data = json.dumps(payload).encode("utf-8") if payload is not None else None
@@ -99,7 +101,6 @@ class OllamaAnalyzer(DefectAnalyzer):
             "model": self.model,
             "stream": False,
             "keep_alive": config.KEEP_ALIVE,
-            "format": output_schema(),
             "options": {"temperature": 0},
             "messages": [{
                 "role": "user",
@@ -107,7 +108,16 @@ class OllamaAnalyzer(DefectAnalyzer):
                 "images": [base64.b64encode(image_bytes).decode("ascii")],
             }],
         }
-        body = self._request("/api/chat", payload, timeout=self.timeout_s)
+        if self._use_format:
+            payload["format"] = output_schema()
+        try:
+            body = self._request("/api/chat", payload, timeout=self.timeout_s)
+        except urllib.error.HTTPError as exc:
+            if exc.code != 501 or not self._use_format:
+                raise
+            self._use_format = False
+            payload.pop("format", None)
+            body = self._request("/api/chat", payload, timeout=self.timeout_s)
         return body.get("message", {}).get("content", "")
 
     def analyze(self, image_bytes: bytes) -> Finding:

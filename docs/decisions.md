@@ -4,7 +4,7 @@
 
 | Phase | State |
 |---|---|
-| Gate 0 (Gemma sees images) | **Not done.** Needs the Gemma machine. Template in `gate0.md`. |
+| Gate 0 (Gemma sees images) | **Windows certification pending.** Runner, two licensed photos, streamed timing, production JSON checks and controlled concurrency benchmarks implemented. Run `scripts/gate0_windows.ps1` on the demo laptop; see `gate0.md`. No real Windows Gemma results yet. |
 | 1 Skeleton | Done and verified here (server, welcome view, 390 px layout, `run.ps1` untested on a fresh window). |
 | 2 Inference core | Code done: `DefectAnalyzer`, Ollama implementation, taxonomy-built prompt, parsing with retry, EXIF strip and resize. Tested against a local stub server only. **Never run against real Gemma.** Prompt v1 is untuned. |
 | 3 Grading, costs, data, queue | Done, 72 pytest tests green. |
@@ -20,7 +20,9 @@
 - **Medium-confidence label.** Badge text is "Serious to Urgent", from the best-end and worst-end letters, so the aria-label does not understate the worse letter.
 - **Maryland mapping.** Form fetched from the Maryland Department of Labor, printed revision "Rev August 3, 2026". Five types map to a numbered question (3 Foundation, 5 Roof, 7 Plumbing system, 10 Electric Systems, 17 Wood-destroying insects). `water_intrusion`, `mold_mildew` and `window_door_rot` have no matching question and go under question 25 (other material defects). This is weaker than the "nearly one-to-one" claim in the plan. `unclear` goes in a separate inspector group.
 - **Extra modules** beyond the plan layout: `app/present.py` (shared display dicts for API and PDF), `app/config.py`, `tests/dev_server.py` (runs the real app with a canned fake analyzer, for UI checks without Gemma).
-- **Concurrency (added by someone else while I was building):** `app/queue.py` runs `DISCLOSURE_WORKERS` threads (default 4), `claim_pending` is one atomic `UPDATE ... RETURNING`, and `keep_alive` is sent to Ollama. Four parallel image requests on a laptop GPU may be slower or run out of memory. Set `DISCLOSURE_WORKERS=1` first if Gate 0 shows trouble, and set Ollama's `OLLAMA_NUM_PARALLEL` to match.
+- **Concurrency:** `app/queue.py` runs `DISCLOSURE_WORKERS` threads (default 1 pending Gate 0), `claim_pending` is one atomic `UPDATE ... RETURNING`, and `keep_alive` is sent to Ollama. The Gate 0 wrapper measures three warmed four-photo batches with one and four workers, restarting its own Ollama server with matching parallelism. Four workers are recommended only for faster successful measurements; failures and ties retain one.
+- **Gate 0 evidence:** first-content receipt is measured from streaming content, excluding thinking. Raw NDJSON, complete production replies/retries, CLI output, model identity, load/evaluation durations and sampled resource data are retained under `data/gate0/`. Automated checks never certify image specificity. The Windows reviewer must compare both fixture photos with replies before changing the model default or recording a pass.
+- **Gate 0 fixtures:** Ed!'s ceiling-water-stain photo (CC BY-SA 3.0) and Beltedweir's spalling-chimney photo (CC BY-SA 4.0), license-checked and visually inspected October 24, 2026. Resized and stripped of EXIF; attribution and expected evidence are in `assets/test_photos/ATTRIBUTION.md`. These are two smoke-test fixtures, not the complete adversarial dataset.
 - **Model tag default `gemma4` is a guess.** Gate 0 sets the real tag; override with `DISCLOSURE_MODEL`.
 - **Ollama `format` (structured output) is always sent.** Unverified for the chosen tag. If Ollama rejects it, remove it in `ollama_analyzer.py`; the parser already copes with plain JSON.
 - **CSP** on the index page: `default-src 'self'`. The PDF response carries no CSP so Chrome's viewer works.
