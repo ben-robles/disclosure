@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -20,7 +21,24 @@ ASSETS_DIR = ROOT / "assets"
 STATIC_DIR = ROOT / "static"
 DATA_DIR = Path(os.environ.get("DISCLOSURE_DATA_DIR", ROOT / "data"))
 
+# Ollama on this computer, or the Cloud Run proxy (http://127.0.0.1:9090, see cloud/README.md).
 OLLAMA_URL = os.environ.get("DISCLOSURE_OLLAMA_URL", "http://127.0.0.1:11434")
+
+
+def is_local_url(url: str) -> bool:
+    """True only for Ollama's own default address; the Cloud Run proxy port counts as hosted."""
+    parts = urlsplit(url)
+    try:
+        port = parts.port
+    except ValueError:
+        return False
+    return (parts.hostname or "").lower() in {"127.0.0.1", "localhost"} and port == 11434
+
+
+OLLAMA_IS_LOCAL = is_local_url(OLLAMA_URL)
+# Only for a direct IAM identity token; empty when going through the gcloud proxy.
+OLLAMA_TOKEN = os.environ.get("DISCLOSURE_OLLAMA_TOKEN", "").strip()
+PROXY_FIX = "gcloud run services proxy disclosure-gemma --region us-east4 --port 9090"
 # PLACEHOLDER: the real tag is chosen in Gate 0 (docs/gate0.md). Set DISCLOSURE_MODEL to override.
 MODEL = os.environ.get("DISCLOSURE_MODEL", "gemma4")
 INFERENCE_TIMEOUT_S = int(os.environ.get("DISCLOSURE_TIMEOUT_S", "120"))
