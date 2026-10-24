@@ -27,8 +27,8 @@ the repository's code license does not replace them. No endorsement is implied.
 - License: [Creative Commons Attribution-ShareAlike 4.0 International](https://creativecommons.org/licenses/by-sa/4.0/).
 - Visible evidence: an attic brick chimney between wooden roof members, with
   flaked/eroded brick faces, cavities and brick debris along its base.
-- Expected taxonomy: `foundation_structural`, the closest available category for
-  masonry damage. This label does not establish structural instability.
+- Expected taxonomy: `chimney_fireplace`. (Taxonomy v1 had no chimney category, so
+  this was `foundation_structural`; that label did not establish structural instability.)
 
 Gate 0 image specificity requires different descriptions of these visible features.
 A generic statement such as “there may be home damage” fails. Correct taxonomy JSON

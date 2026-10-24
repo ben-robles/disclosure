@@ -1,13 +1,13 @@
 """Prompt and output schema, both built from assets/defect_taxonomy.json.
 
-PROMPT_VERSION v1 - bump on every wording change; test-results.md logs it.
+PROMPT_VERSION v2 - bump on every wording change; test-results.md logs it.
 """
 import json
 
 from ..config import ASSETS_DIR
 from .analyzer import CONFIDENCES, QUALITIES, URGENCIES
 
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 
 
 def load_taxonomy() -> list:
@@ -26,6 +26,7 @@ def build_prompt() -> str:
         "Look only at what is visible. Reply with JSON only, no other text.\n\n"
         "defect_type must be exactly one of these ids:\n"
         f"{allowed}\n\n"
+        "Pick the most specific id that fits what is visible.\n\n"
         "Fields:\n"
         "- severity: integer 1 (trivial) to 5 (dangerous or structural)\n"
         f"- urgency: one of {', '.join(URGENCIES)}\n"

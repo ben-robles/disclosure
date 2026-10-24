@@ -16,7 +16,7 @@ Next performance work: [smaller-model comparison and inference-speed handoff](do
 
 ## What the AI does and never does
 
-- **Does:** looks at one photo and picks one of 9 fixed types (roof, water intrusion, mold, foundation or structural, electrical, plumbing, window or door, pests or wood damage, unclear). Rates severity (1-5), urgency and its own confidence. Writes one sentence about what is visible.
+- **Does:** looks at one photo and picks one of 28 fixed types, listed in `assets/defect_taxonomy.json` (roof, chimney, gutters, grading, siding, deck, water intrusion, basement moisture, mold, foundation, electrical, panel, plumbing, water heater, heating, cooling, insulation, windows and doors, walls, flooring, stairs, pests, alarms, hazardous materials, septic, fire damage, and more; unclear when it cannot tell). Rates severity (1-5), urgency and its own confidence. Writes one sentence about what is visible.
 - **Never:** writes dollar amounts, gives legal conclusions, or gives a grade when it is unsure. Cost ranges come from a hand-built table the model never sees. Nothing goes in the report until you confirm it.
 
 ## The grading rule
