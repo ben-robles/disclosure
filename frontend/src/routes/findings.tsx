@@ -61,7 +61,7 @@ function Findings() {
     <AppShell
       step={2}
       title="What we found"
-      lead="Check each one. Only findings you confirm go into the report."
+      lead="Only findings you confirm go into the report."
       footer={
         confirmed === 0 ? (
           <div className="space-y-2">

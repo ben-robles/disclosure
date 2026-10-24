@@ -49,7 +49,6 @@ function Report() {
     <AppShell
       step={4}
       title="Your report is ready"
-      lead="Read it through, then download a copy."
       footer={
         <div className="grid gap-2">
           <Button asChild size="xl" disabled={!url}>
