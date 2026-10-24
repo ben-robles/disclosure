@@ -105,7 +105,7 @@ After review, set `DISCLOSURE_MODEL` to the verified explicit tag and
 Tested Windows specs, model size and measured latency per photo: pending;
 see [Gate 0](docs/gate0.md) and [environment status](docs/environment.md).
 
-Settings (environment variables): `DISCLOSURE_MODEL`, `DISCLOSURE_WORKERS` (photos analyzed at once, default 1 pending Gate 0 measurements; match Ollama's `OLLAMA_NUM_PARALLEL`), `DISCLOSURE_KEEP_ALIVE`, `DISCLOSURE_TIMEOUT_S`, `DISCLOSURE_DATA_DIR`. Set the explicit verified model tag after reviewing Gate 0; the existing app model default is still unverified.
+Settings (environment variables): `DISCLOSURE_OLLAMA_URL` (default `http://127.0.0.1:11434`; set to `http://127.0.0.1:9090` with the Cloud Run proxy, see `cloud/README.md`), `DISCLOSURE_OLLAMA_TOKEN` (only for a direct IAM token), `DISCLOSURE_MODEL`, `DISCLOSURE_WORKERS` (photos analyzed at once, default 1 pending Gate 0 measurements; match Ollama's `OLLAMA_NUM_PARALLEL`), `DISCLOSURE_KEEP_ALIVE`, `DISCLOSURE_TIMEOUT_S`, `DISCLOSURE_DATA_DIR`. Set the explicit verified model tag after reviewing Gate 0; the existing app model default is still unverified.
 
 Tests: `.\.venv\Scripts\python -m pytest`. To try the UI without Gemma: `.\.venv\Scripts\python -m tests.dev_server` (canned fake answers, http://127.0.0.1:8001).
 
