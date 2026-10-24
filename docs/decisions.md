@@ -14,7 +14,7 @@
 
 ## Choices made while building
 
-- **Hosted inference (October 24, 2026).** Gemma 4 (`gemma4:e4b`) runs on a private Cloud Run service with one NVIDIA L4, scale to zero, at most 3 instances (about $2.25 per hour cap). The laptop reaches it through `gcloud run services proxy` on port 9090 via `DISCLOSURE_OLLAMA_URL`. Local Ollama remains supported and is the default.
+- **Hosted inference (October 24, 2026).** Gemma 4 (`gemma4:e4b`) runs on a private Cloud Run service with one NVIDIA L4, scale to zero, at most 1 instance (about $0.75 per hour cap; the regional quota on a new project does not fit 3). The laptop reaches it through `gcloud run services proxy` on port 9090 via `DISCLOSURE_OLLAMA_URL`. Local Ollama remains supported and is the default.
 - **Stored image is the 1024 px sanitized JPEG.** Original is never kept. The report uses the same file.
 - **Edited findings are graded as high confidence.** An edit is the seller's own judgement, so it shows a single letter and is marked "Edited by you". Editing un-confirms the finding.
 - **Can't-tell findings can be confirmed** into the report (shown under "Needs review by a licensed home inspector"). Blurry, not-a-house, timeout and unreachable cards can only be retaken, retried or deleted.

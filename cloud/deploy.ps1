@@ -1,6 +1,6 @@
 # Builds the Ollama + Gemma image on Cloud Build and deploys it to Cloud Run with one NVIDIA L4 GPU.
 # The service is private (IAM only) and scales to zero. Cost cap: -MaxInstances limits how many
-# GPUs can run at once, at about $0.75 per GPU-hour, so the default of 3 is about $2.25 per hour.
+# GPUs can run at once, at about $0.75 per GPU-hour, so 3 would be about $2.25 per hour. The default is 1: a new project's regional quota (20 vCPU, 40 GiB) only fits one 8 vCPU, 32 GiB instance.
 # Safe to run twice: the Artifact Registry repository is only created when it is missing.
 param(
     [string]$Project = $env:GCP_PROJECT,
@@ -8,7 +8,7 @@ param(
     [string]$Service = "disclosure-gemma",
     [string]$Model = "gemma4:e4b",
     [int]$MinInstances = 0,
-    [int]$MaxInstances = 3,
+    [int]$MaxInstances = 1,
     [int]$Concurrency = 4
 )
 

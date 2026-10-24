@@ -9,7 +9,7 @@ Ollama image pinned in `Dockerfile`: `ollama/ollama:0.40.10`.
 - gcloud SDK installed and logged in (`gcloud auth login`).
 - A project with billing enabled.
 - Roles: `roles/run.admin`, `roles/iam.serviceAccountUser`, `roles/serviceusage.serviceUsageConsumer`, `roles/artifactregistry.admin`, `roles/cloudbuild.builds.editor`. Project owners have all of them.
-- Cloud Run GPU quota: Nvidia L4 without zonal redundancy in `us-east4`, 3 units.
+- Cloud Run GPU quota: Nvidia L4 without zonal redundancy in `us-east4`. A new project also has a regional limit of 20 vCPU and 40 GiB, which fits one instance (8 vCPU, 32 GiB); request more quota before raising `-MaxInstances`.
 
 ## Deploy
 
@@ -51,14 +51,14 @@ gcloud run services update disclosure-gemma --region us-east4 --min-instances 0
 | Setting | Value |
 |---|---|
 | Concurrency per instance | 4 (`OLLAMA_NUM_PARALLEL`) |
-| Max instances | 3 (default GPU quota) |
-| Concurrent photos | 12 |
+| Max instances | 1 (regional CPU and memory quota on a new project) |
+| Concurrent photos | 4 |
 
-To go further: request more GPU quota, raise `-MaxInstances`, and raise `DISCLOSURE_WORKERS` to match.
+Measured: about 16 photos per minute at 4 workers. To go further: request more CPU, memory and GPU quota, raise `-MaxInstances`, and raise `DISCLOSURE_WORKERS` to match.
 
 ## Cost
 
-An L4 without zonal redundancy costs $0.0001867 per second, about $0.67 per hour, plus about $0.08 per hour for CPU and memory. `--max-instances 3` caps the service at about $2.25 per hour. Idle time costs nothing at `--min-instances 0`. Create billing alerts at $100, $200 and $300 in the console.
+An L4 without zonal redundancy costs $0.0001867 per second, about $0.67 per hour, plus about $0.08 per hour for CPU and memory. `--max-instances 1` caps the service at about $0.75 per hour; 3 instances would be about $2.25. Idle time costs nothing at `--min-instances 0`. Create billing alerts at $100, $200 and $300 in the console.
 
 ## Tear down
 
