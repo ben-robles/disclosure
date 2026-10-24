@@ -21,7 +21,7 @@ ASSETS_DIR = ROOT / "assets"
 STATIC_DIR = ROOT / "static"
 DATA_DIR = Path(os.environ.get("DISCLOSURE_DATA_DIR", ROOT / "data"))
 
-# Ollama on this computer, or the Cloud Run proxy (http://127.0.0.1:9090, see cloud/README.md).
+# Ollama on this computer, or the Cloud Run proxy on port 9090 (see cloud/README.md).
 OLLAMA_URL = os.environ.get("DISCLOSURE_OLLAMA_URL", "http://127.0.0.1:11434")
 
 
