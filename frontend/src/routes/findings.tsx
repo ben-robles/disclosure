@@ -169,7 +169,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
             }}
           />
           <div className="mt-3 grid grid-cols-2 gap-2">
-            {f.guard === "timeout" ? (
+            {f.guard === "timeout" || f.guard === "unavailable" ? (
               <Button size="touch" onClick={() => retryPhoto(photo.id)}>
                 Try again
               </Button>

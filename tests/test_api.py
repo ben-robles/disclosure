@@ -169,3 +169,18 @@ def test_retry_requeues(client, jpeg):
     while client.app_.state.worker.run_once():
         pass
     assert client.get(f"/api/session/{sid}").json()["photos"][0]["state"] == "graded"
+
+
+def test_analyze_one_returns_finding_and_stores_nothing(client, jpeg, analyzer):
+    r = client.post("/api/analyze", files={"file": ("p.jpg", jpeg(), "image/jpeg")})
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["defect_type"] == "water_intrusion"
+    assert set(body) >= {"severity", "urgency", "confidence", "image_quality", "reason", "analysis_status"}
+    assert analyzer.calls == 1
+    assert not list((client.app_.state.photo_path("x").parent).iterdir())
+
+
+def test_analyze_one_rejects_non_image(client):
+    r = client.post("/api/analyze", files={"file": ("x.jpg", b"not an image", "image/jpeg")})
+    assert r.status_code == 400

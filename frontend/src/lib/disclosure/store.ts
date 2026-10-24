@@ -127,7 +127,7 @@ export async function runQueue() {
 }
 
 /** Derived view of a finding with edits applied. */
-export type GuardKind = "blurry" | "not_a_house" | "low_confidence" | "timeout" | null;
+export type GuardKind = "blurry" | "not_a_house" | "low_confidence" | "timeout" | "unavailable" | null;
 
 export function viewFinding(p: Photo) {
   const r = p.result!;
@@ -135,7 +135,9 @@ export function viewFinding(p: Photo) {
   const severity = p.severity ?? r.severity;
   const guard: GuardKind = r.timedOut
     ? "timeout"
-    : r.image_quality === "blurry"
+    : r.unavailable
+      ? "unavailable"
+      : r.image_quality === "blurry"
       ? "blurry"
       : r.image_quality === "not_a_house"
         ? "not_a_house"
@@ -153,6 +155,7 @@ export const GUARD_MESSAGE: Record<Exclude<GuardKind, null>, string> = {
   not_a_house: "This doesn't look like part of a home. Try again.",
   low_confidence: "Can't tell from this photo — recommend a licensed home inspector.",
   timeout: "Analysis timed out.",
+  unavailable: "The AI model isn't running. Start the backend with .\\run.ps1, then try again.",
 };
 
 /** Resize to max 1024px long edge; re-encoding through canvas also drops EXIF. */

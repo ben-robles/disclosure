@@ -102,6 +102,19 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
         return [{"id": d["id"], "label": d["label"]} for d in load_taxonomy()
                 if d["id"] != "unclear"]
 
+    # One photo in, one raw finding out, nothing stored. Used by the React UI in
+    # frontend/, which keeps its own queue and grading in the browser.
+    @app.post("/api/analyze")
+    def analyze_one(file: UploadFile = File(...)):
+        raw = file.file.read(config.MAX_UPLOAD_BYTES + 1)
+        if len(raw) > config.MAX_UPLOAD_BYTES:
+            raise HTTPException(413, "Photo is too large (15 MB max).")
+        try:
+            clean = sanitize(raw)
+        except BadImage as exc:
+            raise HTTPException(400, str(exc))
+        return vars(analyzer.analyze(clean))
+
     # ---- sessions ---------------------------------------------------------
     @app.post("/api/session")
     def create_session(body: SessionIn):

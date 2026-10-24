@@ -1,6 +1,6 @@
 import { parseModelOutput, UNCLEAR_FALLBACK, type RawFinding } from "./parse";
 
-export type AnalyzeResult = RawFinding & { timedOut?: boolean };
+export type AnalyzeResult = RawFinding & { timedOut?: boolean; unavailable?: boolean };
 
 /** The ONE boundary to the model. Swap mockAnalyzer for a Gemma 4 implementation later. */
 export interface DefectAnalyzer {
@@ -47,5 +47,31 @@ export const mockAnalyzer: DefectAnalyzer = makeAnalyzer(async () => {
   return JSON.stringify(s);
 });
 
-// TODO(Gemma 4): replace with makeAnalyzer(img => fetch(...your Gemma endpoint...).then(r => r.text()))
-export const analyzer: DefectAnalyzer = mockAnalyzer;
+const UNAVAILABLE: AnalyzeResult = {
+  ...UNCLEAR_FALLBACK,
+  reason: "The local AI model is not reachable.",
+  unavailable: true,
+};
+
+/** Gemma 4 through the local Python backend (POST /api/analyze, proxied by Vite).
+ *  The backend strips EXIF, retries bad JSON once and times out at 120 s. */
+export const gemmaAnalyzer: DefectAnalyzer = {
+  async analyze(img) {
+    let res: Response;
+    try {
+      const body = new FormData();
+      body.append("file", await (await fetch(img)).blob(), "photo.jpg");
+      res = await fetch("/api/analyze", { method: "POST", body });
+    } catch {
+      return UNAVAILABLE;
+    }
+    if (!res.ok) return UNAVAILABLE;
+    const data = (await res.json()) as { analysis_status?: string };
+    if (data.analysis_status === "timeout") return { ...UNCLEAR_FALLBACK, reason: "Analysis timed out.", timedOut: true };
+    if (data.analysis_status === "unavailable") return UNAVAILABLE;
+    return parseModelOutput(JSON.stringify(data)) ?? UNCLEAR_FALLBACK;
+  },
+};
+
+// VITE_MOCK_ANALYZER=1 runs the UI with canned results and no backend.
+export const analyzer: DefectAnalyzer = import.meta.env["VITE_MOCK_ANALYZER"] === "1" ? mockAnalyzer : gemmaAnalyzer;

@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Model calls go to the local Python backend (.\run.ps1 serves it on port 8000).
+  vite: {
+    server: { proxy: { "/api": "http://127.0.0.1:8000" } },
+  },
 });
