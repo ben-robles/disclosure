@@ -2,7 +2,7 @@
 
 Selling a home in Maryland means telling the buyer about problems you know of, and most sellers do not know how to document them. Disclosure is a seller-side tool: photograph a defect, get a first-pass classification from a local AI model, confirm or correct it, and produce a PDF disclosure report organized by the sections of Maryland's seller disclosure form.
 
-It is built for home sellers in the DC/Maryland/Virginia area. The AI runs on your own computer. Nothing is uploaded.
+It is built for home sellers in the DC/Maryland/Virginia area. The AI runs on your own computer. Nothing is uploaded unless you choose to email yourself the finished report.
 
 > **AI-assisted documentation aid. Not a home inspection and not legal advice.**
 
@@ -49,7 +49,7 @@ Screenshots of each: PLACEHOLDER.
 ## Privacy
 
 - The server listens on `127.0.0.1` only. `.\run.ps1 -Lan` listens on all interfaces so a phone on the same Wi-Fi can open the app. Windows Firewall will ask: allow it on private networks only.
-- The only outbound call is to the local Ollama server. A test (`tests/test_no_network.py`) fails if any other address appears in the code.
+- The only outbound calls are to the local Ollama server and, only if you ask for the report by email, to the SMTP server you configure (copy `.env.example` to `.env` and fill it in; `.env` is git-ignored). The address and PDF are not stored. Leave those unset and email is disabled. A test (`tests/test_no_network.py`) fails if any other URL appears in the code.
 - Photo metadata (GPS, time, device) is stripped on upload. Photos are resized to 1024 px on the long edge, which also keeps analysis fast.
 - Data kept: photos, your confirmations and edits, and an optional 5-digit ZIP printed on the report. All of it lives in `data/` on this computer. "Delete this session" erases it.
 - No accounts, no analytics, no faces or addresses collected.

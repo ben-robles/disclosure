@@ -35,8 +35,8 @@ function About() {
           report that follows the sections of Maryland's seller disclosure form.
         </p>
         <p>
-          The AI that looks at your photos runs on your own computer. Nothing is uploaded, and there
-          are no accounts.
+          The AI that looks at your photos runs on your own computer. Nothing is uploaded unless you
+          choose to email yourself your report, and there are no accounts.
         </p>
       </div>
 

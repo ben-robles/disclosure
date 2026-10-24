@@ -223,7 +223,8 @@ export function AppShell({
               <h2 className="font-semibold">Privacy</h2>
               <p className="text-muted-foreground">
                 Photos are resized and stripped of location and device data before analysis. Your
-                session stays on this device. No accounts, no analytics.
+                session stays on this device unless you email yourself your report. No accounts, no
+                analytics.
               </p>
             </section>
             <section>

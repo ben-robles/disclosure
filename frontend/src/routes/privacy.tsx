@@ -27,6 +27,10 @@ const SECTIONS: [string, string][] = [
     "Your photos, findings and details are stored in this browser and in a local database on this computer. We don't have copies.",
   ],
   [
+    "Emailing your report (optional)",
+    "If you ask us to email your report, the PDF and your address are sent to our mail server once, forwarded to you, and not saved. The PDF includes your photos. Skip it and nothing leaves this computer.",
+  ],
+  [
     "No accounts, no tracking",
     "There's nothing to sign up for, and we don't use analytics or advertising.",
   ],
