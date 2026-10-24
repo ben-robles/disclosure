@@ -45,3 +45,19 @@ def test_send_failure_is_502(client, monkeypatch):
     monkeypatch.setattr(mailer, "configured", lambda: True)
     monkeypatch.setattr(mailer, "send_report", boom)
     assert post(client).status_code == 502
+
+
+def test_smtp_failure_is_logged_without_address(monkeypatch, caplog):
+    import smtplib
+
+    class Broken:
+        def __init__(self, *a, **k):
+            raise smtplib.SMTPAuthenticationError(535, b"rejected seller@example.org")
+
+    monkeypatch.setattr(mailer.config, "SMTP_HOST", "smtp.example.org")
+    monkeypatch.setattr(mailer.config, "SMTP_FROM", "me@example.org")
+    monkeypatch.setattr(smtplib, "SMTP", Broken)
+    with caplog.at_level("WARNING"), pytest.raises(mailer.MailError):
+        mailer.send_report("seller@example.org", PDF)
+    assert "SMTPAuthenticationError" in caplog.text and "535" in caplog.text
+    assert "seller@example.org" not in caplog.text
