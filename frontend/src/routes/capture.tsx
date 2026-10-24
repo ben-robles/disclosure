@@ -10,12 +10,12 @@ import { addPhoto, removePhoto, resizeImage, runQueue, useSession } from "@/lib/
 export const Route = createFileRoute("/capture")({
   head: () => ({
     meta: [
-      { title: "Add photos — Disclosure" },
+      { title: "Add photos | Disclosure" },
       {
         name: "description",
         content: "Take or choose photos of defects in your home for analysis.",
       },
-      { property: "og:title", content: "Add photos — Disclosure" },
+      { property: "og:title", content: "Add photos | Disclosure" },
       {
         property: "og:description",
         content: "Take or choose photos of defects in your home for analysis.",

@@ -11,12 +11,12 @@ import { useSession } from "@/lib/disclosure/store";
 export const Route = createFileRoute("/review")({
   head: () => ({
     meta: [
-      { title: "Review — Disclosure" },
+      { title: "Review | Disclosure" },
       {
         name: "description",
         content: "Overall grade and confirmed findings grouped by Maryland disclosure section.",
       },
-      { property: "og:title", content: "Review — Disclosure" },
+      { property: "og:title", content: "Review | Disclosure" },
       {
         property: "og:description",
         content: "Overall grade and confirmed findings grouped by Maryland disclosure section.",
@@ -128,7 +128,7 @@ function Review() {
                   <p className="mt-2 text-sm text-muted-foreground tabular-nums">
                     {formatCost(it.cost)}
                   </p>
-                  {needsPro(it.range) && (
+                  {needsPro(it.range) && it.info.pro && (
                     <p className="mt-1 text-sm font-medium text-grade-f">
                       Have a licensed {it.info.pro.toLowerCase()} take a look.
                     </p>

@@ -10,9 +10,9 @@ import {
 export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
-      { title: "FAQ — Disclosure" },
+      { title: "FAQ | Disclosure" },
       { name: "description", content: "Answers about photos, grading, accuracy and privacy." },
-      { property: "og:title", content: "FAQ — Disclosure" },
+      { property: "og:title", content: "FAQ | Disclosure" },
       {
         property: "og:description",
         content: "Answers about photos, grading, accuracy and privacy.",
@@ -50,7 +50,7 @@ const QUESTIONS: [string, string][] = [
   ["Do I need an account?", "No accounts, no payments and no analytics."],
   [
     "Why can't it grade my photo?",
-    "The photo may be blurry, may not show part of a home, or may not give the AI enough to go on. Retake it closer and in better light, or ask an inspector.",
+    "The photo may be blurry, may not show part of a home, or may not give the AI enough to go on. Retake it closer and in better light.",
   ],
 ];
 

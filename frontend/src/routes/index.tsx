@@ -9,13 +9,13 @@ import { startSession, useSession } from "@/lib/disclosure/store";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Disclosure — photo-based home defect report" },
+      { title: "Disclosure: photo-based home defect report" },
       {
         name: "description",
         content:
           "Photograph defects in your home and get a graded, organized disclosure companion report.",
       },
-      { property: "og:title", content: "Disclosure — photo-based home defect report" },
+      { property: "og:title", content: "Disclosure: photo-based home defect report" },
       {
         property: "og:description",
         content:

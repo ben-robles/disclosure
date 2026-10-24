@@ -2,9 +2,9 @@ import type { DefectType } from "./taxonomy";
 
 // PLACEHOLDER — verify before any real use. Region: DC/MD/VA metro. USD.
 export const COST_TABLE_META = {
-  status: "PLACEHOLDER — verify before any real use",
+  status: "PLACEHOLDER: verify before any real use",
   region: "DC/MD/VA metro",
-  caption: "Estimate — varies by region and contractor.",
+  caption: "Estimate. Varies by region and contractor.",
 };
 
 type Bucket = "low" | "mid" | "high";

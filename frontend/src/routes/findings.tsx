@@ -38,12 +38,12 @@ import {
 export const Route = createFileRoute("/findings")({
   head: () => ({
     meta: [
-      { title: "Findings — Disclosure" },
+      { title: "Findings | Disclosure" },
       {
         name: "description",
         content: "Confirm, edit, or remove each AI-classified defect finding.",
       },
-      { property: "og:title", content: "Findings — Disclosure" },
+      { property: "og:title", content: "Findings | Disclosure" },
       {
         property: "og:description",
         content: "Confirm, edit, or remove each AI-classified defect finding.",
@@ -143,11 +143,6 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
         />
         <div className="p-4">
           <p className="text-lg font-bold leading-snug">{GUARD_MESSAGE[f.guard]}</p>
-          {f.guard === "low_confidence" && (
-            <p className="mt-1 text-muted-foreground">
-              For a reliable answer, have a licensed home inspector take a look.
-            </p>
-          )}
           <input
             ref={retake}
             type="file"
@@ -253,9 +248,11 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
         )}
         <p className="mt-2 text-xs text-muted-foreground">{COST_TABLE_META.caption}</p>
       </div>
-      <div className="mt-3">
-        <QuoteButton pro={f.info.pro} />
-      </div>
+      {f.info.pro && (
+        <div className="mt-3">
+          <QuoteButton pro={f.info.pro} />
+        </div>
+      )}
 
       {editing && (
         <div className="mt-4 space-y-3 rounded-2xl border bg-background p-3">

@@ -28,7 +28,7 @@ export function QuoteButton({ pro }: { pro: string }) {
         <SheetContent side="bottom" className="mx-auto max-w-[430px] rounded-t-2xl">
           <SheetHeader>
             <SheetTitle className="text-xl">Recommended: {pro}</SheetTitle>
-            <SheetDescription>Demo only — no request is actually sent.</SheetDescription>
+            <SheetDescription>Demo only. No request is actually sent.</SheetDescription>
           </SheetHeader>
           <div className="px-4 pb-6" aria-live="polite">
             {sent ? (

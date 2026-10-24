@@ -95,8 +95,8 @@ export async function generatePdf(session: Session): Promise<Blob> {
   y = 150;
 
   const meta: [string, string][] = [
-    ["Prepared for", session.sellerName || "—"],
-    ["Property", [session.address, session.zip].filter(Boolean).join(", ") || "—"],
+    ["Prepared for", session.sellerName || "Not provided"],
+    ["Property", [session.address, session.zip].filter(Boolean).join(", ") || "Not provided"],
     ["Generated", new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })],
   ];
   for (const [k, v] of meta) {
@@ -173,7 +173,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
 
       // Section label + heading
       font(9, true, TEAL); doc.text(section.toUpperCase(), M, top + 4);
-      font(15, true); doc.text(clip(`Finding ${n} — ${it.info.label}`, CW - 110), M, top + 24);
+      font(15, true); doc.text(clip(`Finding ${n}: ${it.info.label}`, CW - 110), M, top + 24);
       const gl = it.range ? formatRange(it.range) : "Not graded";
       badge(W - M - 96, top + 8, 96, 26, gl, null, c, 13);
 
@@ -219,11 +219,13 @@ export async function generatePdf(session: Session): Promise<Blob> {
       font(10.5, false); const rl = wrap(it.reason, CW);
       doc.text(rl, M, by); by += rl.length * 14 + 6;
 
-      const rec = needsPro(it.range) ? `Recommend evaluation by a licensed ${it.info.pro.toLowerCase()}.` : `Typical professional: ${it.info.pro}.`;
-      fill(needsPro(it.range) ? [253, 240, 238] : TINT);
-      doc.roundedRect(M, by, CW, 26, 4, 4, "F");
-      fill(needsPro(it.range) ? TONE.bad : TEAL); doc.rect(M, by, 4, 26, "F");
-      font(10, true, needsPro(it.range) ? TONE.bad : TEAL); doc.text(clip(rec, CW - 24), M + 14, by + 16.5);
+      if (it.info.pro) {
+        const rec = needsPro(it.range) ? `Recommend evaluation by a licensed ${it.info.pro.toLowerCase()}.` : `Typical professional: ${it.info.pro}.`;
+        fill(needsPro(it.range) ? [253, 240, 238] : TINT);
+        doc.roundedRect(M, by, CW, 26, 4, 4, "F");
+        fill(needsPro(it.range) ? TONE.bad : TEAL); doc.rect(M, by, 4, 26, "F");
+        font(10, true, needsPro(it.range) ? TONE.bad : TEAL); doc.text(clip(rec, CW - 24), M + 14, by + 16.5);
+      }
 
       onPage++;
       y = top + 330;

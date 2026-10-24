@@ -4,9 +4,9 @@ import { AppShell } from "@/components/disclosure/AppShell";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Privacy — Disclosure" },
+      { title: "Privacy | Disclosure" },
       { name: "description", content: "What happens to your photos and details." },
-      { property: "og:title", content: "Privacy — Disclosure" },
+      { property: "og:title", content: "Privacy | Disclosure" },
       { property: "og:description", content: "What happens to your photos and details." },
     ],
   }),

@@ -12,9 +12,9 @@ import { useSession } from "@/lib/disclosure/store";
 export const Route = createFileRoute("/report")({
   head: () => ({
     meta: [
-      { title: "Report — Disclosure" },
+      { title: "Report | Disclosure" },
       { name: "description", content: "View and download your defect documentation PDF." },
-      { property: "og:title", content: "Report — Disclosure" },
+      { property: "og:title", content: "Report | Disclosure" },
       { property: "og:description", content: "View and download your defect documentation PDF." },
     ],
   }),

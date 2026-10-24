@@ -4,9 +4,9 @@ import { AppShell, Disclaimer } from "@/components/disclosure/AppShell";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Terms of use — Disclosure" },
+      { title: "Terms of use | Disclosure" },
       { name: "description", content: "What Disclosure is and is not." },
-      { property: "og:title", content: "Terms of use — Disclosure" },
+      { property: "og:title", content: "Terms of use | Disclosure" },
       { property: "og:description", content: "What Disclosure is and is not." },
     ],
   }),

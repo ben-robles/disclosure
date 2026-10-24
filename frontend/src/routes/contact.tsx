@@ -11,9 +11,9 @@ import { EMAIL, GITHUB_URL } from "@/lib/disclosure/site";
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
-      { title: "Contact — Disclosure" },
+      { title: "Contact | Disclosure" },
       { name: "description", content: "Email the Disclosure team or send a message." },
-      { property: "og:title", content: "Contact — Disclosure" },
+      { property: "og:title", content: "Contact | Disclosure" },
       { property: "og:description", content: "Email the Disclosure team or send a message." },
     ],
   }),

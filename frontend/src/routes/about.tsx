@@ -7,12 +7,12 @@ import { TEAM } from "@/lib/disclosure/site";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About — Disclosure" },
+      { title: "About | Disclosure" },
       {
         name: "description",
         content: "Who Disclosure is for, how it grades defects, and who built it.",
       },
-      { property: "og:title", content: "About — Disclosure" },
+      { property: "og:title", content: "About | Disclosure" },
       {
         property: "og:description",
         content: "Who Disclosure is for, how it grades defects, and who built it.",
@@ -51,7 +51,7 @@ function About() {
       <ul className="list-disc space-y-2 pl-5 text-muted-foreground">
         <li>
           When the AI is very sure, you see one letter. When it's fairly sure, you see two. When it
-          isn't sure enough, you see no grade and a note to call an inspector.
+          isn't sure enough, you see no grade.
         </li>
         <li>{GRADING_RULE}</li>
         <li>
