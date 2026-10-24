@@ -24,3 +24,10 @@ OVERALL_RULE = (
     "The overall grade is the worst grade among your confirmed findings. "
     "It is never an average."
 )
+
+# Optional: emailing a finished report. Unset means the feature reports "not set up".
+SMTP_HOST = os.environ.get("DISCLOSURE_SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("DISCLOSURE_SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("DISCLOSURE_SMTP_USER", "")
+SMTP_PASSWORD = os.environ.get("DISCLOSURE_SMTP_PASSWORD", "")
+SMTP_FROM = os.environ.get("DISCLOSURE_SMTP_FROM", SMTP_USER)
