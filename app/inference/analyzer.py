@@ -1,0 +1,32 @@
+"""The one boundary between the app and any model."""
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+URGENCIES = ("immediate", "30_days", "1_year", "cosmetic")
+CONFIDENCES = ("high", "medium", "low")
+QUALITIES = ("ok", "blurry", "not_a_house")
+
+
+@dataclass
+class Finding:
+    defect_type: str
+    severity: int
+    urgency: str
+    confidence: str
+    image_quality: str
+    reason: str
+    analysis_status: str = "ok"  # ok | timeout | unavailable | invalid
+
+
+def unclear_finding(reason: str, analysis_status: str) -> Finding:
+    return Finding("unclear", 1, "cosmetic", "low", "ok", reason, analysis_status)
+
+
+class DefectAnalyzer(ABC):
+    @abstractmethod
+    def analyze(self, image_bytes: bytes) -> Finding:
+        """Never raises for model problems; returns an `unclear` Finding instead."""
+
+    @abstractmethod
+    def status(self) -> dict:
+        """{'ready': bool, 'message': str, 'fix': str}. Used by the startup banner."""

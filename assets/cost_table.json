@@ -1,0 +1,17 @@
+{
+  "status": "PLACEHOLDER — verify before any real use",
+  "region": "DC/MD/VA metro",
+  "currency": "USD",
+  "buckets": {"1-2": "severity 1 to 2", "3": "severity 3", "4-5": "severity 4 to 5"},
+  "ranges": {
+    "roof":                  {"1-2": {"low": 300,  "high": 1000},  "3": {"low": 1000, "high": 4000},  "4-5": {"low": 5000,  "high": 20000}},
+    "water_intrusion":       {"1-2": {"low": 200,  "high": 800},   "3": {"low": 800,  "high": 3000},  "4-5": {"low": 3000,  "high": 15000}},
+    "mold_mildew":           {"1-2": {"low": 300,  "high": 1000},  "3": {"low": 1000, "high": 3500},  "4-5": {"low": 3500,  "high": 15000}},
+    "foundation_structural": {"1-2": {"low": 500,  "high": 2000},  "3": {"low": 2000, "high": 8000},  "4-5": {"low": 8000,  "high": 40000}},
+    "electrical":            {"1-2": {"low": 150,  "high": 500},   "3": {"low": 500,  "high": 2000},  "4-5": {"low": 2000,  "high": 8000}},
+    "plumbing":              {"1-2": {"low": 150,  "high": 600},   "3": {"low": 600,  "high": 2500},  "4-5": {"low": 2500,  "high": 10000}},
+    "window_door_rot":       {"1-2": {"low": 200,  "high": 800},   "3": {"low": 800,  "high": 3000},  "4-5": {"low": 3000,  "high": 10000}},
+    "pest_wood_damage":      {"1-2": {"low": 200,  "high": 800},   "3": {"low": 800,  "high": 3000},  "4-5": {"low": 3000,  "high": 12000}},
+    "unclear":               null
+  }
+}

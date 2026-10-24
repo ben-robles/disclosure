@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "defects": [
+    {"id": "roof", "label": "Roof damage", "look_for": "missing or curling shingles, damaged flashing, sagging roof lines", "pro": "Roofer"},
+    {"id": "water_intrusion", "label": "Water intrusion", "look_for": "water stains, active leaks, moisture damage on walls or ceilings", "pro": "Plumber or roofer"},
+    {"id": "mold_mildew", "label": "Mold or mildew", "look_for": "visible mold or mildew growth", "pro": "Mold remediation specialist"},
+    {"id": "foundation_structural", "label": "Foundation or structural cracks", "look_for": "cracks in foundation, walls, or structural members", "pro": "Structural engineer"},
+    {"id": "electrical", "label": "Electrical hazard", "look_for": "exposed wiring, scorched outlets, open panel, missing covers", "pro": "Electrician"},
+    {"id": "plumbing", "label": "Plumbing problem", "look_for": "leaking or corroded pipes, fixture leaks, water heater issues", "pro": "Plumber"},
+    {"id": "window_door_rot", "label": "Window or door damage", "look_for": "rotted frames, broken glass or seals, doors that do not close", "pro": "Carpenter or window installer"},
+    {"id": "pest_wood_damage", "label": "Pest or wood damage", "look_for": "termite tubes, carpenter ant damage, rodent evidence", "pro": "Pest control specialist"},
+    {"id": "unclear", "label": "Cannot determine", "look_for": "the photo does not show enough to decide", "pro": "Licensed home inspector"}
+  ]
+}

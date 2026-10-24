@@ -1,0 +1,26 @@
+{
+  "jurisdiction": "Maryland",
+  "form_title": "Maryland Residential Property Disclosure and Disclaimer Statement",
+  "form_revision": "MREC/DLLR: Rev August 3, 2026 (printed on the PDF fetched 2026-10-24; the Commission announced a further update in September 2026 - confirm the current version before real use)",
+  "source_url": "https://labor.md.gov/forms/propertydanddform.pdf",
+  "note": "Section names below are copied from the numbered questions on the Residential Property Disclosure Statement. Rows marked direct=false have no matching itemized question and fall under question 25. Mapping choices are judgment calls for a human to review.",
+  "sections": {
+    "3":  "Foundation",
+    "5":  "Roof",
+    "7":  "Plumbing system",
+    "10": "Electric Systems",
+    "17": "Wood-destroying insects",
+    "25": "Other material defects, including latent defects, affecting the physical condition of the property"
+  },
+  "mapping": {
+    "roof":                  {"section": "5",  "direct": true},
+    "water_intrusion":       {"section": "25", "direct": false},
+    "mold_mildew":           {"section": "25", "direct": false},
+    "foundation_structural": {"section": "3",  "direct": true},
+    "electrical":            {"section": "10", "direct": true},
+    "plumbing":              {"section": "7",  "direct": true},
+    "window_door_rot":       {"section": "25", "direct": false},
+    "pest_wood_damage":      {"section": "17", "direct": true},
+    "unclear":               {"section": null, "direct": false}
+  }
+}
