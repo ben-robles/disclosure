@@ -1,6 +1,6 @@
 import { formatCost, lookupCost, COST_TABLE_META } from "./costs";
 import { worstEnd, GRADING_RULE, LETTER_WORD, LETTERS, needsPro, overallGrade, URGENCY_LABEL, type Letter } from "./grading";
-import { JURISDICTION, MD_SECTIONS, sectionNumber } from "./jurisdiction";
+import { MD_SECTIONS, sectionNumber } from "./jurisdiction";
 import { DISCLAIMER, viewFinding, type Session } from "./store";
 
 export function buildReport(session: Session) {
@@ -185,7 +185,6 @@ export async function generatePdf(session: Session): Promise<Blob> {
   // ---- Cover ----
   y = header(23, 16, "Property Condition Report", 1.5);
 
-  label("Companion report", M, y + 38, BLUE, 7.9);
   let h1 = 33;
   font(h1, "x");
   while (doc.getTextWidth("Seller Defect Documentation") > CW && h1 > 20) {
@@ -193,9 +192,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
     font(h1, "x");
   }
   doc.text("Seller Defect Documentation", M, y + 38 + 9 + h1 * 0.85);
-  font(9.75, "r", MUTED);
-  doc.text(`${JURISDICTION.name} ${JURISDICTION.form}`, M, y + 38 + 9 + h1 * 0.85 + 19);
-  y = y + 38 + 9 + h1 * 0.85 + 19 + 21;
+  y = y + 38 + 9 + h1 * 0.85 + 21;
 
   // Prepared for / Property / Generated
   const meta: [string, string, boolean][] = [

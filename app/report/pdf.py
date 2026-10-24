@@ -220,16 +220,13 @@ def _cover(p, zip_code, findings, items, overall):
     M, CW, W = p.M, p.CW, p.W
     y = p.header(23, 16, "Property Condition Report", 1.5)
 
-    p.label("Companion report", M, y + 38, BLUE, 7.9)
     h1 = 33
     p.font(h1, "x")
     while p.width("Seller Defect Documentation") > CW and h1 > 20:
         h1 -= 0.5
         p.font(h1, "x")
     p.text("Seller Defect Documentation", M, y + 38 + 9 + h1 * 0.85)
-    p.font(9.75, "r", MUTED)
-    p.text(mapping.form_title(), M, y + 38 + 9 + h1 * 0.85 + 19)
-    y = y + 38 + 9 + h1 * 0.85 + 19 + 21
+    y = y + 38 + 9 + h1 * 0.85 + 21
 
     # Prepared for / Property / Generated (the backend only knows the ZIP)
     meta = [("Prepared for", "Not provided", False),
