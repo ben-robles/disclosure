@@ -52,7 +52,7 @@ Assert-Ok "Cloud Build"
 
 Write-Host "4/5 Deploying $Service"
 $ErrorActionPreference = "Continue"
-$deployOutput = gcloud beta run deploy $Service --image $image --project $Project --region $Region `
+$deployOutput = gcloud run deploy $Service --image $image --project $Project --region $Region `
     --gpu 1 --gpu-type nvidia-l4 --no-gpu-zonal-redundancy --cpu 8 --memory 32Gi --no-cpu-throttling `
     --no-allow-unauthenticated --timeout 300 --concurrency $Concurrency `
     --min-instances $MinInstances --max-instances $MaxInstances `

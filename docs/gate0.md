@@ -127,3 +127,13 @@ Does not satisfy Gate 0, which must be passed on the Windows demo laptop.
 - Both labels match the expected taxonomy in `assets/test_photos/ATTRIBUTION.md`; the water-stain reason names specific visible features. The chimney reason is generic ("structural wall" is not what the photo shows, an attic chimney), so image specificity needs a human check.
 - Ollama `format` returns HTTP 501 for gemma4. `OllamaAnalyzer` now retries once without `format` and stops sending it for that instance.
 - Latency of 78-96 s per photo exceeds the plan's ~60 s target and is close to the 120 s timeout. Likely 12b on 16 GB; try `gemma4:e2b`/`e4b` before relying on it.
+
+## Cloud Run GPU (us-east4, gemma4:e4b)
+
+- Date: October 24, 2026. Ollama image tag pinned: `ollama/ollama:0.40.10`. Service `disclosure-gemma`, one NVIDIA L4, 8 vCPU, 32 GiB, reached through `gcloud run services proxy` on `127.0.0.1:9090`. Ollama logs show the model on `CUDA0`.
+- Instance cap: the new project's regional Cloud Run quota is 20 vCPU and 40 GiB, so the deploy is capped at `--max-instances 1` rather than the planned 3. One instance runs 4 requests at once.
+- Image-specific: `gate0_water_stain.jpg` gave "A small area of spalling or damage is visible at the junction where the textured ceiling meets the smooth wall" and "A localized area of material deterioration and cracking is visible at the ceiling-wall junction". Both name the ceiling-wall junction in the photo. Only this one fixture was run through `scripts/gate0_ollama.py`; the other 16 test photos were run through the analyzer (below).
+- Latency, `gate0_water_stain.jpg`, three runs in a row: run 1 timed out at 120 s (instance and model cold), run 2 57.4 s, run 3 18.8 s.
+- Throughput, 4 workers, 17 test photos through `OllamaAnalyzer` against the warm service: 62 s total, 16.3 photos per minute, 17 of 17 returned `analysis_status` `ok`, 7.7 to 21.5 s per photo. This measures speed only. Labels were not scored against expected types.
+- Cold start: the first chat request after the instance woke (a `/api/tags` call had started it) exceeded the app's 120 s timeout. A cold first photo will show "Analysis timed out" until Retry. For a demo, set `--min-instances 1` (see `cloud/README.md`). Scale to zero after 15 minutes idle was not measured.
+- Evidence files: `data/gate0/cloud-run/` (git-ignored): `run1.json`, `run2.json`, `run3.json`, `throughput.json`.
