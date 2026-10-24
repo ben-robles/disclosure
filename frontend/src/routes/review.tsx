@@ -61,15 +61,15 @@ function Review() {
         )
       }
     >
-      <section className="rounded-2xl bg-secondary px-5 pb-5 pt-6" aria-labelledby="overall">
+      <section className="rounded-3xl border bg-card px-5 pb-5 pt-6 shadow-[var(--shadow-card)]" aria-labelledby="overall">
         <h2
           id="overall"
-          className="mb-1 text-center text-base font-semibold text-secondary-foreground"
+          className="mb-1 text-center text-sm font-bold text-muted-foreground"
         >
           Overall grade
         </h2>
         <OverallGrade letter={overall} />
-        <p className="mt-3 text-center text-sm text-secondary-foreground">{GRADING_RULE}</p>
+        <p className="mt-3 text-center text-sm text-muted-foreground">{GRADING_RULE}</p>
       </section>
 
       {items.length === 0 && (
@@ -92,7 +92,7 @@ function Review() {
             <GradeMix counts={counts} />
           </div>
           {total && (
-            <div className="rounded-lg border p-4">
+            <div className="rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <p className="text-sm text-muted-foreground">Estimated repairs, all findings</p>
               <p className="text-2xl font-extrabold tabular-nums">{formatCost(total)}</p>
               <div className="mt-2">
@@ -108,14 +108,14 @@ function Review() {
 
       {sections.map(([section, list]) => (
         <section key={section} className="mt-8">
-          <h2 className="border-b-2 border-foreground pb-1.5 text-lg font-bold">{section}</h2>
-          <ul className="divide-y">
+          <h2 className="mb-2 text-lg font-extrabold">{section}</h2>
+          <ul className="divide-y rounded-3xl border bg-card px-3.5 shadow-[var(--shadow-card)]">
             {list.map((it) => (
               <li key={it.photo.id} className="flex gap-3 py-4">
                 <img
                   src={it.photo.dataUrl}
                   alt={it.info.label}
-                  className="size-20 shrink-0 rounded-lg object-cover"
+                  className="size-20 shrink-0 rounded-2xl object-cover"
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">

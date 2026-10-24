@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import {
   LETTERS,
+  LETTER_SCORES,
   LETTER_WORD,
   URGENCY_SCORE,
   letterFor,
@@ -22,9 +23,9 @@ export const GRADE_FILL: Record<Letter, string> = {
 /** Text colour that stays readable on each fill. */
 export const GRADE_INK: Record<Letter, string> = {
   A: "#fff",
-  B: "#fff",
+  B: "#1d2a00",
   C: "#2b1d00",
-  D: "#fff",
+  D: "#2b1300",
   F: "#fff",
 };
 
@@ -89,15 +90,17 @@ export function GradeDial({ range, className }: { range: Letter[] | null; classN
       })}
       {range && (
         <>
-          <line
-            x1="120"
-            y1="120"
-            x2={nx}
-            y2={ny}
-            stroke="var(--foreground)"
-            strokeWidth="4"
-            strokeLinecap="round"
-          />
+          <g className="sweep" style={{ "--sweep-from": `${180 - needleDeg}deg` } as React.CSSProperties}>
+            <line
+              x1="120"
+              y1="120"
+              x2={nx}
+              y2={ny}
+              stroke="var(--foreground)"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+          </g>
           <circle cx="120" cy="120" r="8" fill="var(--foreground)" />
           <circle cx="120" cy="120" r="3" fill="var(--background)" />
         </>
@@ -304,5 +307,27 @@ export function GradeMix({ counts }: { counts: Partial<Record<Letter, number>> }
         ))}
       </ul>
     </div>
+  );
+}
+
+/** A to F key: the letter, its plain word and the score band behind it. */
+export function GradeLegend() {
+  return (
+    <ul className="divide-y overflow-hidden rounded-lg border">
+      {LETTERS.map((l) => (
+        <li key={l} className="flex items-center gap-3 py-1.5 pl-1.5 pr-3 text-sm">
+          <span
+            className="flex size-7 items-center justify-center rounded font-extrabold"
+            style={{ background: GRADE_FILL[l], color: GRADE_INK[l] }}
+          >
+            {l}
+          </span>
+          <span className="font-medium">{LETTER_WORD[l]}</span>
+          <span className="ml-auto tabular-nums text-muted-foreground">
+            score {LETTER_SCORES[l]}
+          </span>
+        </li>
+      ))}
+    </ul>
   );
 }

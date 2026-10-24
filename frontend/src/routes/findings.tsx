@@ -85,7 +85,7 @@ function Findings() {
       }
     >
       <div
-        className="mb-5 flex items-center gap-3 rounded-lg bg-muted px-3.5 py-2.5"
+        className="mb-5 flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-[var(--shadow-card)]"
         aria-live="polite"
       >
         <div className="h-2 flex-1 overflow-hidden rounded-full bg-border" aria-hidden>
@@ -98,7 +98,7 @@ function Findings() {
           {confirmed} of {total} confirmed
         </p>
       </div>
-      <ul className="space-y-8">
+      <ul className="space-y-5">
         {session.photos.map((p, i) => (
           <li key={p.id}>
             <FindingCard photo={p} index={i} />
@@ -120,7 +120,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
   const retake = useRef<HTMLInputElement>(null);
   if (photo.status !== "done" || !photo.result) {
     return (
-      <div className="flex items-center gap-3 rounded-lg border border-dashed p-3 text-muted-foreground">
+      <div className="flex items-center gap-3 rounded-2xl border border-dashed bg-card p-3 text-muted-foreground">
         <img src={photo.dataUrl} alt="" className="size-14 rounded-md object-cover opacity-70" />
         <p>
           Photo {index + 1}: {photo.status === "analyzing" ? "checking now…" : "waiting its turn"}
@@ -133,7 +133,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
   if (f.guard) {
     return (
       <article
-        className="overflow-hidden rounded-xl border bg-muted"
+        className="overflow-hidden rounded-3xl border bg-muted"
         aria-label={`Photo ${index + 1}, needs attention`}
       >
         <img
@@ -169,7 +169,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
             }}
           />
           <div className="mt-3 grid grid-cols-2 gap-2">
-            {f.guard === "timeout" ? (
+            {f.guard === "timeout" || f.guard === "unavailable" ? (
               <Button size="touch" onClick={() => retryPhoto(photo.id)}>
                 Try again
               </Button>
@@ -189,26 +189,29 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
 
   const cost = lookupCost(f.type, f.severity);
   return (
-    <article aria-label={`Photo ${index + 1}, ${f.info.label}`}>
-      <div className="relative overflow-hidden rounded-xl">
+    <article
+      aria-label={`Photo ${index + 1}, ${f.info.label}`}
+      className="rounded-3xl border bg-card p-3 shadow-[var(--shadow-card)]"
+    >
+      <div className="relative overflow-hidden rounded-2xl">
         <img
           src={photo.dataUrl}
           alt={`Photo ${index + 1}: ${f.info.label}`}
           className="aspect-[4/3] w-full object-cover"
         />
-        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/60 to-transparent px-3 pb-3 pt-10" />
+        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute bottom-3 left-3">
           <GradeBadge range={f.range} />
         </div>
         {photo.confirmed && (
-          <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-sm font-semibold text-primary-foreground">
+          <span className="pop absolute right-3 top-3 flex items-center gap-1 rounded-full bg-grade-a px-2.5 py-1 text-sm font-bold text-white shadow-sm">
             <Check className="size-4" aria-hidden /> Confirmed
           </span>
         )}
       </div>
 
-      <h2 className="mt-3 text-xl font-bold leading-tight">{f.info.label}</h2>
-      <p className="mt-1 text-base">{f.reason}</p>
+      <h2 className="mt-3.5 px-1 text-xl font-extrabold leading-tight">{f.info.label}</h2>
+      <p className="mt-1 px-1 text-base text-foreground/85">{f.reason}</p>
 
       <div className="mt-4">
         <GradeScale range={f.range} />
@@ -239,7 +242,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
         Score {risk(f.severity, f.urgency)} of 20: severity times urgency.
       </p>
 
-      <div className="mt-4 rounded-lg bg-muted p-3">
+      <div className="mt-4 rounded-2xl bg-muted p-3.5">
         <div className="flex items-baseline justify-between">
           <p className="text-sm text-muted-foreground">Typical repair</p>
           <p className="text-lg font-bold tabular-nums">{formatCost(cost)}</p>
@@ -256,7 +259,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
       </div>
 
       {editing && (
-        <div className="mt-4 space-y-3 rounded-lg border bg-background p-3">
+        <div className="mt-4 space-y-3 rounded-2xl border bg-background p-3">
           <div className="space-y-1">
             <Label htmlFor={`type-${photo.id}`}>Defect type</Label>
             <Select

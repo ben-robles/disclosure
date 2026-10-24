@@ -16,7 +16,14 @@ export type Photo = {
   confirmed: boolean;
 };
 
-export type Session = { id: string; zip: string; address?: string; sellerName?: string; photos: Photo[]; createdAt: number };
+export type Session = {
+  id: string;
+  zip: string;
+  address?: string;
+  sellerName?: string;
+  photos: Photo[];
+  createdAt: number;
+};
 
 const KEY = "disclosure.session.v1";
 let session: Session | null = null;
@@ -92,7 +99,10 @@ export function deleteSession() {
 }
 
 export function addPhoto(dataUrl: string) {
-  update((s) => ({ ...s, photos: [...s.photos, { id: uid(), dataUrl, status: "queued", confirmed: false }] }));
+  update((s) => ({
+    ...s,
+    photos: [...s.photos, { id: uid(), dataUrl, status: "queued", confirmed: false }],
+  }));
 }
 
 export function patchPhoto(id: string, patch: Partial<Photo>) {
@@ -119,7 +129,12 @@ export async function runQueue() {
       patchPhoto(next.id, { status: "analyzing" });
       const result = await analyzer.analyze(next.dataUrl);
       if (!session?.photos.some((p) => p.id === next.id)) continue;
-      patchPhoto(next.id, { status: "done", result, defect_type: result.defect_type, severity: result.severity });
+      patchPhoto(next.id, {
+        status: "done",
+        result,
+        defect_type: result.defect_type,
+        severity: result.severity,
+      });
     }
   } finally {
     running = false;
@@ -127,25 +142,37 @@ export async function runQueue() {
 }
 
 /** Derived view of a finding with edits applied. */
-export type GuardKind = "blurry" | "not_a_house" | "low_confidence" | "timeout" | null;
+export type GuardKind =
+  "blurry" | "not_a_house" | "low_confidence" | "timeout" | "unavailable" | null;
 
 export function viewFinding(p: Photo) {
   const r = p.result!;
   const type = p.defect_type ?? r.defect_type;
   const severity = p.severity ?? r.severity;
-  const guard: GuardKind = r.timedOut
-    ? "timeout"
-    : r.image_quality === "blurry"
-      ? "blurry"
-      : r.image_quality === "not_a_house"
-        ? "not_a_house"
-        : r.confidence === "low"
-          ? "low_confidence"
-          : null;
+  const guard: GuardKind = r.unavailable
+    ? "unavailable"
+    : r.timedOut
+      ? "timeout"
+      : r.image_quality === "blurry"
+        ? "blurry"
+        : r.image_quality === "not_a_house"
+          ? "not_a_house"
+          : r.confidence === "low"
+            ? "low_confidence"
+            : null;
   const range: Letter[] | null =
     guard || type === "unclear" ? null : gradeRange(severity, r.urgency as Urgency, r.confidence);
   const info = defectInfo(guard ? "unclear" : type);
-  return { type: guard ? ("unclear" as DefectType) : type, severity, urgency: r.urgency as Urgency, confidence: r.confidence, reason: r.reason, guard, range, info };
+  return {
+    type: guard ? ("unclear" as DefectType) : type,
+    severity,
+    urgency: r.urgency as Urgency,
+    confidence: r.confidence,
+    reason: r.reason,
+    guard,
+    range,
+    info,
+  };
 }
 
 export const GUARD_MESSAGE: Record<Exclude<GuardKind, null>, string> = {
@@ -153,6 +180,7 @@ export const GUARD_MESSAGE: Record<Exclude<GuardKind, null>, string> = {
   not_a_house: "This doesn't look like part of a home. Try again.",
   low_confidence: "Can't tell from this photo — recommend a licensed home inspector.",
   timeout: "Analysis timed out.",
+  unavailable: "The AI isn't running on this computer. Start it with run.ps1, then try again.",
 };
 
 /** Resize to max 1024px long edge; re-encoding through canvas also drops EXIF. */
@@ -174,4 +202,5 @@ export function resizeImage(file: File, max = 1024): Promise<string> {
   });
 }
 
-export const DISCLAIMER = "AI-assisted documentation aid. Not a home inspection and not legal advice.";
+export const DISCLAIMER =
+  "AI-assisted documentation aid. Not a home inspection and not legal advice.";

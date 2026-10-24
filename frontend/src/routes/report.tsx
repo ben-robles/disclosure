@@ -72,7 +72,7 @@ function Report() {
         <iframe
           src={url}
           title="Disclosure report PDF"
-          className="h-[65vh] w-full rounded-lg border bg-muted shadow-sm"
+          className="h-[65vh] w-full border bg-muted shadow-[var(--shadow-card)]"
         />
       )}
     </AppShell>
