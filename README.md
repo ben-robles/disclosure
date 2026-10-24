@@ -104,7 +104,9 @@ The report is a companion document organized by the numbered questions of the [M
 
 ## Test photos and results
 
-PLACEHOLDER: add photos to `assets/test_photos/` with sources and licenses in `test_photos.csv`, then run `scripts\run_test_set.py`. Results go to `docs/test-results.md`.
+15 openly licensed photos from Wikimedia Commons in [`assets/test_photos/`](assets/test_photos/): 10 defects covering all 8 defect types, 2 blurry, 2 not a house (a cat, a road), 1 undamaged room. Source, author and license per file: [`test_photos.csv`](assets/test_photos/test_photos.csv).
+
+Results: PLACEHOLDER. Run `scripts\run_test_set.py` on the Gemma machine; it writes `docs/test-results.md`.
 
 ## The user
 
