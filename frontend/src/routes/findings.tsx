@@ -199,7 +199,6 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
           alt={`Photo ${index + 1}: ${f.info.label}`}
           className="aspect-[4/3] w-full object-cover"
         />
-        <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/55 to-transparent" />
         <div className="absolute bottom-3 left-3">
           <GradeBadge range={f.range} />
         </div>

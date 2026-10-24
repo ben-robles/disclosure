@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import type { CSSProperties } from "react";
-import { Lock } from "lucide-react";
+import { Camera, ChevronDown, ClipboardCheck, FileDown, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AppShell, Disclaimer } from "@/components/disclosure/AppShell";
 import { GradeTile } from "@/components/disclosure/GradeBadge";
@@ -64,7 +64,6 @@ function Hero() {
         height={675}
         fetchPriority="high"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent from-45% to-foreground/55" />
       <Chip letter="B" title="Roof" note="Worn shingles" className="left-4 top-4" delay="0.45s" />
       <Chip
         letter="C"
@@ -78,10 +77,47 @@ function Hero() {
 }
 
 const HOW = [
-  ["Photograph", "Each stain, crack or exposed wire."],
-  ["Confirm", "Keep, fix or delete every finding."],
-  ["Download", "A report by Maryland form section."],
+  { icon: Camera, title: "Photo" },
+  { icon: ClipboardCheck, title: "Analysis" },
+  { icon: FileDown, title: "Report" },
 ] as const;
+
+function StepFlow() {
+  return (
+    <ol aria-label="How it works" className="mt-7">
+      {HOW.map(({ icon: Icon, title }, i) => {
+        const last = i === HOW.length - 1;
+        return (
+          <li
+            key={title}
+            style={{ "--d": `${0.3 + i * 0.1}s` } as CSSProperties}
+            className="rise relative flex gap-4 pb-6 last:pb-0"
+          >
+            {!last && (
+              <span
+                className="absolute left-[1.375rem] top-12 bottom-1 w-0.5 -translate-x-1/2 bg-border"
+                aria-hidden
+              >
+                <ChevronDown className="absolute -bottom-1 left-1/2 size-5 -translate-x-1/2 bg-canvas text-muted-foreground" />
+              </span>
+            )}
+            <span
+              className="relative z-10 flex size-11 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground"
+              aria-hidden
+            >
+              <Icon className="size-5" />
+            </span>
+            <div className="flex min-h-11 min-w-0 items-center">
+              <h2 className="text-lg font-bold leading-tight">
+                <span className="text-primary">{i + 1}.</span> {title}
+              </h2>
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
 
 function Welcome() {
   const session = useSession();
@@ -110,19 +146,7 @@ function Welcome() {
         and builds a report you can attach to your Maryland disclosure.
       </p>
 
-      <ol className="mt-6 grid grid-cols-3 gap-2.5">
-        {HOW.map(([t, d], i) => (
-          <li
-            key={t}
-            style={{ "--d": `${0.3 + i * 0.08}s` } as CSSProperties}
-            className="rise rounded-2xl border bg-card p-3 shadow-[var(--shadow-card)]"
-          >
-            <span className="text-xs font-extrabold text-primary">{i + 1}</span>
-            <h2 className="mt-1 text-[0.95rem] font-bold leading-tight">{t}</h2>
-            <p className="mt-1 text-[0.8rem] leading-snug text-muted-foreground">{d}</p>
-          </li>
-        ))}
-      </ol>
+      <StepFlow />
       <p className="mt-4 text-sm">
         <Link to="/about" className="font-semibold text-primary underline underline-offset-4">
           How grading works

@@ -57,7 +57,7 @@ export function GradeTile({ letter, className }: { letter: Letter; className?: s
     <span
       aria-hidden
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-[0.65rem] text-base font-extrabold leading-none",
+        "flex size-8 shrink-0 items-center justify-center rounded-md text-base font-extrabold leading-none",
         className,
       )}
       style={{ background: GRADE_FILL[letter], color: GRADE_INK[letter] }}
