@@ -12,6 +12,8 @@ The app, grading, cost lookup, queue, PDF report and all guardrails are built an
 
 Screenshots: PLACEHOLDER (add after the first run on the demo machine).
 
+Next performance work: [smaller-model comparison and inference-speed handoff](docs/inference-speed-handoff.md).
+
 ## What the AI does and never does
 
 - **Does:** looks at one photo and picks one of 9 fixed types (roof, water intrusion, mold, foundation or structural, electrical, plumbing, window or door, pests or wood damage, unclear). Rates severity (1-5), urgency and its own confidence. Writes one sentence about what is visible.
