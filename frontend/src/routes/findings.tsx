@@ -19,7 +19,6 @@ import {
   RiskMatrix,
   SeverityDots,
 } from "@/components/disclosure/RiskViz";
-import { QuoteButton } from "@/components/disclosure/QuoteSheet";
 import { COST_TABLE_META, formatCost, lookupCost } from "@/lib/disclosure/costs";
 import { URGENCY_LABEL, risk } from "@/lib/disclosure/grading";
 import { TAXONOMY, type DefectType } from "@/lib/disclosure/taxonomy";
@@ -252,9 +251,6 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
           </div>
         )}
         <p className="mt-2 text-xs text-muted-foreground">{COST_TABLE_META.caption}</p>
-      </div>
-      <div className="mt-3">
-        <QuoteButton pro={f.info.pro} />
       </div>
 
       {editing && (
