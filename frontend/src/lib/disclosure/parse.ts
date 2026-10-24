@@ -18,7 +18,7 @@ export const UNCLEAR_FALLBACK: RawFinding = {
   urgency: "cosmetic",
   confidence: "low",
   image_quality: "ok",
-  reason: "Could not read the analysis result.",
+  reason: "We couldn't read the analysis result. Try again.",
 };
 
 /** Parse model text defensively. Returns null if unusable (caller retries once, then uses UNCLEAR_FALLBACK). */

@@ -129,7 +129,7 @@ export function OverallGrade({ letter }: { letter: Letter | null }) {
             <p className="mt-1 text-base font-semibold">{LETTER_WORD[letter]}</p>
           </>
         ) : (
-          <p className="text-lg font-semibold text-muted-foreground">No grade yet</p>
+          <p className="text-lg font-semibold text-muted-foreground">Not graded</p>
         )}
       </div>
     </div>

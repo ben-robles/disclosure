@@ -151,11 +151,11 @@ export function viewFinding(p: Photo) {
 }
 
 export const GUARD_MESSAGE: Record<Exclude<GuardKind, null>, string> = {
-  blurry: "Photo too blurry — retake closer and in better light.",
-  not_a_house: "This doesn't look like part of a home. Try again.",
-  low_confidence: "Can't tell from this photo — recommend a licensed home inspector.",
-  timeout: "Analysis timed out.",
-  unavailable: "The AI model isn't running. Start the backend with .\\run.ps1, then try again.",
+  blurry: "This photo is too blurry to read. Retake it closer and in better light.",
+  not_a_house: "This doesn't look like part of a home. Try a photo of the problem area.",
+  low_confidence: "The AI couldn't make out what this is, so it hasn't graded it.",
+  timeout: "This took too long to analyze. Try again.",
+  unavailable: "The AI model isn't running on this computer. Start it with .\\run.ps1, then try again.",
 };
 
 /** Resize to max 1024px long edge; re-encoding through canvas also drops EXIF. */

@@ -25,7 +25,7 @@ export function makeAnalyzer(callModel: (img: string) => Promise<string>): Defec
         }
         return UNCLEAR_FALLBACK;
       } catch {
-        return { ...UNCLEAR_FALLBACK, reason: "Analysis timed out.", timedOut: true };
+        return { ...UNCLEAR_FALLBACK, reason: "The analysis took too long.", timedOut: true };
       }
     },
   };
@@ -55,7 +55,7 @@ const SAMPLES: RawFinding[] = [
     urgency: "cosmetic",
     confidence: "low",
     image_quality: "blurry",
-    reason: "Image is too blurry to identify any surface detail.",
+    reason: "Too blurry to make out any detail.",
   },
   {
     defect_type: "foundation_structural",
@@ -87,7 +87,7 @@ const SAMPLES: RawFinding[] = [
     urgency: "1_year",
     confidence: "low",
     image_quality: "ok",
-    reason: "Discoloration visible but cause cannot be determined from this angle.",
+    reason: "There's discoloration, but the cause isn't clear from this angle.",
   },
   {
     defect_type: "roof",
@@ -108,7 +108,7 @@ export const mockAnalyzer: DefectAnalyzer = makeAnalyzer(async () => {
 
 const UNAVAILABLE: AnalyzeResult = {
   ...UNCLEAR_FALLBACK,
-  reason: "The local AI model is not reachable.",
+  reason: "The local AI model isn't reachable.",
   unavailable: true,
 };
 
@@ -127,7 +127,7 @@ export const gemmaAnalyzer: DefectAnalyzer = {
     if (!res.ok) return UNAVAILABLE;
     const data = (await res.json()) as { analysis_status?: string };
     if (data.analysis_status === "timeout")
-      return { ...UNCLEAR_FALLBACK, reason: "Analysis timed out.", timedOut: true };
+      return { ...UNCLEAR_FALLBACK, reason: "The analysis took too long.", timedOut: true };
     if (data.analysis_status === "unavailable") return UNAVAILABLE;
     return parseModelOutput(JSON.stringify(data)) ?? UNCLEAR_FALLBACK;
   },

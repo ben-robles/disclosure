@@ -108,7 +108,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
   // Overall grade card
   y += 10;
   fill(TINT); doc.roundedRect(M, y, CW, 92, 8, 8, "F");
-  badge(M + 16, y + 14, 90, 64, overall ?? "–", overall ? LETTER_WORD[overall] : "No grade", toneFor(overall ? [overall] : null), 34);
+  badge(M + 16, y + 14, 90, 64, overall ?? "–", overall ? LETTER_WORD[overall] : "Not graded", toneFor(overall ? [overall] : null), 34);
   font(13, true); doc.text("Overall grade", M + 124, y + 32);
   font(9.5, false, MUTED);
   doc.text(wrap(GRADING_RULE, CW - 140), M + 124, y + 48);
@@ -174,7 +174,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
       // Section label + heading
       font(9, true, TEAL); doc.text(section.toUpperCase(), M, top + 4);
       font(15, true); doc.text(clip(`Finding ${n} — ${it.info.label}`, CW - 110), M, top + 24);
-      const gl = it.range ? formatRange(it.range) : "No grade";
+      const gl = it.range ? formatRange(it.range) : "Not graded";
       badge(W - M - 96, top + 8, 96, 26, gl, null, c, 13);
 
       // Photo (aspect-preserving, centered in a bordered frame)

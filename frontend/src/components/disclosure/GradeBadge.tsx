@@ -13,7 +13,7 @@ export function GradeBadge({ range, large }: { range: Letter[] | null; large?: b
         )}
         aria-label="No grade"
       >
-        Can't grade
+        Not graded
       </span>
     );
   }

@@ -8,7 +8,7 @@ export const TAXONOMY = [
   { id: "plumbing", label: "Plumbing", description: "Leaking/corroded pipes, fixture leaks, water heater issues", pro: "Plumber" },
   { id: "window_door_rot", label: "Window / door damage", description: "Rotted frames, broken glass/seals, doors that don't close", pro: "Carpenter / window installer" },
   { id: "pest_wood_damage", label: "Pest / wood damage", description: "Termite tubes, carpenter ant damage, rodent evidence", pro: "Pest control" },
-  { id: "unclear", label: "Can't determine", description: "Cannot determine from photo", pro: "Licensed home inspector" },
+  { id: "unclear", label: "Couldn't identify", description: "Not clear enough from the photo", pro: "Licensed home inspector" },
 ] as const;
 
 export type DefectType = (typeof TAXONOMY)[number]["id"];

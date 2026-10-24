@@ -145,7 +145,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
           <p className="text-lg font-bold leading-snug">{GUARD_MESSAGE[f.guard]}</p>
           {f.guard === "low_confidence" && (
             <p className="mt-1 text-muted-foreground">
-              A licensed home inspector can take a proper look.
+              For a reliable answer, have a licensed home inspector take a look.
             </p>
           )}
           <input
