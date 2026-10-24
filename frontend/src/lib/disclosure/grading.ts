@@ -32,7 +32,7 @@ export const LETTER_SCORES: Record<Letter, string> = {
 };
 
 export const GRADING_RULE =
-  "Overall grade = the worst confirmed finding's worst-end letter. Never an average.";
+  "Overall grade = the worst confirmed finding's worst-end letter.";
 
 export function risk(severity: number, urgency: Urgency): number {
   return severity * URGENCY_SCORE[urgency];

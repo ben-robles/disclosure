@@ -30,9 +30,9 @@ function About() {
     >
       <div className="space-y-4 text-base leading-relaxed">
         <p>
-          Selling a home in Maryland means telling the buyer about problems you know of. Most
-          sellers have no easy way to document them. Disclosure turns phone photos into an organized
-          report that follows the sections of Maryland's seller disclosure form.
+          Selling a home means telling the buyer about problems you know of. Most sellers have no
+          easy way to document them. Disclosure turns phone photos into an organized report that
+          follows the sections of the seller disclosure form.
         </p>
         <p>
           The AI that looks at your photos runs on your own computer. Nothing is uploaded unless you

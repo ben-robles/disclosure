@@ -20,7 +20,7 @@ const SECTIONS: [string, string][] = [
   ],
   [
     "Your responsibility",
-    "You decide what goes in your report and what you disclose to a buyer. Check the report against Maryland's disclosure requirements, and ask a licensed professional if you're unsure.",
+    "You decide what goes in your report and what you disclose to a buyer. Check the report against your state's disclosure requirements, and ask a licensed professional if you're unsure.",
   ],
   [
     "AI can be wrong",
