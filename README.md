@@ -111,7 +111,9 @@ The report is a companion document organized by the numbered questions of the [M
 
 ## Test photos and results
 
-Two licensed Gate 0 photos are included with [attribution and expected visible details](assets/test_photos/ATTRIBUTION.md). The full adversarial set is still pending. Add its remaining photos with sources/licenses in `test_photos.csv`, then run `scripts\run_test_set.py`. Results go to `docs/test-results.md`; a two-photo run is not the full accuracy evaluation.
+15 openly licensed photos from Wikimedia Commons in [`assets/test_photos/`](assets/test_photos/): 10 defects covering all 8 defect types, 2 blurry, 2 not a house (a cat, a road), 1 undamaged room. Source, author and license per file: [`test_photos.csv`](assets/test_photos/test_photos.csv). Two further Gate 0 photos have [attribution and expected visible details](assets/test_photos/ATTRIBUTION.md).
+
+Results: PLACEHOLDER. Run `scripts\run_test_set.py` on the Gemma machine; it writes `docs/test-results.md`. A two-photo Gate 0 run is not the full accuracy evaluation.
 
 ## The user
 

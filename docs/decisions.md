@@ -10,7 +10,7 @@
 | 3 Grading, costs, data, queue | Done, 72 pytest tests green. |
 | 4 UI flow | Done. Driven end to end in Edge at 390 px with a fake analyzer. Not yet tested with Narrator or on a phone over Wi-Fi. |
 | 5 Report | Done. PDF has the footer on every page and findings grouped by Maryland form question. |
-| 6 Guardrails, adversarial set, docs | Guardrails 1-6 and 8 done and covered by tests. Guardrail 7 (startup banner) done. **Test photo set and `docs/test-results.md` not done** (needs Gemma and photo licensing). |
+| 6 Guardrails, adversarial set, docs | Guardrails 1-6 and 8 done and covered by tests. Guardrail 7 (startup banner) done. Test photo set done (15 Wikimedia Commons photos, licenses in `test_photos.csv`). **`docs/test-results.md` not done** (needs Gemma). |
 
 ## Choices made while building
 
@@ -31,7 +31,6 @@
 
 - `assets/cost_table.json`: every dollar range is PLACEHOLDER.
 - `docs/user-interview.md` and `docs/personas.md`: need a real person's words.
-- `assets/test_photos/` and `test_photos.csv`: find and license-check the photos.
 - `docs/environment.md` and `docs/gate0.md`: run on the Gemma machine.
 - Confirm the current Maryland form revision (the Commission announced a September 2026 update after the August 3 print on the PDF used here).
 - README screenshots, measured latency, model size, tested laptop specs.
