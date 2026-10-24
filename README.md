@@ -54,20 +54,40 @@ Screenshots of each: PLACEHOLDER.
 - Data kept: photos, your confirmations and edits, and an optional 5-digit ZIP printed on the report. All of it lives in `data/` on this computer. "Delete this session" erases it.
 - No accounts, no analytics, no faces or addresses collected.
 
-## Setup (Windows)
+## Setup
+
+### Quick start (Windows)
 
 ```powershell
-# 1. Python 3.11+ and Git are required. Install Ollama from ollama.com.
-# 2. Get the code and install dependencies.
+# Python 3.11+ and Git are required. Install Ollama from ollama.com.
 git clone https://github.com/ben-robles/disclosure
 cd disclosure
 py -3.11 -m venv .venv
 .\.venv\Scripts\python -m pip install -r requirements.txt
-# 3. Quit the Ollama tray app, then collect Gate 0 evidence.
-.\scripts\gate0_windows.ps1
+ollama pull gemma4:e2b      # or the tag verified in Gate 0
+.\run.ps1                   # http://127.0.0.1:8000  (add -Lan for a phone on the same Wi-Fi)
 ```
 
-Complete [Gate 0](docs/gate0.md) first: quit the Ollama tray app, then run
+### macOS / Linux (development)
+
+`run.ps1` is Windows-only. Run the same server directly:
+
+```sh
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m uvicorn app.main:create_app --factory --port 8000
+```
+
+Without Ollama the page loads and shows the "model not running" banner; use
+`.venv/bin/python -m tests.dev_server` to try the full flow with canned answers.
+
+The UI is plain HTML, CSS and JavaScript in `static/`, served by the app. The
+`frontend/` folder is a separate React prototype from Lovable. The app does not use
+it, and the build plan calls for no Node toolchain.
+
+### Gate 0 (certify Gemma on the demo laptop)
+
+Complete [Gate 0](docs/gate0.md) before the demo: quit the Ollama tray app, then run
 `.\scripts\gate0_windows.ps1` from the Windows checkout. It starts a local server,
 pulls `gemma4:e2b`, tests both licensed defect photos through the CLI, HTTP API and
 production analyzer, restarts the server for one/four workers, and saves raw evidence
