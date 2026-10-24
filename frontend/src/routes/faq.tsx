@@ -41,11 +41,7 @@ const QUESTIONS: [string, string][] = [
   ],
   [
     "Where do the repair costs come from?",
-    "A fixed table by defect type and severity. The AI never writes a dollar amount. The numbers are placeholders for the DC, Maryland and Virginia area.",
-  ],
-  [
-    "Is it only for Maryland?",
-    "For now, yes. The report follows the sections of Maryland's seller disclosure form.",
+    "A fixed table by defect type and severity. The AI never writes a dollar amount. The numbers are placeholders.",
   ],
   ["Do I need an account?", "No accounts, no payments and no analytics."],
   [

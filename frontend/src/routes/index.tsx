@@ -143,7 +143,7 @@ function Welcome() {
       </h1>
       <p className="mt-3 text-[1.05rem] leading-relaxed text-muted-foreground">
         Photograph what you know is wrong. Disclosure sorts each photo, grades how serious it is,
-        and builds a report you can attach to your Maryland disclosure.
+        and builds a report you can attach to your disclosure.
       </p>
 
       <StepFlow />

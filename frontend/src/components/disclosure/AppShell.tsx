@@ -103,7 +103,7 @@ export function SiteFooter() {
         <Logo className="size-6" /> Disclosure
       </Link>
       <p className="mt-2 text-muted-foreground">
-        Photo-based defect documentation for Maryland home sellers.
+        Photo-based defect documentation for home sellers.
       </p>
       <nav aria-label="Site" className="mt-5">
         <ul className="grid grid-cols-2 gap-x-4 gap-y-1">

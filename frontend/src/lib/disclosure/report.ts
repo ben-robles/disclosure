@@ -91,7 +91,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
   font(11, false, [200, 230, 230]); doc.text("DISCLOSURE", M, 48);
   font(24, true, [255, 255, 255]); doc.text("Seller Defect Documentation", M, 78);
   font(11, false, [220, 240, 240]);
-  doc.text(`Companion report · ${JURISDICTION.name} ${JURISDICTION.form}`, M, 100);
+  doc.text(`Companion report · ${JURISDICTION.form}`, M, 100);
   y = 150;
 
   const meta: [string, string][] = [

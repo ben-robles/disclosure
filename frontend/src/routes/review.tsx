@@ -14,12 +14,12 @@ export const Route = createFileRoute("/review")({
       { title: "Review | Disclosure" },
       {
         name: "description",
-        content: "Overall grade and confirmed findings grouped by Maryland disclosure section.",
+        content: "Overall grade and confirmed findings grouped by disclosure section.",
       },
       { property: "og:title", content: "Review | Disclosure" },
       {
         property: "og:description",
-        content: "Overall grade and confirmed findings grouped by Maryland disclosure section.",
+        content: "Overall grade and confirmed findings grouped by disclosure section.",
       },
     ],
   }),
@@ -38,7 +38,7 @@ function Review() {
   return (
     <AppShell
       step={3}
-      title="Your report at a glance"
+      title="Your report"
       lead={session.address || undefined}
       footer={
         items.length ? (
