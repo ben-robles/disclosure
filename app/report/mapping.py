@@ -27,6 +27,15 @@ def section_for(defect_type: str):
     return (int(num), f"Form question {num}: {_data()['sections'][num]}")
 
 
+def section_short(defect_type: str) -> str:
+    """Compact label like '5. Roof' for tables and eyebrows."""
+    entry = _data()["mapping"].get(defect_type)
+    if not entry or not entry["section"]:
+        return NEEDS_INSPECTOR
+    num = entry["section"]
+    return f"{num}. {_data()['sections'][num]}"
+
+
 def group_findings(items: list) -> list:
     """items: dicts with 'defect_type'. Returns [(heading, [items...])] in form order."""
     groups = {}
