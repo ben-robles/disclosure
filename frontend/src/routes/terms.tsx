@@ -30,7 +30,6 @@ const SECTIONS: [string, string][] = [
     "Repair costs are placeholders",
     "Cost ranges come from a fixed table and vary by region, contractor and the real condition of the problem.",
   ],
-  ["Quote requests are a demo", "The Get a quote and Request quote buttons don't contact anyone."],
   ["No warranty", "Disclosure is provided as is, without warranties of any kind."],
 ];
 

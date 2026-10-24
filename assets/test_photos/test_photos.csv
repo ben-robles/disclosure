@@ -15,4 +15,4 @@ normal_empty_room.jpg,normal,https://commons.wikimedia.org/wiki/File:Empty_apart
 blurry_light_switch.jpg,blurry,https://commons.wikimedia.org/wiki/File:Light_swtich_blur_2.jpg,CC BY-SA 4.0,https://creativecommons.org/licenses/by-sa/4.0,Downtowngal,resized to 1280 px wide
 blurry_wiring.jpg,blurry,https://commons.wikimedia.org/wiki/File:Exposed_Wall_Wiring_and_Breaker_Box.jpg,CC0,https://creativecommons.org/publicdomain/zero/1.0/deed.en,Paul The Writer,resized to 1280 px wide; Gaussian blur radius 14 applied for this test set
 gate0_water_stain.jpg,water_intrusion,https://commons.wikimedia.org/wiki/File:Water_Damage.JPG,"CC BY-SA 3.0 (Ed!; see ATTRIBUTION.md)",,,see ATTRIBUTION.md
-gate0_chimney_spalling.jpg,foundation_structural,https://commons.wikimedia.org/wiki/File:Spalling_in_chimney.jpg,"CC BY-SA 4.0 (Beltedweir; see ATTRIBUTION.md)",,,see ATTRIBUTION.md
+gate0_chimney_spalling.jpg,chimney_fireplace,https://commons.wikimedia.org/wiki/File:Spalling_in_chimney.jpg,"CC BY-SA 4.0 (Beltedweir; see ATTRIBUTION.md)",,,see ATTRIBUTION.md

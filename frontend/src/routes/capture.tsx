@@ -139,7 +139,6 @@ function Capture() {
         <span className="text-lg font-semibold">
           {total ? "Add another photo" : "Take or choose a photo"}
         </span>
-        <span className="text-sm text-muted-foreground">On a phone this opens the camera</span>
       </button>
 
       {nudge && (

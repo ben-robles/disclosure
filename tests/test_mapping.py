@@ -14,6 +14,14 @@ def test_known_sections():
     assert mapping.section_for("unclear")[1] == mapping.NEEDS_INSPECTOR
 
 
+def test_new_categories_map_to_matching_questions():
+    assert "Heating" in mapping.section_for("hvac_heating")[1]
+    assert "Air Conditioning" in mapping.section_for("hvac_cooling")[1]
+    assert "Basement" in mapping.section_for("basement_moisture")[1]
+    assert "Exterior Drainage" in mapping.section_for("grading_drainage")[1]
+    assert "Septic" in mapping.section_for("septic_sewer")[1]
+
+
 def test_grouping_follows_form_order():
     items = [{"defect_type": "pest_wood_damage"}, {"defect_type": "roof"},
              {"defect_type": "unclear"}, {"defect_type": "foundation_structural"}]

@@ -16,7 +16,7 @@ Next performance work: [smaller-model comparison and inference-speed handoff](do
 
 ## What the AI does and never does
 
-- **Does:** looks at one photo and picks one of 9 fixed types (roof, water intrusion, mold, foundation or structural, electrical, plumbing, window or door, pests or wood damage, unclear). Rates severity (1-5), urgency and its own confidence. Writes one sentence about what is visible.
+- **Does:** looks at one photo and picks one of 28 fixed types, listed in `assets/defect_taxonomy.json` (roof, chimney, gutters, grading, siding, deck, water intrusion, basement moisture, mold, foundation, electrical, panel, plumbing, water heater, heating, cooling, insulation, windows and doors, walls, flooring, stairs, pests, alarms, hazardous materials, septic, fire damage, and more; unclear when it cannot tell). Rates severity (1-5), urgency and its own confidence. Writes one sentence about what is visible.
 - **Never:** writes dollar amounts, gives legal conclusions, or gives a grade when it is unsure. Cost ranges come from a hand-built table the model never sees. Nothing goes in the report until you confirm it.
 
 ## The grading rule
@@ -51,6 +51,7 @@ Screenshots of each: PLACEHOLDER.
 ## Privacy
 
 - The server listens on `127.0.0.1` only. `.\run.ps1 -Lan` listens on all interfaces so a phone on the same Wi-Fi can open the app. Windows Firewall will ask: allow it on private networks only.
+- To open the app from your own devices away from home, use Tailscale Serve (tailnet only, not public): `tailscale serve --bg --https=8443 http://127.0.0.1:5173`. Photos travel encrypted between your devices and this computer, and the server still listens on `127.0.0.1`. Do not use Tailscale Funnel or a public tunnel: that sends photos from strangers to your model.
 - The only outbound calls are to the local Ollama server and, only if you ask for the report by email, to the SMTP server you configure (copy `.env.example` to `.env` and fill it in; `.env` is git-ignored). The address and PDF are not stored. Leave those unset and email is disabled. A test (`tests/test_no_network.py`) fails if any other URL appears in the code.
 - Photo metadata (GPS, time, device) is stripped on upload. Photos are resized to 1024 px on the long edge, which also keeps analysis fast.
 - Data kept: photos, your confirmations and edits, and an optional 5-digit ZIP printed on the report. All of it lives in `data/` on this computer. "Delete this session" erases it.

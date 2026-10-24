@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,6 @@ import {
   RiskMatrix,
   SeverityDots,
 } from "@/components/disclosure/RiskViz";
-import { QuoteButton } from "@/components/disclosure/QuoteSheet";
 import { COST_TABLE_META, formatCost, lookupCost } from "@/lib/disclosure/costs";
 import { URGENCY_LABEL, risk } from "@/lib/disclosure/grading";
 import { TAXONOMY, type DefectType } from "@/lib/disclosure/taxonomy";
@@ -62,7 +61,7 @@ function Findings() {
     <AppShell
       step={2}
       title="What we found"
-      lead="Check each one. Only findings you confirm go into the report."
+      lead="Only findings you confirm go into the report."
       footer={
         confirmed === 0 ? (
           <div className="space-y-2">
@@ -84,20 +83,7 @@ function Findings() {
         )
       }
     >
-      <div
-        className="mb-5 flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-[var(--shadow-card)]"
-        aria-live="polite"
-      >
-        <div className="h-2 flex-1 overflow-hidden rounded-full bg-border" aria-hidden>
-          <div
-            className="h-full rounded-full bg-primary transition-[width] duration-300 motion-reduce:transition-none"
-            style={{ width: `${total ? (confirmed / total) * 100 : 0}%` }}
-          />
-        </div>
-        <p className="text-sm font-semibold tabular-nums">
-          {confirmed} of {total} confirmed
-        </p>
-      </div>
+      <ProgressBar photos={session.photos} />
       <ul className="space-y-5">
         {session.photos.map((p, i) => (
           <li key={p.id}>
@@ -112,6 +98,58 @@ function Findings() {
         <Disclaimer />
       </div>
     </AppShell>
+  );
+}
+
+// Analysis of one photo takes about a minute with no real progress signal, so the
+// photo being analyzed counts as a fraction that creeps toward (never reaches) done.
+const ANALYZE_TAU_MS = 45_000;
+
+/** Shows analysis progress while photos are being analyzed, then confirmation progress. */
+function ProgressBar({ photos }: { photos: Photo[] }) {
+  const total = photos.length;
+  const done = photos.filter((p) => p.status === "done").length;
+  const confirmed = photos.filter((p) => p.confirmed).length;
+  const analyzingId = photos.find((p) => p.status === "analyzing")?.id;
+  const [partial, setPartial] = useState(0);
+
+  useEffect(() => {
+    setPartial(0);
+    if (!analyzingId) return;
+    const start = Date.now();
+    const timer = setInterval(
+      () => setPartial(0.95 * (1 - Math.exp(-(Date.now() - start) / ANALYZE_TAU_MS))),
+      500,
+    );
+    return () => clearInterval(timer);
+  }, [analyzingId]);
+
+  const analyzing = done < total;
+  const pct = total ? ((analyzing ? done + partial : confirmed) / total) * 100 : 0;
+  const label = analyzing
+    ? `Analyzing photo ${Math.min(done + 1, total)} of ${total}…`
+    : `${confirmed} of ${total} confirmed`;
+
+  return (
+    <div
+      className="mb-5 flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 shadow-[var(--shadow-card)]"
+      aria-live="polite"
+    >
+      <div
+        className="h-2 flex-1 overflow-hidden rounded-full bg-border"
+        role="progressbar"
+        aria-label={analyzing ? "Analysis progress" : "Confirmation progress"}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={Math.round(pct)}
+      >
+        <div
+          className={`h-full rounded-full bg-primary transition-[width] duration-500 motion-reduce:transition-none ${analyzing ? "motion-safe:animate-pulse" : ""}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <p className="text-sm font-semibold tabular-nums">{label}</p>
+    </div>
   );
 }
 
@@ -248,11 +286,6 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
         )}
         <p className="mt-2 text-xs text-muted-foreground">{COST_TABLE_META.caption}</p>
       </div>
-      {f.info.pro && (
-        <div className="mt-3">
-          <QuoteButton pro={f.info.pro} />
-        </div>
-      )}
 
       {editing && (
         <div className="mt-4 space-y-3 rounded-2xl border bg-background p-3">

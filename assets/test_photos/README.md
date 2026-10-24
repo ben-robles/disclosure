@@ -2,7 +2,7 @@
 
 15 photos from Wikimedia Commons. Each one's license was read on its Commons page. Source, author, license and changes for every file are in [`test_photos.csv`](test_photos.csv).
 
-Two extra Gate 0 fixtures (`gate0_*.jpg`, a ceiling stain and spalling chimney bricks) are described in [ATTRIBUTION.md](ATTRIBUTION.md). They are a vision smoke check, not part of the adversarial set; severity and urgency are not ground-truth inspection labels.
+Two extra Gate 0 fixtures (`gate0_*.jpg`, a ceiling stain and spalling chimney bricks, expected `chimney_fireplace`) are described in [ATTRIBUTION.md](ATTRIBUTION.md). They are a vision smoke check, not part of the adversarial set; severity and urgency are not ground-truth inspection labels.
 
 | Expected | Files |
 |---|---|
