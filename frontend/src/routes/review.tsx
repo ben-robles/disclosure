@@ -61,11 +61,11 @@ function Review() {
         )
       }
     >
-      <section className="rounded-3xl border bg-card px-5 pb-5 pt-6 shadow-[var(--shadow-card)]" aria-labelledby="overall">
-        <h2
-          id="overall"
-          className="mb-1 text-center text-sm font-bold text-muted-foreground"
-        >
+      <section
+        className="rounded-3xl border bg-card px-5 pb-5 pt-6 shadow-[var(--shadow-card)]"
+        aria-labelledby="overall"
+      >
+        <h2 id="overall" className="mb-1 text-center text-sm font-bold text-muted-foreground">
           Overall grade
         </h2>
         <OverallGrade letter={overall} />

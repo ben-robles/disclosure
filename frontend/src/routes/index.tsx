@@ -1,9 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AppShell, Disclaimer } from "@/components/disclosure/AppShell";
 import { GradeTile } from "@/components/disclosure/GradeBadge";
 import { startSession, useSession } from "@/lib/disclosure/store";
@@ -68,7 +66,13 @@ function Hero() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-transparent from-45% to-foreground/55" />
       <Chip letter="B" title="Roof" note="Worn shingles" className="left-4 top-4" delay="0.45s" />
-      <Chip letter="C" title="Water intrusion" note="Ceiling stain" className="bottom-4 right-4" delay="0.65s" />
+      <Chip
+        letter="C"
+        title="Water intrusion"
+        note="Ceiling stain"
+        className="bottom-4 right-4"
+        delay="0.65s"
+      />
     </div>
   );
 }
@@ -80,20 +84,19 @@ const HOW = [
 ] as const;
 
 function Welcome() {
-  const [zip, setZip] = useState("");
   const session = useSession();
   const navigate = useNavigate();
-  const zipValid = zip === "" || /^\d{5}$/.test(zip);
 
   return (
     <AppShell
       footer={
         <div>
-          <Button type="submit" form="start-form" size="xl" disabled={!zipValid}>
+          <Button type="submit" form="start-form" size="xl">
             Start your report
           </Button>
           <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[0.8rem] font-medium text-muted-foreground">
-            <Lock className="size-3.5" aria-hidden /> Analyzed on this device. Nothing uploaded. No account.
+            <Lock className="size-3.5" aria-hidden /> Analyzed on this device. Nothing uploaded. No
+            account.
           </p>
         </div>
       }
@@ -112,7 +115,8 @@ function Welcome() {
           <li
             key={t}
             style={{ "--d": `${0.3 + i * 0.08}s` } as CSSProperties}
-            className="rise rounded-2xl border bg-card p-3 shadow-[var(--shadow-card)]">
+            className="rise rounded-2xl border bg-card p-3 shadow-[var(--shadow-card)]"
+          >
             <span className="text-xs font-extrabold text-primary">{i + 1}</span>
             <h2 className="mt-1 text-[0.95rem] font-bold leading-tight">{t}</h2>
             <p className="mt-1 text-[0.8rem] leading-snug text-muted-foreground">{d}</p>
@@ -127,45 +131,20 @@ function Welcome() {
 
       <form
         id="start-form"
-        className="mt-9 space-y-4 rounded-3xl border bg-card p-4 shadow-[var(--shadow-card)]"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!zipValid) return;
-          startSession(zip);
+          startSession("");
           navigate({ to: "/capture" });
         }}
-      >
-        <h2 className="text-xl font-bold">Where is the home?</h2>
-        <p className="-mt-2 text-sm text-muted-foreground">Optional. Your ZIP code prints on the report.</p>
-        <div className="space-y-1.5">
-          <Label htmlFor="zip" className="text-base">
-            ZIP code <span className="font-normal text-muted-foreground">(optional)</span>
-          </Label>
-          <Input
-            id="zip"
-            inputMode="numeric"
-            maxLength={5}
-            value={zip}
-            onChange={(e) => setZip(e.target.value.replace(/\D/g, ""))}
-            className="h-12 rounded-xl bg-background text-lg"
-            aria-invalid={!zipValid}
-            aria-describedby={zipValid ? undefined : "zip-help"}
-          />
-          {!zipValid && (
-            <p id="zip-help" className="text-sm font-medium text-destructive">
-              Enter all 5 digits, or leave it blank.
-            </p>
-          )}
-        </div>
-        {session && (
-          <Button asChild variant="outline" size="xl">
-            <Link to="/capture">
-              Pick up where you left off ({session.photos.length}{" "}
-              {session.photos.length === 1 ? "photo" : "photos"})
-            </Link>
-          </Button>
-        )}
-      </form>
+      />
+      {session && (
+        <Button asChild variant="outline" size="xl" className="mt-8">
+          <Link to="/capture">
+            Pick up where you left off ({session.photos.length}{" "}
+            {session.photos.length === 1 ? "photo" : "photos"})
+          </Link>
+        </Button>
+      )}
       <div className="mt-6">
         <Disclaimer />
       </div>

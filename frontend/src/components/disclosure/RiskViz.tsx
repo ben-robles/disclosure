@@ -90,7 +90,10 @@ export function GradeDial({ range, className }: { range: Letter[] | null; classN
       })}
       {range && (
         <>
-          <g className="sweep" style={{ "--sweep-from": `${180 - needleDeg}deg` } as React.CSSProperties}>
+          <g
+            className="sweep"
+            style={{ "--sweep-from": `${180 - needleDeg}deg` } as React.CSSProperties}
+          >
             <line
               x1="120"
               y1="120"

@@ -67,7 +67,9 @@ function Steps({ current }: { current: number }) {
                     state === "done" && "group-hover:text-foreground",
                   )}
                 >
-                  {state === "done" && <Check className="mr-0.5 inline size-3 -translate-y-px" aria-hidden />}
+                  {state === "done" && (
+                    <Check className="mr-0.5 inline size-3 -translate-y-px" aria-hidden />
+                  )}
                   {s.label}
                 </span>
                 <span
