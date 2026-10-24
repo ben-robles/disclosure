@@ -15,8 +15,8 @@ export const Route = createFileRoute("/privacy")({
 
 const SECTIONS: [string, string][] = [
   [
-    "Your photos stay on this computer",
-    "The AI model runs locally through Ollama. Photos are never sent to a cloud service.",
+    "Where your photos are analyzed",
+    "Your photos are stripped of location and device data on this computer, then sent over an encrypted connection to our AI server on Google Cloud, which looks at them and sends back a finding. The server does not keep your photos. Everything else stays on this computer until you choose to email yourself the report.",
   ],
   [
     "Location and device data are removed",
@@ -28,7 +28,7 @@ const SECTIONS: [string, string][] = [
   ],
   [
     "Emailing your report (optional)",
-    "If you ask us to email your report, the PDF and your address are sent to our mail server once, forwarded to you, and not saved. The PDF includes your photos. Skip it and nothing leaves this computer.",
+    "If you ask us to email your report, the PDF and your address are sent to our mail server once, forwarded to you, and not saved. The PDF includes your photos. Skip it and only the analysis request leaves this computer.",
   ],
   [
     "No accounts, no tracking",

@@ -108,7 +108,7 @@ export const mockAnalyzer: DefectAnalyzer = makeAnalyzer(async () => {
 
 const UNAVAILABLE: AnalyzeResult = {
   ...UNCLEAR_FALLBACK,
-  reason: "The local AI model is not reachable.",
+  reason: "The AI model server is not reachable.",
   unavailable: true,
 };
 

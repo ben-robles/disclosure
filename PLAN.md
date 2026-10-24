@@ -34,6 +34,8 @@ If RAM is under 16 GB or there is no GPU, still proceed, but choose the smallest
 
 **Out of scope — do not build, do not stub, do not leave TODOs for:** accounts, payments, any cloud service, real contractor integration, multiple jurisdictions, video, buyer marketplace, desktop/tablet layouts, a native mobile app, in-browser model execution.
 
+**Amendment, October 24, 2026:** hosted inference on Google Cloud Run GPU (Ollama, `gemma4:e4b`) is now in scope. The backend and data stay local, and the privacy copy was rewritten to say photos are sent to our private model server. See `docs/superpowers/specs/2026-10-24-cloud-run-gemma-design.md`.
+
 **Tracks:** GDG Best Overall AI for Housing + MLH **Best Use of Gemma 4** (the one MLH pick). Gemma 4 is the only model and does the only inference. Open-source hygiene (license, README) is still required because the GDG rubric scores it.
 
 ---
@@ -255,6 +257,8 @@ Each phase ends with a commit and a line in `docs/decisions.md`. Do not start th
 
 - Never invent dollar amounts, legal text, form field names, statistics, or user quotes. If a value is needed and unknown, write `PLACEHOLDER` and list it in `docs/decisions.md` under "Human must fill."
 - Never add a cloud call, API key, analytics, or third-party endpoint. The no-network test enforces this.
+
+**Amendment, October 24, 2026:** the model server URL may be a hosted Cloud Run service supplied through `DISCLOSURE_OLLAMA_URL`; no URL is hardcoded and the no-network test still enforces that.
 - Never add a feature not in §1. If something seems necessary, ASK with a one-line cost/benefit.
 - Windows specifics: use `pathlib` everywhere, never hard-coded slashes; give commands in PowerShell form in the README; don't require WSL; test `run.ps1` from a fresh PowerShell window.
 - Commit after every phase with a message naming the phase and push, so the public history shows the work happened this weekend.

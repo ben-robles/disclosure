@@ -12,7 +12,7 @@ Disclosure is a seller-side tool: photograph a home's defects, get each one rate
 | MLH Best Use of Gemma 4 | Yes, as the one MLH pick | Fits only if Gemma 4 does the photo analysis itself, not as an add-on. |
 | MLH Best Open-Source AI Project | Probably automatic | Needs a public repo and a license file from the start. |
 | MLH Best UI/UX | Only if time allows | Grade card and report flow can earn it, but the slides say not to check boxes just to enter. |
-| MLH Best Use of Google Cloud | No | A local-first model contradicts it. |
+| MLH Best Use of Google Cloud | Possible | Inference runs on Cloud Run GPU; see cloud/README.md. |
 
 **Conflict in the slides to ask an organizer about:** slide 12 says select only ONE MLH track, while slide 7 says you are judged in every track you enter. Ask whether Open-Source is added automatically on top of your one pick (slide 8 notes say it is).
 
