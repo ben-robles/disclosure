@@ -31,8 +31,22 @@ function Capture() {
   const [nudge, setNudge] = useState(false);
   const [started, setStarted] = useState(false);
   const [aiUp, setAiUp] = useState<boolean | null>(null);
+  const [dragging, setDragging] = useState(false);
   useEffect(() => {
     void backendHealthy().then(setAiUp);
+  }, []);
+  useEffect(() => {
+    // Without this, a photo dropped outside the drop zone makes the browser open it and leave the app.
+    const hasFiles = (e: DragEvent) => e.dataTransfer?.types.includes("Files");
+    const block = (e: DragEvent) => {
+      if (hasFiles(e)) e.preventDefault();
+    };
+    window.addEventListener("dragover", block);
+    window.addEventListener("drop", block);
+    return () => {
+      window.removeEventListener("dragover", block);
+      window.removeEventListener("drop", block);
+    };
   }, []);
   if (!session) return <NoSession />;
 
@@ -43,10 +57,11 @@ function Capture() {
   const analyzing = (started || photos.some((p) => p.status === "analyzing")) && busy;
   const current = Math.min(done + 1, total);
 
-  async function onFiles(files: FileList | null) {
+  async function onFiles(files: ArrayLike<File> | null) {
     if (!files) return;
-    for (const f of Array.from(files)) addPhoto(await resizeImage(f));
-    setNudge(true);
+    const images = Array.from(files).filter((f) => f.type.startsWith("image/"));
+    for (const f of images) addPhoto(await resizeImage(f));
+    if (images.length) setNudge(true);
     if (input.current) input.current.value = "";
   }
 
@@ -105,7 +120,18 @@ function Capture() {
       <button
         type="button"
         onClick={() => input.current?.click()}
-        className="flex w-full flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-primary/35 bg-card px-4 py-10 shadow-[var(--shadow-card)] text-center transition-colors hover:border-primary hover:bg-accent"
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = "copy";
+          setDragging(true);
+        }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragging(false);
+          void onFiles(e.dataTransfer.files);
+        }}
+        className={`flex w-full flex-col items-center gap-2 rounded-3xl border-2 border-dashed px-4 py-10 shadow-[var(--shadow-card)] text-center transition-colors hover:border-primary hover:bg-accent ${dragging ? "border-primary bg-accent" : "border-primary/35 bg-card"}`}
       >
         <span className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-cta)]">
           <Camera className="size-7" aria-hidden />
