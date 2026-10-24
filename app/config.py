@@ -2,6 +2,20 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def _load_dotenv(path: Path) -> None:
+    """Read KEY=value lines from a gitignored .env so secrets never live in the code."""
+    if not path.is_file():
+        return
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            key, _, value = line.partition("=")
+            os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+_load_dotenv(ROOT / ".env")
 ASSETS_DIR = ROOT / "assets"
 STATIC_DIR = ROOT / "static"
 DATA_DIR = Path(os.environ.get("DISCLOSURE_DATA_DIR", ROOT / "data"))
@@ -24,3 +38,10 @@ OVERALL_RULE = (
     "The overall grade is the worst grade among your confirmed findings. "
     "It is never an average."
 )
+
+# Optional: emailing a finished report. Unset means the feature reports "not set up".
+SMTP_HOST = os.environ.get("DISCLOSURE_SMTP_HOST", "")
+SMTP_PORT = int(os.environ.get("DISCLOSURE_SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("DISCLOSURE_SMTP_USER", "")
+SMTP_PASSWORD = os.environ.get("DISCLOSURE_SMTP_PASSWORD", "")
+SMTP_FROM = os.environ.get("DISCLOSURE_SMTP_FROM", SMTP_USER)

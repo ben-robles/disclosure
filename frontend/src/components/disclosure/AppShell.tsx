@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState, type ReactNode } from "react";
+import { useState, type CSSProperties, type ReactNode } from "react";
 import { Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,33 +11,27 @@ import {
 } from "@/components/ui/sheet";
 import { GRADING_RULE } from "@/lib/disclosure/grading";
 import { cn } from "@/lib/utils";
-import { GRADE_FILL, GRADE_INK } from "./RiskViz";
+import { EMAIL, GITHUB_URL } from "@/lib/disclosure/site";
+import { GradeLegend } from "./RiskViz";
 import { DISCLAIMER, deleteSession, useSession } from "@/lib/disclosure/store";
 
 export function Logo({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={cn("size-7", className)} aria-hidden>
-      <rect width="32" height="32" rx="8" fill="var(--primary)" />
+    <svg viewBox="0 0 32 32" className={cn("size-8", className)} aria-hidden>
+      <rect width="32" height="32" rx="10" fill="var(--primary)" />
       <path
-        d="M6.5 15.5 16 7l9.5 8.5"
+        d="M7 15 16 7.5 25 15v9.5H7z"
         fill="none"
         stroke="#fff"
-        strokeWidth="2.4"
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       <path
-        d="M9.5 14v10h13V14"
+        d="m12.2 16.6 2.8 2.8 5-5"
         fill="none"
         stroke="#fff"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-      />
-      <path
-        d="m13 19 2.4 2.4L20 16.8"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="2.4"
+        strokeWidth="2.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -54,48 +48,95 @@ const STEPS = [
 
 function Steps({ current }: { current: number }) {
   return (
-    <nav aria-label="Progress" className="border-b bg-background px-5 pb-3 pt-1">
-      <ol className="flex items-center">
+    <nav aria-label="Progress" className="px-5 pb-3 pt-1">
+      <ol className="flex gap-1.5">
         {STEPS.map((s, i) => {
           const n = i + 1;
           const state = n < current ? "done" : n === current ? "current" : "todo";
           return (
-            <li key={s.to} className={cn("flex items-center", i < STEPS.length - 1 && "flex-1")}>
+            <li key={s.to} className="flex-1">
               <Link
                 to={s.to}
                 aria-current={state === "current" ? "step" : undefined}
-                className="flex items-center gap-1.5 rounded-full py-1 text-sm"
+                className="group flex min-h-9 flex-col justify-end gap-1.5"
               >
                 <span
                   className={cn(
-                    "flex size-6 items-center justify-center rounded-full text-xs font-bold",
-                    state === "done" && "bg-primary text-primary-foreground",
-                    state === "current" && "bg-foreground text-background",
-                    state === "todo" && "bg-muted text-muted-foreground",
+                    "text-xs font-semibold transition-colors",
+                    state === "current" ? "text-foreground" : "text-muted-foreground",
+                    state === "done" && "group-hover:text-foreground",
                   )}
                 >
-                  {state === "done" ? <Check className="size-3.5" aria-hidden /> : n}
+                  {state === "done" && (
+                    <Check className="mr-0.5 inline size-3 -translate-y-px" aria-hidden />
+                  )}
+                  {s.label}
                 </span>
                 <span
                   className={cn(
-                    state === "current" ? "font-semibold" : "text-muted-foreground",
-                    state !== "current" && "max-[380px]:hidden",
+                    "h-1.5 rounded-full transition-colors",
+                    state === "todo" ? "bg-border" : "bg-primary",
                   )}
-                >
-                  {s.label}
-                </span>
-              </Link>
-              {i < STEPS.length - 1 && (
-                <span
-                  className={cn("mx-2 h-px flex-1", n < current ? "bg-primary" : "bg-border")}
                   aria-hidden
                 />
-              )}
+              </Link>
             </li>
           );
         })}
       </ol>
     </nav>
+  );
+}
+
+const FOOTER_LINKS = [
+  { to: "/about", label: "About" },
+  { to: "/faq", label: "FAQ" },
+  { to: "/contact", label: "Contact" },
+  { to: "/privacy", label: "Privacy" },
+  { to: "/terms", label: "Terms" },
+] as const;
+
+export function SiteFooter() {
+  return (
+    <footer className="border-t bg-muted px-5 py-8 text-sm">
+      <Link to="/" className="flex items-center gap-2 text-base font-extrabold tracking-tight">
+        <Logo className="size-6" /> Disclosure
+      </Link>
+      <p className="mt-2 text-muted-foreground">
+        Photo-based defect documentation for Maryland home sellers.
+      </p>
+      <nav aria-label="Site" className="mt-5">
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-1">
+          {FOOTER_LINKS.map((l) => (
+            <li key={l.to}>
+              <Link
+                to={l.to}
+                className="inline-flex min-h-9 items-center font-medium hover:underline"
+              >
+                {l.label}
+              </Link>
+            </li>
+          ))}
+          <li>
+            <a
+              href={GITHUB_URL}
+              className="inline-flex min-h-9 items-center font-medium hover:underline"
+            >
+              GitHub
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <p className="mt-4">
+        Questions?{" "}
+        <a href={`mailto:${EMAIL}`} className="font-medium text-primary underline">
+          {EMAIL}
+        </a>
+      </p>
+      <p className="mt-5 border-t pt-4 text-xs text-muted-foreground">
+        {DISCLAIMER} Built for the GDG AI for Housing challenge with Gemma 4. © 2026 Disclosure.
+      </p>
+    </footer>
   );
 }
 
@@ -116,12 +157,12 @@ export function AppShell({
   const session = useSession();
   const navigate = useNavigate();
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-background shadow-[0_0_0_1px_var(--border),0_12px_40px_-12px_oklch(0.25_0.05_255/0.18)]">
-      <div className="sticky top-0 z-10 bg-background">
+    <div className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-canvas shadow-[0_0_0_1px_var(--border),0_20px_60px_-20px_oklch(0.25_0.05_258/0.3)]">
+      <div className="sticky top-0 z-10 bg-canvas/90 backdrop-blur supports-[backdrop-filter]:bg-canvas/80">
         <header className="flex items-center justify-between px-5 py-2">
           <Link
             to="/"
-            className="flex min-h-11 items-center gap-2 text-lg font-extrabold tracking-tight"
+            className="flex min-h-11 items-center gap-2.5 text-xl font-extrabold tracking-tight"
           >
             <Logo /> Disclosure
           </Link>
@@ -135,19 +176,20 @@ export function AppShell({
           </Button>
         </header>
         {step && session && <Steps current={step} />}
-        {!(step && session) && <div className="border-b" />}
+        <div className="border-b" />
       </div>
-      <main className="flex-1 px-5 pb-8 pt-6">
+      <main className="rise flex-1 px-5 pb-8 pt-6" style={{ "--d": "0.05s" } as CSSProperties}>
         {title && (
           <div className="mb-5">
-            <h1 className="text-[1.75rem] font-extrabold leading-tight">{title}</h1>
+            <h1 className="text-[2rem] font-extrabold leading-[1.08]">{title}</h1>
             {lead && <p className="mt-1.5 text-base text-muted-foreground">{lead}</p>}
           </div>
         )}
         {children}
       </main>
+      <SiteFooter />
       {footer && (
-        <div className="sticky bottom-0 border-t bg-background/95 px-5 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+        <div className="sticky bottom-0 z-10 border-t bg-canvas/95 px-4 pb-5 pt-3 backdrop-blur supports-[backdrop-filter]:bg-canvas/85">
           {footer}
         </div>
       )}
@@ -168,28 +210,9 @@ export function AppShell({
                 Score = severity (1 to 5) × urgency (cosmetic 1, within a year 2, within 30 days 3,
                 immediately 4).
               </p>
-              <ul className="my-3 divide-y overflow-hidden rounded-lg border">
-                {(
-                  [
-                    ["A", "1 to 3", "Minor"],
-                    ["B", "4 to 6", "Low concern"],
-                    ["C", "7 to 10", "Moderate"],
-                    ["D", "11 to 15", "Serious"],
-                    ["F", "16 to 20", "Urgent"],
-                  ] as const
-                ).map(([l, r, w]) => (
-                  <li key={l} className="flex items-center gap-3 py-1.5 pl-1.5 pr-3 text-sm">
-                    <span
-                      className="flex size-7 items-center justify-center rounded font-extrabold"
-                      style={{ background: GRADE_FILL[l], color: GRADE_INK[l] }}
-                    >
-                      {l}
-                    </span>
-                    <span className="font-medium">{w}</span>
-                    <span className="ml-auto tabular-nums text-muted-foreground">score {r}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="my-3">
+                <GradeLegend />
+              </div>
               <p className="text-muted-foreground">
                 When the AI is only fairly sure, you see two letters. When it isn't sure enough, you
                 see no grade.
@@ -200,7 +223,8 @@ export function AppShell({
               <h2 className="font-semibold">Privacy</h2>
               <p className="text-muted-foreground">
                 Photos are resized and stripped of location and device data before analysis. Your
-                session stays on this device. No accounts, no analytics.
+                session stays on this device unless you email yourself your report. No accounts, no
+                analytics.
               </p>
             </section>
             <section>
@@ -232,8 +256,8 @@ export function AppShell({
 
 export function Disclaimer() {
   return (
-    <p className="flex gap-2.5 border-l-4 border-primary bg-secondary py-2.5 pl-3 pr-3 text-sm text-secondary-foreground">
-      <Info className="mt-0.5 size-4 shrink-0" aria-hidden />
+    <p className="flex gap-2.5 rounded-2xl bg-secondary p-3.5 text-sm leading-snug text-secondary-foreground">
+      <Info className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
       {DISCLAIMER}
     </p>
   );

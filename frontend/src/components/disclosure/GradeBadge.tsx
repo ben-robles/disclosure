@@ -8,7 +8,7 @@ export function GradeBadge({ range, large }: { range: Letter[] | null; large?: b
     return (
       <span
         className={cn(
-          "inline-flex items-center rounded-md bg-muted px-2.5 py-1 font-semibold text-muted-foreground",
+          "inline-flex items-center rounded-xl bg-muted px-2.5 py-1 font-semibold text-muted-foreground",
           large ? "text-base" : "text-sm",
         )}
         aria-label="No grade"
@@ -25,7 +25,7 @@ export function GradeBadge({ range, large }: { range: Letter[] | null; large?: b
     <span
       role="img"
       aria-label={label}
-      className="inline-flex items-stretch overflow-hidden rounded-md shadow-sm"
+      className="inline-flex items-stretch overflow-hidden rounded-xl shadow-[var(--shadow-card)]"
     >
       {range.map((l) => (
         <span
@@ -47,6 +47,22 @@ export function GradeBadge({ range, large }: { range: Letter[] | null; large?: b
       >
         {word}
       </span>
+    </span>
+  );
+}
+
+/** Single rounded grade letter, the compact form used on cards and chips. */
+export function GradeTile({ letter, className }: { letter: Letter; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex size-8 shrink-0 items-center justify-center rounded-[0.65rem] text-base font-extrabold leading-none",
+        className,
+      )}
+      style={{ background: GRADE_FILL[letter], color: GRADE_INK[letter] }}
+    >
+      {letter}
     </span>
   );
 }

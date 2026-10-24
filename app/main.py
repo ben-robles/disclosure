@@ -1,15 +1,16 @@
 """FastAPI app. Run with: python -m uvicorn app.main:create_app --factory"""
 import re
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Optional
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import config, present
+from . import config, mailer, present
 from .db import Database
 from .images import BadImage, sanitize
 from .inference.analyzer import DefectAnalyzer
@@ -238,6 +239,37 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
         return FileResponse(path, media_type="application/pdf",
                             filename="disclosure-report.pdf",
                             content_disposition_type="attachment" if download else "inline")
+
+    # ---- email (optional) ------------------------------------------------
+    sent_log: dict = {}
+
+    def _allow(key: str, limit: int) -> bool:
+        now = time.time()
+        recent = [t for t in sent_log.get(key, []) if now - t < 3600]
+        sent_log[key] = recent
+        if len(recent) >= limit:
+            return False
+        recent.append(now)
+        return True
+
+    @app.post("/api/email-report")
+    async def email_report(request: Request, email: str = Form(...), file: UploadFile = File(...)):
+        if not mailer.configured():
+            raise HTTPException(503, "Email isn't set up on this server.")
+        email = email.strip()
+        if not mailer.valid_address(email):
+            raise HTTPException(422, "Enter a valid email address.")
+        pdf = await file.read(config.MAX_UPLOAD_BYTES + 1)
+        if len(pdf) > config.MAX_UPLOAD_BYTES or not pdf.startswith(b"%PDF"):
+            raise HTTPException(422, "That file isn't a report PDF.")
+        client = request.client.host if request.client else "unknown"
+        if not (_allow("to:" + email.lower(), 3) and _allow("from:" + client, 10)):
+            raise HTTPException(429, "Too many emails. Try again in an hour.")
+        try:
+            mailer.send_report(email, pdf)
+        except mailer.MailError:
+            raise HTTPException(502, "We couldn't send the email. Try again, or download the PDF.")
+        return {"ok": True}
 
     # ---- static -----------------------------------------------------------
     @app.get("/")

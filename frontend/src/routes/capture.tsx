@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Camera, Check, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { backendHealthy } from "@/lib/disclosure/analyzer";
 import { AppShell, NoSession } from "@/components/disclosure/AppShell";
 import { addPhoto, removePhoto, resizeImage, runQueue, useSession } from "@/lib/disclosure/store";
 
@@ -29,6 +30,10 @@ function Capture() {
   const input = useRef<HTMLInputElement>(null);
   const [nudge, setNudge] = useState(false);
   const [started, setStarted] = useState(false);
+  const [aiUp, setAiUp] = useState<boolean | null>(null);
+  useEffect(() => {
+    void backendHealthy().then(setAiUp);
+  }, []);
   if (!session) return <NoSession />;
 
   const photos = session.photos;
@@ -68,7 +73,7 @@ function Capture() {
         ) : (
           <Button
             size="xl"
-            disabled={total === 0}
+            disabled={total === 0 || aiUp === false}
             onClick={() => {
               setStarted(true);
               void runQueue();
@@ -89,12 +94,20 @@ function Capture() {
         id="photo-input"
         onChange={(e) => onFiles(e.target.files)}
       />
+      {aiUp === false && (
+        <p
+          className="mb-4 flex gap-2.5 rounded-2xl bg-destructive/10 p-3.5 text-sm font-medium text-destructive"
+          role="alert"
+        >
+          The AI isn't running. Start it with run.ps1, then reload this page.
+        </p>
+      )}
       <button
         type="button"
         onClick={() => input.current?.click()}
-        className="flex w-full flex-col items-center gap-2 rounded-2xl border-2 border-dashed border-primary/40 bg-secondary px-4 py-8 text-center transition-colors hover:border-primary hover:bg-accent"
+        className="flex w-full flex-col items-center gap-2 rounded-3xl border-2 border-dashed border-primary/35 bg-card px-4 py-10 shadow-[var(--shadow-card)] text-center transition-colors hover:border-primary hover:bg-accent"
       >
-        <span className="flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <span className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-cta)]">
           <Camera className="size-7" aria-hidden />
         </span>
         <span className="text-lg font-semibold">
@@ -105,7 +118,7 @@ function Capture() {
 
       {nudge && (
         <p
-          className="mt-4 border-l-4 border-primary bg-accent py-2.5 pl-3 pr-3 text-accent-foreground"
+          className="mt-4 rounded-2xl bg-accent p-3.5 text-sm font-medium text-accent-foreground"
           role="status"
         >
           Got a second angle of the same problem? It helps us read it more accurately.
@@ -126,7 +139,7 @@ function Capture() {
                 <img
                   src={p.dataUrl}
                   alt={`Photo ${i + 1}`}
-                  className={`aspect-square w-full rounded-lg object-cover ${p.status === "done" ? "" : "brightness-90"}`}
+                  className={`aspect-square w-full rounded-2xl object-cover ${p.status === "done" ? "" : "brightness-90"}`}
                 />
                 {p.status !== "done" && (
                   <span className="absolute inset-0 flex items-center justify-center rounded-lg bg-foreground/25">

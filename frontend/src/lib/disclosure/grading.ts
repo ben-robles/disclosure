@@ -3,7 +3,12 @@ export type Confidence = "high" | "medium" | "low";
 export type Letter = "A" | "B" | "C" | "D" | "F";
 
 export const LETTERS: Letter[] = ["A", "B", "C", "D", "F"];
-export const URGENCY_SCORE: Record<Urgency, number> = { immediate: 4, "30_days": 3, "1_year": 2, cosmetic: 1 };
+export const URGENCY_SCORE: Record<Urgency, number> = {
+  immediate: 4,
+  "30_days": 3,
+  "1_year": 2,
+  cosmetic: 1,
+};
 export const URGENCY_LABEL: Record<Urgency, string> = {
   immediate: "Fix immediately",
   "30_days": "Within 30 days",
@@ -12,10 +17,18 @@ export const URGENCY_LABEL: Record<Urgency, string> = {
 };
 export const LETTER_WORD: Record<Letter, string> = {
   A: "Minor",
-  B: "Low concern",
-  C: "Moderate",
-  D: "Serious",
-  F: "Urgent",
+  B: "Moderate",
+  C: "Serious",
+  D: "Urgent",
+  F: "Critical",
+};
+
+export const LETTER_SCORES: Record<Letter, string> = {
+  A: "1 to 3",
+  B: "4 to 6",
+  C: "7 to 10",
+  D: "11 to 15",
+  F: "16 to 20",
 };
 
 export const GRADING_RULE =
@@ -34,7 +47,11 @@ export function letterFor(r: number): Letter {
 }
 
 /** null = no grade (low confidence). */
-export function gradeRange(severity: number, urgency: Urgency, confidence: Confidence): Letter[] | null {
+export function gradeRange(
+  severity: number,
+  urgency: Urgency,
+  confidence: Confidence,
+): Letter[] | null {
   if (confidence === "low") return null;
   const l = letterFor(risk(severity, urgency));
   if (confidence === "high") return [l];

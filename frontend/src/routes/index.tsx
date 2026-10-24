@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import type { CSSProperties } from "react";
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { AppShell, Disclaimer } from "@/components/disclosure/AppShell";
+import { GradeTile } from "@/components/disclosure/GradeBadge";
 import { startSession, useSession } from "@/lib/disclosure/store";
 
 export const Route = createFileRoute("/")({
@@ -26,222 +26,128 @@ export const Route = createFileRoute("/")({
   component: Welcome,
 });
 
-function HouseHero() {
+function Chip({
+  letter,
+  title,
+  note,
+  className,
+  delay,
+}: {
+  letter: "A" | "B" | "C" | "D" | "F";
+  title: string;
+  note: string;
+  className: string;
+  delay: string;
+}) {
   return (
-    <svg
-      viewBox="0 0 360 210"
-      className="w-full"
-      role="img"
-      aria-label="A house with three pins marking a roof, a window and a foundation problem"
+    <div
+      style={{ "--d": delay } as CSSProperties}
+      className={`pop absolute flex items-center gap-2.5 rounded-2xl bg-card py-2 pl-2 pr-3.5 text-sm font-bold shadow-[0_8px_20px_-6px_oklch(0.2_0.05_258/0.45)] ${className}`}
     >
-      <rect width="360" height="210" rx="14" fill="var(--secondary)" />
-      <path d="M0 176h360v22a12 12 0 0 1-12 12H12A12 12 0 0 1 0 198z" fill="oklch(0.88 0.04 150)" />
-      <rect x="0" y="170" width="360" height="8" fill="oklch(0.8 0.05 150)" />
-      {/* house */}
-      <path
-        d="M92 172V96h176v76z"
-        fill="#fff"
-        stroke="var(--foreground)"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
+      <GradeTile letter={letter} />
+      <span className="leading-tight">
+        {title}
+        <span className="block text-xs font-medium text-muted-foreground">{note}</span>
+      </span>
+    </div>
+  );
+}
+
+function Hero() {
+  return (
+    <div className="relative h-60 overflow-hidden rounded-3xl bg-muted">
+      <img
+        src="/hero-roof.jpg"
+        alt="Worn asphalt roof shingles photographed up close"
+        className="size-full object-cover"
+        width={900}
+        height={675}
+        fetchPriority="high"
       />
-      <path
-        d="M78 100 180 34l102 66z"
-        fill="oklch(0.42 0.07 255)"
-        stroke="var(--foreground)"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent from-45% to-foreground/55" />
+      <Chip letter="B" title="Roof" note="Worn shingles" className="left-4 top-4" delay="0.45s" />
+      <Chip
+        letter="C"
+        title="Water intrusion"
+        note="Ceiling stain"
+        className="bottom-4 right-4"
+        delay="0.65s"
       />
-      <rect
-        x="236"
-        y="48"
-        width="16"
-        height="30"
-        fill="oklch(0.55 0.08 40)"
-        stroke="var(--foreground)"
-        strokeWidth="2.5"
-      />
-      <rect
-        x="112"
-        y="116"
-        width="42"
-        height="34"
-        rx="2"
-        fill="oklch(0.9 0.04 230)"
-        stroke="var(--foreground)"
-        strokeWidth="2.5"
-      />
-      <path d="M133 116v34M112 133h42" stroke="var(--foreground)" strokeWidth="2" />
-      <rect
-        x="164"
-        y="124"
-        width="36"
-        height="48"
-        rx="2"
-        fill="oklch(0.55 0.08 40)"
-        stroke="var(--foreground)"
-        strokeWidth="2.5"
-      />
-      <circle cx="193" cy="150" r="2.2" fill="#fff" />
-      <rect
-        x="210"
-        y="116"
-        width="42"
-        height="34"
-        rx="2"
-        fill="oklch(0.9 0.04 230)"
-        stroke="var(--foreground)"
-        strokeWidth="2.5"
-      />
-      <path d="M231 116v34M210 133h42" stroke="var(--foreground)" strokeWidth="2" />
-      {/* a hairline crack at the foundation */}
-      <path
-        d="M118 172l5-6 -3-5 6-5"
-        fill="none"
-        stroke="var(--grade-f)"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      {/* pins */}
-      <g>
-        <circle cx="160" cy="76" r="13" fill="var(--grade-a)" stroke="#fff" strokeWidth="3" />
-        <text x="160" y="81" fontSize="13" fontWeight="800" fill="#fff" textAnchor="middle">
-          A
-        </text>
-      </g>
-      <g>
-        <circle cx="224" cy="108" r="13" fill="var(--grade-c)" stroke="#fff" strokeWidth="3" />
-        <text x="224" y="113" fontSize="13" fontWeight="800" fill="#2b1d00" textAnchor="middle">
-          C
-        </text>
-      </g>
-      <g>
-        <circle cx="124" cy="158" r="13" fill="var(--grade-f)" stroke="#fff" strokeWidth="3" />
-        <text x="124" y="163" fontSize="13" fontWeight="800" fill="#fff" textAnchor="middle">
-          F
-        </text>
-      </g>
-    </svg>
+    </div>
   );
 }
 
 const HOW = [
-  ["Take photos", "Snap each stain, crack or exposed wire. Add a second angle if you can."],
-  [
-    "Check what we found",
-    "Every photo gets a defect type, a grade and a typical repair cost. Confirm, fix or delete each one.",
-  ],
-  [
-    "Download your report",
-    "Confirmed findings are grouped by the sections of the Maryland disclosure form.",
-  ],
+  ["Photograph", "Each stain, crack or exposed wire."],
+  ["Confirm", "Keep, fix or delete every finding."],
+  ["Download", "A report by Maryland form section."],
 ] as const;
 
 function Welcome() {
-  const [zip, setZip] = useState("");
-  const [address, setAddress] = useState("");
-  const [sellerName, setSellerName] = useState("");
   const session = useSession();
   const navigate = useNavigate();
-  const zipValid = zip === "" || /^\d{5}$/.test(zip);
 
   return (
-    <AppShell>
-      <HouseHero />
-      <h1 className="mt-6 text-[2rem] font-extrabold leading-[1.1]">
+    <AppShell
+      footer={
+        <div>
+          <Button type="submit" form="start-form" size="xl">
+            Start your report
+          </Button>
+          <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[0.8rem] font-medium text-muted-foreground">
+            <Lock className="size-3.5" aria-hidden /> Analyzed on this device. Nothing leaves it
+            unless you email your report. No account.
+          </p>
+        </div>
+      }
+    >
+      <Hero />
+      <h1 className="rise mt-6 text-[2.15rem] font-extrabold leading-[1.04] tracking-[-0.035em]">
         Put your home's known problems on the record
       </h1>
-      <p className="mt-3 text-lg leading-relaxed text-muted-foreground">
+      <p className="mt-3 text-[1.05rem] leading-relaxed text-muted-foreground">
         Photograph what you know is wrong. Disclosure sorts each photo, grades how serious it is,
         and builds a report you can attach to your Maryland disclosure.
       </p>
 
-      <ol className="mt-7 divide-y border-y">
+      <ol className="mt-6 grid grid-cols-3 gap-2.5">
         {HOW.map(([t, d], i) => (
-          <li key={t} className="flex gap-4 py-4">
-            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-foreground text-sm font-bold text-background">
-              {i + 1}
-            </span>
-            <div>
-              <h2 className="font-semibold">{t}</h2>
-              <p className="text-base text-muted-foreground">{d}</p>
-            </div>
+          <li
+            key={t}
+            style={{ "--d": `${0.3 + i * 0.08}s` } as CSSProperties}
+            className="rise rounded-2xl border bg-card p-3 shadow-[var(--shadow-card)]"
+          >
+            <span className="text-xs font-extrabold text-primary">{i + 1}</span>
+            <h2 className="mt-1 text-[0.95rem] font-bold leading-tight">{t}</h2>
+            <p className="mt-1 text-[0.8rem] leading-snug text-muted-foreground">{d}</p>
           </li>
         ))}
       </ol>
+      <p className="mt-4 text-sm">
+        <Link to="/about" className="font-semibold text-primary underline underline-offset-4">
+          How grading works
+        </Link>
+      </p>
 
       <form
-        className="mt-8 space-y-4"
+        id="start-form"
         onSubmit={(e) => {
           e.preventDefault();
-          if (!zipValid) return;
-          startSession(zip, { address: address.trim(), sellerName: sellerName.trim() });
+          startSession("");
           navigate({ to: "/capture" });
         }}
-      >
-        <h2 className="text-xl font-bold">About the property</h2>
-        <div className="space-y-1.5">
-          <Label htmlFor="seller" className="text-base">
-            Your name <span className="font-normal text-muted-foreground">(optional)</span>
-          </Label>
-          <Input
-            id="seller"
-            autoComplete="name"
-            value={sellerName}
-            onChange={(e) => setSellerName(e.target.value)}
-            className="h-12 bg-background text-lg"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="address" className="text-base">
-            Street address <span className="font-normal text-muted-foreground">(optional)</span>
-          </Label>
-          <Input
-            id="address"
-            autoComplete="street-address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            className="h-12 bg-background text-lg"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="zip" className="text-base">
-            ZIP code <span className="font-normal text-muted-foreground">(optional)</span>
-          </Label>
-          <Input
-            id="zip"
-            inputMode="numeric"
-            maxLength={5}
-            value={zip}
-            onChange={(e) => setZip(e.target.value.replace(/\D/g, ""))}
-            className="h-12 bg-background text-lg"
-            aria-invalid={!zipValid}
-            aria-describedby={zipValid ? undefined : "zip-help"}
-          />
-          {!zipValid && (
-            <p id="zip-help" className="text-sm font-medium text-destructive">
-              Enter all 5 digits, or leave it blank.
-            </p>
-          )}
-        </div>
-        <Button type="submit" size="xl" disabled={!zipValid}>
-          Start your report
+      />
+      {session && (
+        <Button asChild variant="outline" size="xl" className="mt-8">
+          <Link to="/capture">
+            Pick up where you left off ({session.photos.length}{" "}
+            {session.photos.length === 1 ? "photo" : "photos"})
+          </Link>
         </Button>
-        {session && (
-          <Button asChild variant="outline" size="xl">
-            <Link to="/capture">
-              Pick up where you left off ({session.photos.length}{" "}
-              {session.photos.length === 1 ? "photo" : "photos"})
-            </Link>
-          </Button>
-        )}
-      </form>
+      )}
       <div className="mt-6">
         <Disclaimer />
       </div>
-      <p className="mt-4 text-sm text-muted-foreground">
-        Photos are analyzed on this computer. Nothing is uploaded, and there's no account to make.
-      </p>
     </AppShell>
   );
 }
