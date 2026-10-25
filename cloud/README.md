@@ -37,6 +37,16 @@ DISCLOSURE_WORKERS=4
 
 Run `.\run.ps1`. It prints `Model server: hosted (http://127.0.0.1:9090)` when the proxy is up. Remove the URL line to go back to local Ollama.
 
+## Public web app (no laptop needed)
+
+```powershell
+.\cloud\deploy-app.ps1 -Project <id>
+```
+
+Deploy the model first. This builds the React front end (`frontend/`) and the Python API into one container, with `cloud/gateway.mjs` sending `/api/*` to Python and everything else to React. It deploys the container to Cloud Run as `disclosure-app` with a public URL (no login), and lets its own service account call the private model service. Redeploy after every front-end change. The old plain-HTML UI in `static/` is no longer served there. The script prints the link to share; it is the same link each time. The app keeps one instance (`-MaxInstances 1`) and loses sessions when that instance restarts. If `.env` has the `DISCLOSURE_SMTP_*` settings, the script stores the password in Secret Manager (`disclosure-smtp-password`) and passes the other settings as env vars, so "Email me a copy" works on the public link. Without them, email stays off. Remove the public link with `gcloud run services delete disclosure-app --region us-east4`.
+
+If the model service is cold, the first photo can time out. Warm it before sharing the link (see Demo day).
+
 ## Demo day
 
 A cold start loads the model and can take a minute or more. Keep one instance warm for the demo, then put it back:

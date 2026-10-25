@@ -4,7 +4,7 @@ import { AppShell, Disclaimer, NoSession } from "@/components/disclosure/AppShel
 import { GradeBadge } from "@/components/disclosure/GradeBadge";
 import { CostBar, GradeMix, GradeScale, OverallGrade } from "@/components/disclosure/RiskViz";
 import { formatAvg, formatCost } from "@/lib/disclosure/costs";
-import { GRADING_RULE, needsPro, worstEnd, type Letter } from "@/lib/disclosure/grading";
+import { needsPro, worstEnd, type Letter } from "@/lib/disclosure/grading";
 import { buildReport, totalCost } from "@/lib/disclosure/report";
 import { useSession } from "@/lib/disclosure/store";
 
@@ -62,14 +62,13 @@ function Review() {
       }
     >
       <section
-        className="rounded-3xl border bg-card px-5 pb-5 pt-6 shadow-[var(--shadow-card)]"
+        className="rounded-3xl border bg-card p-5 shadow-[var(--shadow-card)]"
         aria-labelledby="overall"
       >
         <h2 id="overall" className="mb-1 text-center text-sm font-bold text-muted-foreground">
           Overall grade
         </h2>
         <OverallGrade letter={overall} />
-        <p className="mt-3 text-center text-sm text-muted-foreground">{GRADING_RULE}</p>
       </section>
 
       {items.length === 0 && (

@@ -122,15 +122,16 @@ function ProgressBar({ photos }: { photos: Photo[] }) {
       aria-live="polite"
     >
       <div
-        className="h-2 flex-1 overflow-hidden rounded-full bg-border"
+        className="relative h-2 flex-1 overflow-hidden rounded-full bg-border"
         role="progressbar"
         aria-label={analyzing ? "Analysis progress" : "Confirmation progress"}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={Math.round(pct)}
+        aria-valuenow={analyzing ? undefined : Math.round(pct)}
       >
+        {analyzing && <div className="loading-slide motion-reduce:hidden" />}
         <div
-          className={`h-full rounded-full bg-primary transition-[width] duration-100 motion-reduce:transition-none ${analyzing ? "motion-safe:animate-pulse" : ""}`}
+          className={`h-full rounded-full bg-primary transition-[width] duration-100 motion-reduce:transition-none ${analyzing ? "hidden motion-reduce:block" : ""}`}
           style={{ width: `${pct}%` }}
         />
       </div>

@@ -83,7 +83,7 @@ function Capture() {
             <p className="mb-2 font-semibold">
               Looking at photo {current} of {total}
             </p>
-            <Progress value={progress} aria-label={`Looking at photo ${current} of ${total}`} />
+            <Progress indeterminate value={progress} aria-label={`Looking at photo ${current} of ${total}`} />
           </div>
         ) : total > 0 && !busy ? (
           <Button asChild size="xl">

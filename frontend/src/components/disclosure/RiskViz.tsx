@@ -206,15 +206,6 @@ export function RiskMatrix({ severity, urgency }: { severity: number; urgency: U
             })}
           </div>
         ))}
-        <span />
-        {URGENCY_COLS.map((u) => (
-          <span
-            key={u}
-            className="pt-1 text-center text-[10px] font-medium leading-tight text-muted-foreground"
-          >
-            {URGENCY_SHORT[u]}
-          </span>
-        ))}
       </div>
       <figcaption className="mt-1 flex justify-between text-[10px] text-muted-foreground">
         <span>Severity ↑</span>

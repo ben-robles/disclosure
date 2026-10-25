@@ -141,6 +141,15 @@ input, select {
 .bar { height: 14px; background: var(--soft); border: 1px solid var(--muted); border-radius: 7px; overflow: hidden; }
 .bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.1s linear; }
 @media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+/* With motion allowed, the fill is replaced by a segment with faded ends that loops across the track. */
+.bar { position: relative; }
+@keyframes bar-slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+@media (prefers-reduced-motion: no-preference) {
+  .bar span { display: none; }
+  .bar::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%;
+    background: linear-gradient(90deg, transparent, var(--accent) 50%, transparent);
+    animation: bar-slide 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
+}
 
 /* finding cards */
 .cards { list-style: none; padding: 0; margin: 0 0 1rem; }
