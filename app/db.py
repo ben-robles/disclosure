@@ -1,4 +1,5 @@
 """sqlite3 storage. One short-lived connection per call; safe across threads."""
+import json
 import sqlite3
 import time
 import uuid
@@ -20,10 +21,17 @@ CREATE TABLE IF NOT EXISTS findings (
   confidence TEXT NOT NULL, image_quality TEXT NOT NULL, reason TEXT NOT NULL,
   analysis_status TEXT NOT NULL DEFAULT 'ok',
   confirmed INTEGER NOT NULL DEFAULT 0, edited INTEGER NOT NULL DEFAULT 0,
-  title TEXT NOT NULL DEFAULT '', category_fits INTEGER NOT NULL DEFAULT 1
+  title TEXT NOT NULL DEFAULT '', category_fits INTEGER NOT NULL DEFAULT 1,
+  judge_status TEXT NOT NULL DEFAULT 'skipped', judge_label_p REAL, judge_severity_p REAL,
+  judge_guard_p REAL, judge_top TEXT NOT NULL DEFAULT '[]'
 );
 """
 # photos.status: uploaded | pending | processing | done
+JUDGE_COLUMNS = (
+    ("judge_status", "TEXT NOT NULL DEFAULT 'skipped'"), ("judge_label_p", "REAL"),
+    ("judge_severity_p", "REAL"), ("judge_guard_p", "REAL"),
+    ("judge_top", "TEXT NOT NULL DEFAULT '[]'"),
+)
 
 
 class Database:
@@ -38,6 +46,9 @@ class Database:
                 c.execute("ALTER TABLE findings ADD COLUMN title TEXT NOT NULL DEFAULT ''")
             if "category_fits" not in have:
                 c.execute("ALTER TABLE findings ADD COLUMN category_fits INTEGER NOT NULL DEFAULT 1")
+            for name, ddl in JUDGE_COLUMNS:  # database made before the text judge
+                if name not in have:
+                    c.execute(f"ALTER TABLE findings ADD COLUMN {name} {ddl}")
 
     @contextmanager
     def conn(self):
@@ -150,11 +161,13 @@ class Database:
             c.execute(
                 "INSERT OR REPLACE INTO findings(photo_id, defect_type, severity, urgency,"
                 " confidence, image_quality, reason, analysis_status, confirmed, edited,"
-                " title, category_fits)"
-                " VALUES(?,?,?,?,?,?,?,?,0,0,?,?)",
+                " title, category_fits, judge_status, judge_label_p, judge_severity_p,"
+                " judge_guard_p, judge_top)"
+                " VALUES(?,?,?,?,?,?,?,?,0,0,?,?,?,?,?,?,?)",
                 (pid, f.defect_type, f.severity, f.urgency, f.confidence,
                  f.image_quality, f.reason, f.analysis_status, f.title,
-                 int(f.category_fits)))
+                 int(f.category_fits), f.judge_status, f.judge_label_p, f.judge_severity_p,
+                 f.judge_guard_p, json.dumps(f.judge_top)))
             c.execute("UPDATE photos SET status='done' WHERE id=?", (pid,))
         return True
 

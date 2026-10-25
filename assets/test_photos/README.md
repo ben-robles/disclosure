@@ -22,6 +22,8 @@ Licenses: CC0, CC BY 2.0/3.0, CC BY-SA 2.0/3.0/4.0. The CC BY and CC BY-SA photo
 
 No photo shows the `unclear` type on purpose; `unclear` is an outcome, not a defect to photograph.
 
+`expected_details` in `test_photos.csv` is a short phrase for what is visibly wrong; `run_test_set.py` gives it to the optional text judge. Blurry, not-a-house and normal rows leave it empty and are checked on `image_quality` or `unclear` only.
+
 Run the set (needs Ollama and the model):
 
 ```powershell

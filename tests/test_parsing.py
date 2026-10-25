@@ -74,9 +74,9 @@ def test_fit_flag_parsing(raw, expected):
 
 @pytest.mark.parametrize("raw, expected", [
     ("  Fallen tree on roof. ", "Fallen tree on roof"),
-    ("water_intrusion", "water intrusion"),
+    ("water_intrusion", "Water intrusion"),
     (None, ""), (5, ""), ("", ""),
-    ("one two three four five six seven eight", "one two three four five six"),
+    ("one two three four five six seven eight", "One two three four five six"),
 ])
 def test_title_is_cleaned(raw, expected):
     assert parse_model_output(good(title=raw)).title == expected

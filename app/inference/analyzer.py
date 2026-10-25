@@ -1,6 +1,6 @@
 """The one boundary between the app and any model."""
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 URGENCIES = ("immediate", "30_days", "1_year", "cosmetic")
 CONFIDENCES = ("high", "medium", "low")
@@ -20,6 +20,12 @@ class Finding:
     # category_fits is False (the closest category is only used for grading and cost).
     title: str = ""
     category_fits: bool = True
+    # Text-only judge (app/inference/judge.py). Probabilities are stored raw; code applies thresholds.
+    judge_status: str = "skipped"  # ok | skipped | unavailable
+    judge_label_p: float = None
+    judge_severity_p: float = None
+    judge_guard_p: float = None
+    judge_top: list = field(default_factory=list)  # [(defect id, probability)], best first
 
 
 def unclear_finding(reason: str, analysis_status: str) -> Finding:
@@ -28,8 +34,10 @@ def unclear_finding(reason: str, analysis_status: str) -> Finding:
 
 class DefectAnalyzer(ABC):
     @abstractmethod
-    def analyze(self, image_bytes: bytes) -> Finding:
-        """Never raises for model problems; returns an `unclear` Finding instead."""
+    def analyze(self, image_bytes: bytes, hint: str = None) -> Finding:
+        """Never raises for model problems; returns an `unclear` Finding instead.
+
+        hint: optional extra instruction for a second look at the same photo."""
 
     @abstractmethod
     def status(self) -> dict:

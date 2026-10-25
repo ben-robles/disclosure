@@ -19,9 +19,11 @@ class FakeAnalyzer(DefectAnalyzer):
         self._cycle = itertools.cycle(findings or CANNED)
         self.delay_s = delay_s
         self.calls = 0
+        self.hints = []
 
-    def analyze(self, image_bytes):
+    def analyze(self, image_bytes, hint=None):
         self.calls += 1
+        self.hints.append(hint)
         time.sleep(self.delay_s)
         return Finding(**vars(next(self._cycle)))
 

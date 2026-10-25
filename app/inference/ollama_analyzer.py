@@ -21,7 +21,8 @@ def clean_title(value) -> str:
     """A short plain-text name; anything unusable becomes empty (caller falls back)."""
     if not isinstance(value, str):
         return ""
-    return " ".join(value.replace("_", " ").split()[:6]).strip(" .")[:60]
+    title = " ".join(value.replace("_", " ").split()[:6]).strip(" .")[:60]
+    return title[:1].upper() + title[1:]  # readable: "mold on ceiling" -> "Mold on ceiling"
 
 
 def category_fits(value) -> bool:
@@ -31,7 +32,7 @@ def category_fits(value) -> bool:
     return value is not False
 
 
-def parse_model_output(text: str) -> Finding:
+def parse_model_output(text: str, classify: bool = False) -> Finding:
     """Defensive parse: strip code fences, find the JSON object, validate every field."""
     if not isinstance(text, str) or not text.strip():
         raise ParseError("empty output")
@@ -45,6 +46,8 @@ def parse_model_output(text: str) -> Finding:
         raise ParseError(f"bad JSON: {exc}") from exc
     if not isinstance(data, dict):
         raise ParseError("not an object")
+    if classify:  # v4: no type or confidence from Gemma; app/classify.py fills them in
+        data = {**data, "defect_type": "unclear", "confidence": "low", "category_fits": True}
 
     if data.get("defect_type") not in taxonomy_ids():
         raise ParseError("defect_type not in taxonomy")
@@ -79,7 +82,8 @@ def parse_model_output(text: str) -> Finding:
 
 
 class OllamaAnalyzer(DefectAnalyzer):
-    def __init__(self, base_url=None, model=None, timeout_s=None, token=None):
+    def __init__(self, base_url=None, model=None, timeout_s=None, token=None, classify=False):
+        self.classify = classify
         self.base_url = (base_url or config.OLLAMA_URL).rstrip("/")
         self.model = model or config.MODEL
         self.timeout_s = timeout_s or config.INFERENCE_TIMEOUT_S
@@ -120,7 +124,7 @@ class OllamaAnalyzer(DefectAnalyzer):
             }
         return {"ready": True, "message": "", "fix": ""}
 
-    def _chat_once(self, image_bytes: bytes) -> str:
+    def _chat_once(self, image_bytes: bytes, hint: str = None) -> str:
         payload = {
             "model": self.model,
             "stream": False,
@@ -128,12 +132,12 @@ class OllamaAnalyzer(DefectAnalyzer):
             "options": {"temperature": 0},
             "messages": [{
                 "role": "user",
-                "content": build_prompt(),
+                "content": build_prompt(self.classify) + (f"\n\n{hint}" if hint else ""),
                 "images": [base64.b64encode(image_bytes).decode("ascii")],
             }],
         }
         if self._use_format:
-            payload["format"] = output_schema()
+            payload["format"] = output_schema(self.classify)
         try:
             body = self._request("/api/chat", payload, timeout=self.timeout_s)
         except urllib.error.HTTPError as exc:
@@ -144,10 +148,10 @@ class OllamaAnalyzer(DefectAnalyzer):
             body = self._request("/api/chat", payload, timeout=self.timeout_s)
         return body.get("message", {}).get("content", "")
 
-    def analyze(self, image_bytes: bytes) -> Finding:
+    def analyze(self, image_bytes: bytes, hint: str = None) -> Finding:
         for _attempt in range(2):
             try:
-                return parse_model_output(self._chat_once(image_bytes))
+                return parse_model_output(self._chat_once(image_bytes, hint), self.classify)
             except ParseError:
                 continue
             except (socket.timeout, TimeoutError):

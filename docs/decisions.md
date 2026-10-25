@@ -36,3 +36,39 @@
 - Confirm the current Maryland form revision (the Commission announced a September 2026 update after the August 3 print on the PDF used here).
 - README screenshots, measured latency, model size, tested laptop specs.
 - Confirm with an organizer that Best Use of Gemma 4 is your one MLH track.
+
+## TypeSafe text judge (Jev)
+
+- **Off by default.** `DISCLOSURE_TYPESAFE_URL` empty means no network call. Verify and classify each have their own flag (`DISCLOSURE_JUDGE_VERIFY`, `DISCLOSURE_JUDGE_CLASSIFY`); classify also needs a key, otherwise Gemma keeps naming the type (prompt v3).
+- **Text only.** The judge receives Gemma's `reason`, `title` and typed fields. Photos, ZIP and email never go to TypeSafe. It returns probabilities and picks; `app/verify.py` and `app/classify.py` map them to states, so no judge-written text reaches a report.
+- **Thresholds are starting values, not tuned.** Yes 0.7, no 0.3 (TypeSafe's docs suggest these); confidence high at 0.75 and medium at 0.45 of the top choice. Nothing has been run against the live API yet. Tune on the test set with `scripts/run_test_set.py`, then record results here.
+- **Choice with a `none_of_these` option.** TypeSafe's Choice docs warn such options may work poorly and suggest a companion yes/no question instead. Not built; revisit if the test set shows `none_of_these` over- or under-firing.
+- **A dollar sign followed by a digit is also caught by regex**, independent of the judge, so a cost in model text is scrubbed even when the judge is down.
+- **Not wired:** the single-photo `/api/analyze` route used by the React UI still returns Gemma's raw finding. Verify and classify apply only to the stored-session worker.
+- **v4 vs v3:** run `run_test_set.py` and `run_test_set.py --classify`; both sections land in `docs/test-results.md`. If v4 scores lower on `exact_match`, keep v3 (leave the classify flag off) and note it here.
+
+### v3 vs v4 on the test set (2026-10-24, gemma4:e4b, TypeSafe `jev-latest`, one run each)
+
+- **v3 (Gemma names the type): 12 of 17 exact_match. v4 (judge picks the type): 10 of 17.** Per the rule above, v3 stays and `DISCLOSURE_JUDGE_CLASSIFY` stays off.
+- v3 misses: mold photo (called `unclear`), brick crack (`siding_exterior`), window and door rot (`pest_wood_damage`, `siding_exterior`), termites (`water_intrusion`).
+- v4 fixed the brick crack and the door rot but lost the ceiling stain, mold, open switches, the plumbing leak (Gemma called the photo blurry) and the chimney (judge `none_of_these`).
+- Most v4 misses start in Gemma's sentence, not the judge: the judge scored those sentences low against the expected details too (for example `mentions_expected_p` 0.14 on the ceiling stain). A single run each, 15 photos, so differences of a few photos are noise. Rerun before drawing more from it.
+- Judge mean scores are close: `mentions_expected_p` 0.52 (v3) and 0.51 (v4), `type_consistent_p` 0.67 and 0.63.
+
+### Rerun and verify check (2026-10-24, second run of each prompt)
+
+- **Same totals on rerun: v3 12 of 17, v4 10 of 17.** Per photo, v4 reliably fails the chimney and plumbing photos (Gemma's v4 sentence or the judge's `none_of_these`) and wobbles on the ceiling stains, electrical switches and termites. v3 is steadier. **Decision: drop classify (leave `DISCLOSURE_JUDGE_CLASSIFY` off); keep v3.**
+- **Verify on the 11 gradable v3 findings from the rerun:** it flagged the mold photo that Gemma labelled `hvac_heating` (`label_matches` 0.07, so the UI shows the model's title) and changed nothing on the 7 correct ones. It missed 3 wrong types (door frame, termites, window frame) because Gemma's sentence agreed with its own wrong label. Severity and the cost/legal guard never fired. **Decision: keep verify on.** It catches some self-contradictions; it is not a second pair of eyes on the photo.
+
+### Verify now moves the category (2026-10-24)
+
+When `label_matches` is below the no-threshold, verify asks the judge to pick a category from Gemma's text (one more call). If the pick is not `none_of_these`, differs from Gemma's type and has probability of at least 0.45, the finding moves to it: grade, cost, "pro", report section and the displayed label all follow, and confidence is capped at what the judge's probability supports (never raised). Otherwise the type stays and the model's own title is shown, as before. Limit: the judge only reads Gemma's sentence, so when the sentence describes the wrong thing (the mold photo, described as an HVAC fan) the move cannot fix it.
+
+### Second look, blurry wording, and the web app route (2026-10-24)
+
+- **Contradictions get a second look.** When verify finds that the label contradicts Gemma's sentence, Gemma sees the same photo again with a note naming the mismatched label. Its new answer replaces the first only if the judge then agrees with the new label; confidence is capped at medium. If not, the judge's text-only category pick is tried, then the model's own title is shown. One extra Gemma call per flagged photo.
+- **Mold photo still not fixed.** Forced live: on the second look Gemma again sees only the ceiling fan and answers `unclear`. The first answer stays, with the title shown instead of the category. That is a vision limit, not something text checks can repair.
+- **Titles are capitalised** (`clean_title`) so a title reads as a name, not a fragment.
+- **Blurry false positive (plumbing photo, sharp pipe on a soft background).** Prompt v3.1 added two sentences and fixed it, but dropped the test set from 12 to 10 of 17 on two runs (the water stains and brick crack changed category). Prompt v3.2 only adds "(a sharp subject with a blurred background is not blurry)": plumbing now passes, both truly blurry photos still read blurry, and the test set is back to 12 of 17. v3.2 is the default. The v4 (classify) prompt is unchanged.
+- **`/api/analyze`** (used by the React UI) now runs verify too when `DISCLOSURE_JUDGE_VERIFY=1`, including the second look.
+- **Categories** stay a data file: add or rename entries in `assets/defect_taxonomy.json` (`id`, `label`, `look_for`, `pro`), then give the new id a range in `assets/cost_table.json` and a section in `assets/jurisdiction_md.json`. The prompt, schema and category list pick them up with no code change.
