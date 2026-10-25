@@ -1,8 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AppShell, Disclaimer } from "@/components/disclosure/AppShell";
 import { GradeLegend } from "@/components/disclosure/RiskViz";
 import { GRADING_RULE } from "@/lib/disclosure/grading";
-import { TEAM } from "@/lib/disclosure/site";
+import { EMAIL } from "@/lib/disclosure/site";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -10,12 +10,12 @@ export const Route = createFileRoute("/about")({
       { title: "About | Disclosure" },
       {
         name: "description",
-        content: "Who Disclosure is for, how it grades defects, and who built it.",
+        content: "Who Disclosure is for and how it grades defects.",
       },
       { property: "og:title", content: "About | Disclosure" },
       {
         property: "og:description",
-        content: "Who Disclosure is for, how it grades defects, and who built it.",
+        content: "Who Disclosure is for and how it grades defects.",
       },
     ],
   }),
@@ -63,21 +63,11 @@ function About() {
         <li>Nothing goes in the report until you confirm it.</li>
       </ul>
 
-      <h2 className="mt-8 text-xl font-bold">Who built it</h2>
-      <ul className="mt-3 divide-y border-y">
-        {TEAM.map((m) => (
-          <li key={m.name} className="flex items-baseline justify-between gap-4 py-3">
-            <span className="font-semibold">{m.name}</span>
-            <span className="text-muted-foreground">{m.role}</span>
-          </li>
-        ))}
-      </ul>
-      <p className="mt-3 text-muted-foreground">
-        Want to reach us?{" "}
-        <Link to="/contact" className="font-semibold text-primary underline">
-          Get in touch
-        </Link>
-        .
+      <p className="mt-8 text-muted-foreground">
+        Questions?{" "}
+        <a href={`mailto:${EMAIL}`} className="font-semibold text-primary underline">
+          {EMAIL}
+        </a>
       </p>
       <div className="mt-8">
         <Disclaimer />

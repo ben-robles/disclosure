@@ -114,7 +114,6 @@ function Steps({ current }: { current: number }) {
 const FOOTER_LINKS = [
   { to: "/about", label: "About" },
   { to: "/faq", label: "FAQ" },
-  { to: "/contact", label: "Contact" },
   { to: "/privacy", label: "Privacy" },
   { to: "/terms", label: "Terms" },
 ] as const;
@@ -180,7 +179,8 @@ export function AppShell({
   const session = useSession();
   const navigate = useNavigate();
   const reached = session?.maxStep ?? 1;
-  if (step && session && step > reached) return <Navigate to={(STEPS[reached - 1] ?? STEPS[0]).to} replace />;
+  if (step && session && step > reached)
+    return <Navigate to={(STEPS[reached - 1] ?? STEPS[0]).to} replace />;
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-canvas shadow-[0_0_0_1px_var(--border),0_20px_60px_-20px_oklch(0.25_0.05_258/0.3)]">
       <div className="sticky top-0 z-10 bg-canvas/90 backdrop-blur supports-[backdrop-filter]:bg-canvas/80">

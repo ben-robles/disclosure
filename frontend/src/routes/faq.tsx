@@ -1,5 +1,6 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { AppShell } from "@/components/disclosure/AppShell";
+import { EMAIL } from "@/lib/disclosure/site";
 import {
   Accordion,
   AccordionContent,
@@ -62,10 +63,10 @@ function Faq() {
         ))}
       </Accordion>
       <p className="mt-6 text-muted-foreground">
-        Still stuck?{" "}
-        <Link to="/contact" className="font-semibold text-primary underline">
-          Send us a message
-        </Link>
+        Still stuck? Email{" "}
+        <a href={`mailto:${EMAIL}`} className="font-semibold text-primary underline">
+          {EMAIL}
+        </a>
         .
       </p>
     </AppShell>
