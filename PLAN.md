@@ -203,7 +203,7 @@ Visual style: white background, one accent color, large type, generous whitespac
 Each phase ends with a commit and a line in `docs/decisions.md`. Do not start the next phase until the current one's checks pass in a real browser.
 
 **Phase 1 — Skeleton (after Gate 0 passes)**
-- `LICENSE` (Apache-2.0), `README.md` stub, `.gitignore` (`data/`, `.venv/`, `__pycache__/`), `docs/`, `requirements.txt`, `run.ps1`.
+- `LICENSE` (MIT), `README.md` stub, `.gitignore` (`data/`, `.venv/`, `__pycache__/`), `docs/`, `requirements.txt`, `run.ps1`.
 - FastAPI app serving `static/index.html` with the Welcome view. Startup check for Ollama + model.
 - Check: `.\run.ps1` starts the server, the page loads at the printed URL, and DevTools device mode shows it correctly at 390 px.
 
