@@ -1,60 +1,60 @@
 # Disclosure
 
-**Photograph a home's problems. Review AI-assisted findings. Produce a disclosure report.**
+**Photograph a home's problems. Review the AI's findings. Create a disclosure report.**
 
-Built for **GDG Build with AI x Hacktoberfest 2026: AI for Housing**, Disclosure helps home sellers turn photos of visible defects into a structured, seller-reviewed PDF report.
+Built for **GDG Build with AI x Hacktoberfest 2026: AI for Housing**, Disclosure helps home sellers turn photos of visible problems into a PDF report they review and approve.
 
 **[Try Disclosure](https://disclosure-app-jyruvsvlxa-uk.a.run.app/)** — hosted on Google Cloud Run. No installation required.
 
-**Gemma 4 interprets the photo. TypeSafe checks the findings. The seller controls the report.** The live website connects to Gemma on a private Google Cloud GPU. Local Ollama is also supported for development.
+**Gemma 4 analyzes the photo. TypeSafe can check the findings. The seller controls the report.** The website connects to Gemma on a private Google Cloud server with a GPU. Developers can also run Gemma on their own computer using Ollama.
 
-> **AI-assisted documentation aid. Not a home inspection and not legal advice.** The report is a companion to the official disclosure form, not a replacement.
+> **This tool helps document visible problems. It does not provide a home inspection or legal advice.** Use the report alongside the official disclosure form; it does not replace that form.
 
 ## From photo to report
 
 1. **Capture:** take or upload a photo of a visible problem from a phone or computer.
-2. **Analyze:** Gemma 4 proposes a description, defect category, severity, urgency, and confidence level.
-3. **Review:** confirm, correct, or remove each finding. Optional TypeSafe verification checks the model's text before review.
-4. **Export:** download a PDF with confirmed findings, photos, grades, cost ranges, and professional recommendations.
+2. **Analyze:** Gemma 4 suggests a description and problem type, how serious the problem is, how soon it needs attention, and how confident the AI is.
+3. **Review:** confirm, correct, or remove each finding. If enabled, TypeSafe checks the AI's text before you review it.
+4. **Export:** download a PDF with confirmed findings, photos, grades, repair cost ranges, and suggestions for professional help.
 
 ## How we use Gemma 4
 
-**Gemma 4 powers the visual reasoning in Disclosure.** It receives the photo and a housing-specific prompt, then returns a structured finding that the rest of the application can process.
+**Gemma 4 analyzes photos for Disclosure.** It receives a photo and instructions about housing problems, then returns a finding in a format the app can read.
 
-1. **Prepare the image.** [Image processing](app/images.py) applies orientation, removes metadata, and re-encodes the photo as a JPEG with a maximum 1024-pixel long edge.
-2. **Run multimodal inference.** [OllamaAnalyzer](app/inference/ollama_analyzer.py) sends the photo as base64 alongside the prompt to Ollama's `/api/chat`. Requests use temperature `0` and configurable model keep-alive. The same adapter connects to local Ollama or our private Cloud Run GPU service. Recorded evaluations use **`gemma4:e4b`**.
-3. **Describe before categorizing.** Prompt **v3.2** asks Gemma to write a visible-evidence sentence of at most 20 words and a short title, then return a defect type, severity **1–5**, urgency, confidence, image quality, and whether the category fits its description. It focuses on visible damage and distinguishes a blurry subject from a sharp subject on a blurred background.
-4. **Validate structured output.** The [prompt and JSON schema](app/inference/prompts.py) are built from [27 defect categories plus `unclear`](assets/defect_taxonomy.json). The parser checks category IDs, allowed values, and severity bounds, cleans the title, and limits description length. Invalid output receives one retry before an unclear result.
-5. **Take a second look when needed.** With TypeSafe verification enabled, a category that contradicts Gemma's description can trigger another Gemma analysis of the same photo, with the contradiction identified in the prompt. A revised finding must pass the configured text-consistency check, and its confidence is capped at medium.
+1. **Prepare the image.** [Image processing](app/images.py) rotates the photo as needed, removes details such as GPS location and camera information, and saves it as a JPEG with a longest side of at most 1024 pixels.
+2. **Send the photo to Gemma.** [OllamaAnalyzer](app/inference/ollama_analyzer.py) sends the photo, encoded as base64 text, and the instructions to Ollama's `/api/chat`. Requests use temperature `0` to limit randomness. A setting controls how long the model stays loaded between requests. The same code connects to Ollama locally or on our private Cloud Run GPU service. Recorded tests use **`gemma4:e4b`**.
+3. **Describe the problem, then choose a category.** Prompt **v3.2** asks Gemma for a short title and a description of what it can see, in at most 20 words. It also asks for the problem type, severity from **1–5**, urgency, confidence, image quality, and whether the category matches the description. The instructions focus on visible damage and distinguish a blurry subject from a clear subject with a blurred background.
+4. **Check the response format.** The [instructions and required JSON format](app/inference/prompts.py) use [27 problem categories plus `unclear`](assets/defect_taxonomy.json). The app checks category IDs, allowed values, and severity limits, cleans up the title, and limits description length. If the response is invalid, the app tries once more before marking the finding as unclear.
+5. **Take a second look when needed.** When TypeSafe checks are enabled, a category that conflicts with Gemma's description can trigger another analysis of the same photo. The new instructions explain the conflict. The revised finding must pass the text check, and its confidence cannot be higher than medium.
 
-Every Gemma call stays behind the [`DefectAnalyzer`](app/inference/analyzer.py) interface. This keeps image inference separate from grading, cost lookup, and report generation.
+All requests to Gemma go through [`DefectAnalyzer`](app/inference/analyzer.py). This keeps photo analysis separate from grading, repair cost lookup, and report creation.
 
 ### What the AI does and does not do
 
 | Responsibility | How Disclosure handles it |
 |---|---|
-| Interpret the photo | Gemma proposes visible evidence, a category, severity, urgency, image quality, and its own confidence |
-| Check the description | Optional TypeSafe verification checks whether the category and severity agree with Gemma's words and flags cost or legal language |
-| Calculate grades | Application code applies the published severity × urgency rule |
-| Look up repair ranges | A separate table supplies illustrative ranges; **current repair prices are demonstration data, not verified estimates** |
+| Analyze the photo | Gemma describes what it sees and suggests a category, severity, urgency, image quality, and confidence level |
+| Check the description | If enabled, TypeSafe checks whether the category and severity match Gemma's words and flags cost or legal language |
+| Calculate grades | The app applies the severity × urgency rule explained below |
+| Look up repair cost ranges | A separate table supplies example ranges; **these prices are demo data, not verified estimates** |
 | Decide what enters the report | The seller confirms each finding and can edit or remove it |
 
-The models do not certify a home's safety or determine legal obligations. TypeSafe reads text rather than images, and model confidence is an indication for review rather than a professional assessment.
+The AI cannot certify that a home is safe or decide what the seller must disclose by law. TypeSafe checks text only. The AI's confidence level helps guide review; it is not a professional assessment.
 
 ## TypeSafe verification
 
-TypeSafe's Jev model provides an optional **text-only second opinion** through the [`Judge`](app/inference/judge.py) interface. It returns probabilities and category choices; application code maps those responses to existing finding states and messages.
+TypeSafe's Jev model provides an optional **second opinion on the text** through [`Judge`](app/inference/judge.py). It returns scores and category choices that the app uses to update a finding's status and messages.
 
-- **Category consistency:** compare Gemma's category with its title and description. A flagged contradiction triggers the second-look flow, followed by a text-based category correction or a descriptive title fallback.
-- **Severity consistency:** reduce confidence when the severity is inconsistent with the description. Low confidence produces an unclear finding without a grade.
-- **Conservative corrections:** a second-look result is capped at medium confidence; text-based recategorization never raises confidence.
-- **Cost and legal-language checks:** replace flagged prose with taxonomy text. A dollar-sign/number regex also runs in this verification path, including when the judge is unavailable.
-- **Graceful fallback:** verification failures retain Gemma's finding and record the judge status. `NullJudge` makes no network calls when verification is unconfigured.
-- **Photo test checks:** the [photo test script](scripts/run_test_set.py) can ask TypeSafe whether Gemma's description mentions the expected visible details and fits the expected defect type.
+- **Check the category:** compare Gemma's category with its title and description. A conflict triggers a second look at the photo. After that, the app may correct the category using the text or use a descriptive title instead.
+- **Check the severity:** lower confidence when the severity does not match the description. A low-confidence finding is marked unclear and gets no grade.
+- **Limit confidence after corrections:** a second-look result cannot have confidence above medium. Changing a category based on text never raises confidence.
+- **Check cost and legal language:** replace flagged text with wording from the problem category list. The app also checks for dollar signs and numbers, even when TypeSafe is unavailable.
+- **Handle failed checks:** keep Gemma's finding and record the check's status if verification fails. When verification is not configured, `NullJudge` skips network requests.
+- **Check photo test results:** the [photo test script](scripts/run_test_set.py) can ask TypeSafe whether Gemma's description includes the expected visible details and matches the expected problem type.
 
-Live verification is wired into both the stored-session worker and `/api/analyze`, which the React UI uses. Jev never generates report prose; the seller remains the final reviewer.
+These checks run in both the backend worker for saved sessions and `/api/analyze`, which the React interface uses. Jev does not write report text. The seller reviews and approves the findings.
 
-To enable verification, add these settings to the gitignored `.env` and restart the backend:
+To enable these checks, add these settings to `.env` and restart the backend. Git ignores this file, so it is not committed to the repository.
 
 ```dotenv
 DISCLOSURE_TYPESAFE_URL=<your TypeSafe API base URL>
@@ -64,9 +64,9 @@ DISCLOSURE_JUDGE_VERIFY=1
 DISCLOSURE_JUDGE_CLASSIFY=0
 ```
 
-Both URL and key are required. [`.env.example`](.env.example) documents configuration, [verification tests](tests/test_verify.py) cover the decision rules, and [experiment notes](docs/decisions.md#typesafe-text-judge-jev) record the model comparisons and threshold choices.
+Both the URL and API key are required. See [`.env.example`](.env.example) for settings, [verification tests](tests/test_verify.py) for the decision rules, and [experiment notes](docs/decisions.md#typesafe-text-judge-jev) for model comparisons and the score cutoffs used by the checks.
 
-## Architecture
+## How the app works
 
 ```mermaid
 flowchart LR
@@ -76,11 +76,11 @@ flowchart LR
   Review --> PDF["PDF report"]
 ```
 
-The **website runs on Google Cloud Run**. A FastAPI backend connects it to Gemma 4 through Ollama on a private GPU service. TypeSafe optionally checks Gemma's text. Application code handles grading and cost lookup, and the seller confirms every finding included in the report.
+The **website runs on Google Cloud Run**. Its Python backend uses FastAPI and connects to Gemma 4 through Ollama on a private GPU service. TypeSafe can check Gemma's text. The app calculates grades and looks up repair costs. The seller confirms every finding included in the report.
 
 ## The grading rule
 
-**Risk = severity × urgency.** Urgency weights are immediate **4**, within 30 days **3**, within a year **2**, and cosmetic **1**.
+**Risk = severity × urgency.** Severity ranges from **1–5**. Urgency is scored as follows: needs immediate attention **4**, within 30 days **3**, within a year **2**, and appearance only **1**.
 
 | Risk | Letter | Label |
 |---|---|---|
@@ -90,48 +90,48 @@ The **website runs on Google Cloud Run**. A FastAPI backend connects it to Gemma
 | 11–15 | D | Urgent |
 | 16–20 | F | Critical |
 
-Confidence determines how the result appears: **high** shows one letter, **medium** shows the letter and the next worse one, and **low** shows no grade with a recommendation for a licensed home inspector.
+The AI's confidence affects how the grade appears: **high** shows one letter, **medium** shows that letter and the next worse grade, and **low** shows no grade and recommends a licensed home inspector.
 
 > The overall grade is the worst grade among confirmed, graded findings. It is never an average.
 
-## Guardrails
+## Safety checks
 
 - **Blurry or non-house photo:** ask for a new photo and show no grade when flagged by the model.
 - **Low confidence or unclear finding:** show no grade and recommend a licensed home inspector.
-- **D or F grade:** recommend evaluation by the relevant licensed professional.
-- **Invalid output:** retry once, then return unclear; do not display the unparsed response.
-- **Timeout:** provide a Retry action. The default timeout is 120 seconds per inference request.
-- **Model availability:** show a startup banner with the command to start Ollama or download the selected model.
-- **Seller confirmation:** include confirmed findings only, and require confirmation again after an edit in the default app.
-- **Disclosure:** show the disclaimer at the start, during review, and on every PDF page.
+- **D or F grade:** recommend an assessment by a licensed professional who handles that type of problem.
+- **Invalid AI response:** retry once, then mark the finding unclear. Do not display a response the app cannot read.
+- **Time limit:** offer a Retry button if analysis takes too long. The default limit is 120 seconds per AI request.
+- **Model unavailable:** show a startup message with the command to start Ollama or download the selected model.
+- **Seller approval:** include only confirmed findings. In the default app, editing a finding requires the seller to confirm it again.
+- **Disclaimer:** show the tool's limits at the start, during review, and on every PDF page.
 
 ## Privacy
 
-- **Metadata removal:** photos are resized and rebuilt without GPS, timestamps, or device metadata before analysis.
-- **Hosted analysis:** the website and model service run on Google Cloud. Sanitized photos are sent to the private Gemma service for analysis; that inference service has no application photo-storage layer.
-- **Text-only TypeSafe requests:** Jev receives Gemma's description, title, typed fields, and relevant taxonomy or fixture details. Images, session ZIP fields, and recipient email fields are not sent to TypeSafe. Descriptions can contain details visible in a photo; no zero-retention claim is made for the provider.
-- **Browser session control:** the web interface keeps session photos, findings, and details in the browser's `localStorage`. “Delete this session” clears that session from the browser; downloaded or emailed copies are separate. The standalone Python interface stores its sessions under `data/` on the machine running that backend.
-- **Optional email:** SMTP is disabled until configured. When requested, the provider receives the report and recipient; the endpoint does not save the uploaded attachment. Recipient addresses are kept in process memory for rate limiting.
-- **Minimal collection:** no accounts or analytics in the default app. Faces and addresses visible inside a photo are not automatically redacted.
+- **Photo details removed:** before analysis, photos are resized and saved without GPS location, timestamps, or camera information.
+- **Cloud analysis:** the website and model service run on Google Cloud. Photos with those details removed are sent to the private Gemma service for analysis. That service has no app feature for storing photos.
+- **TypeSafe receives text only:** Jev receives Gemma's description, title, other finding fields, and relevant details from the category list or test examples. It does not receive images, session ZIP codes, or recipient email fields. Descriptions may include details visible in the photo. We do not claim that TypeSafe deletes all data after processing.
+- **Session storage:** the web interface saves session photos, findings, and details in the browser's `localStorage`. “Delete this session” clears it from that browser; downloaded or emailed copies remain separate. The standalone Python interface saves sessions under `data/` on the computer running the backend.
+- **Optional email:** email delivery through SMTP is off until configured. If you send a report, the email provider receives the report and recipient address. The app does not save the uploaded attachment. It holds recipient addresses in temporary server memory to limit how often reports can be sent.
+- **Limited data collection:** the default app has no accounts or analytics. It does not automatically hide faces or addresses visible in photos.
 
-The [network test](tests/test_no_network.py) checks selected source files for hardcoded external URLs; endpoints are configured through environment variables.
+The [network test](tests/test_no_network.py) checks selected source files for external URLs written directly in the code. Service addresses are set through environment variables.
 
 ## Accessibility
 
-The default UI includes labeled controls, a skip link, visible keyboard focus, heading focus on screen changes, live announcements, and progress-bar semantics. Grade letters and text accompany colors. Controls have a minimum height of 44 pixels.
+The default interface includes labeled controls, a link to skip to the main content, and a visible highlight for keyboard navigation. When the screen changes, focus moves to its heading. Screen readers receive status updates and progress information. Grades use letters and text as well as colors. Controls are at least 44 pixels tall.
 
-## Recorded performance
+## Measured speed
 
 | Measurement | Recorded result | Scope |
 |---|---|---|
-| Per-photo analysis | **7.4 s median**, 5.4–10.2 s range | `gemma4:e4b`, prompt v3.2, 17-photo test run; excludes subsequent TypeSafe scoring and live verification |
-| Warm GPU throughput | **17 photos in 62 s**, **16.3 photos/minute** | Separate Cloud Run L4 test with four workers; 17 successful analysis responses; model-only throughput |
+| Time to analyze one photo | **7.4 seconds median** (middle result), 5.4–10.2 seconds range | `gemma4:e4b`, prompt v3.2, 17-photo test; does not include later TypeSafe scoring or live checks |
+| Photos processed with the GPU model already loaded | **17 photos in 62 seconds**, **16.3 photos/minute** | Separate Cloud Run L4 test with four workers; all 17 analyses succeeded; measures the model service only |
 
-See [full test results](docs/test-results.md) and [Cloud Run measurements](docs/gate0.md#cloud-run-gpu-us-east4-gemma4e4b) for the underlying evidence.
+See [full test results](docs/test-results.md) and [Cloud Run measurements](docs/gate0.md#cloud-run-gpu-us-east4-gemma4e4b) for details.
 
 ## How we test changes with photos
 
-We keep **17 example photos with expected answers** and run the same photos through the AI after a change. This helps us catch a change that improves one answer but breaks another. Software developers call this a **regression test suite**: a repeatable check that previously working behavior still works.
+We keep **17 example photos with expected answers** and run them through the AI after changes. This helps us catch changes that improve one answer but break another.
 
 For example:
 
@@ -139,9 +139,9 @@ For example:
 - A cat photo should still be recognized as something other than a house.
 - A blurry photo should still prompt a retake rather than receive a grade.
 
-The [photo list](assets/test_photos/test_photos.csv) covers visible defects, blurry inputs, non-house images, and an undamaged room. The [test script](scripts/run_test_set.py) records the expected answer, the actual answer, and how long each photo takes. When configured, TypeSafe also checks whether Gemma's written description matches the expected visible details.
+The [photo list](assets/test_photos/test_photos.csv) includes visible problems, blurry photos, pictures unrelated to housing, and an undamaged room. The [test script](scripts/run_test_set.py) records the expected answer, the actual answer, and how long each photo takes. When configured, TypeSafe also checks whether Gemma's description matches the expected visible details.
 
-Results are saved in a [comparison report](docs/test-results.md), so we can compare prompt versions using the same examples. These photo checks evaluate the analyzer's answers; live verification and second-look behavior have separate [automated tests](tests/test_verify.py) and [experiment notes](docs/decisions.md#typesafe-text-judge-jev). All example photos are openly licensed, with [attribution recorded](assets/test_photos/ATTRIBUTION.md).
+Results are saved in a [comparison report](docs/test-results.md), so we can compare versions of the AI instructions using the same examples. These checks test the photo analysis answers. Live checks and second looks have separate [automated tests](tests/test_verify.py) and [experiment notes](docs/decisions.md#typesafe-text-judge-jev). All example photos have licenses that allow reuse, with [credits recorded](assets/test_photos/ATTRIBUTION.md).
 
 ## Local development
 
@@ -161,7 +161,7 @@ $env:DISCLOSURE_MODEL = "gemma4:e4b"
 .\run.ps1
 ```
 
-Open **http://localhost:8000** for your local copy. Add `-Lan` to the final command for a phone on the same trusted Wi-Fi network.
+Open **http://localhost:8000** for your local copy. Add `-Lan` to the final command to use the app from a phone on the same trusted Wi-Fi network.
 
 ### macOS / Linux
 
@@ -180,39 +180,39 @@ DISCLOSURE_MODEL=gemma4:e4b .venv/bin/python -m uvicorn app.main:create_app --fa
 .venv/bin/python -m tests.dev_server
 ```
 
-On Windows, use `.\.venv\Scripts\python -m tests.dev_server`. Open **http://localhost:8001**. This mode runs the real application with canned analyzer responses for UI and report walkthroughs.
+On Windows, use `.\.venv\Scripts\python -m tests.dev_server`. Open **http://localhost:8001**. This mode runs the real app with preset AI responses so you can try the interface and reports.
 
 ### React interface
 
-The default HTML/CSS/JavaScript app in `static/` is served by Python without a Node toolchain. To run the separate React interface, start the Python backend, then run `npm install` and `npm run dev` from `frontend/`.
+Python serves the default HTML/CSS/JavaScript app in `static/`; it does not require Node.js. To run the separate React interface, start the Python backend, then run `npm install` and `npm run dev` from `frontend/`.
 
-Vite proxies `/api` to port 8000. React stores sessions in browser `localStorage` and manages its own queue and PDF generation. Use `VITE_MOCK_ANALYZER=1` for canned responses. TypeSafe verification applies to both interfaces through the backend.
+Vite forwards `/api` requests to port 8000. The React interface stores sessions in browser `localStorage`, queues photos for analysis, and creates PDFs. Use `VITE_MOCK_ANALYZER=1` for preset AI responses. Both interfaces use the backend's TypeSafe checks.
 
 ### Configuration
 
-Set environment variables before starting the backend or place them in the gitignored `.env`. Existing process environment variables take precedence.
+Set environment variables before starting the backend, or add them to `.env`, which Git ignores. Variables already set in the running environment override values in `.env`.
 
 | Setting | Purpose |
 |---|---|
-| `DISCLOSURE_MODEL` | Explicit downloaded model tag, such as `gemma4:e4b` |
-| `DISCLOSURE_OLLAMA_URL` | Local Ollama, or `http://localhost:9090` for a developer's authenticated Cloud Run proxy |
-| `DISCLOSURE_OLLAMA_TOKEN` | Optional direct IAM token; leave empty when using the proxy |
-| `DISCLOSURE_WORKERS` | Backend worker count; match Ollama's `OLLAMA_NUM_PARALLEL` |
+| `DISCLOSURE_MODEL` | Name and version of a downloaded model, such as `gemma4:e4b` |
+| `DISCLOSURE_OLLAMA_URL` | Address of local Ollama, or `http://localhost:9090` when connecting through a Cloud Run proxy that handles authentication |
+| `DISCLOSURE_OLLAMA_TOKEN` | Optional Google Cloud authentication token for a direct connection; leave empty when using the proxy |
+| `DISCLOSURE_WORKERS` | Number of backend workers; match Ollama's `OLLAMA_NUM_PARALLEL` |
 | `DISCLOSURE_KEEP_ALIVE` | Keep the model loaded between requests; default `30m` |
-| `DISCLOSURE_TIMEOUT_S` | Timeout per inference request; default `120` seconds |
+| `DISCLOSURE_TIMEOUT_S` | Time limit per AI request; default `120` seconds |
 | `DISCLOSURE_DATA_DIR` | Backend storage directory; default `data/` |
 
-For TypeSafe, use the [verification settings above](#typesafe-verification). For optional SMTP delivery, fill in [`.env.example`](.env.example) and save it as `.env`.
+For TypeSafe, use the [verification settings above](#typesafe-verification). To enable email delivery, fill in the SMTP settings in [`.env.example`](.env.example) and save it as `.env`.
 
 ## Deployment
 
 **Hosted website:** Disclosure is available at [disclosure-app-jyruvsvlxa-uk.a.run.app](https://disclosure-app-jyruvsvlxa-uk.a.run.app/) on Google Cloud Run. Users open the website directly from their browser.
 
-**AI service:** Gemma 4 runs behind Ollama on a separate private Cloud Run service with an NVIDIA L4 GPU. The deployment configuration includes baked-in model weights, configurable concurrency, and instance limits.
+**AI service:** Ollama runs Gemma 4 on a separate private Cloud Run service with an NVIDIA L4 GPU. The deployment includes the model files and settings for how many requests can run at once and how many server instances can start.
 
-**Local development:** developers can also run a copy of the app with local Ollama or connect to the hosted model through an authenticated proxy.
+**Local development:** developers can run the app with Ollama on their own computer or connect to the cloud model through a proxy that handles authentication.
 
-The [model-service deployment guide](cloud/README.md) covers prerequisites, deploying the GPU service, keeping an instance warm for a demo, scaling settings, and teardown.
+The [model-service deployment guide](cloud/README.md) explains what you need, how to deploy the GPU service, how to keep it ready for a demo, how to adjust capacity, and how to shut it down.
 
 ## Development and testing
 
@@ -222,12 +222,12 @@ The [model-service deployment guide](cloud/README.md) covers prerequisites, depl
 .venv/bin/python scripts/run_test_set.py --no-judge
 ```
 
-On Windows, use `.\.venv\Scripts\python`. Automated tests cover parsing, grading, mapping, queue behavior, API operations, and TypeSafe verification with fake model responses. The photo runner uses the configured Gemma endpoint and optional TypeSafe scoring.
+On Windows, use `.\.venv\Scripts\python`. Automated tests use fake model responses to check response handling, grading, category mapping, photo queues, API requests, and TypeSafe checks. The photo test script uses the configured Gemma service and optional TypeSafe scoring.
 
-Photo results are stored by prompt version in `docs/test-results.md`, with raw per-photo JSON under `data/eval/<run>/`. See [the model/hardware measurement guide](docs/gate0.md) for streamed timing and one-versus-four-worker benchmarks.
+Photo results are grouped by prompt version in `docs/test-results.md`. Detailed JSON results for each photo are saved under `data/eval/<run>/`. See [the model and hardware measurement guide](docs/gate0.md) for response timing and speed comparisons between one and four workers.
 
-Model calls belong behind `DefectAnalyzer`; text checks belong behind `Judge`. Grading rules, cost data, and jurisdiction mappings stay separate from prompts so each can be maintained and tested independently.
+Keep model requests in `DefectAnalyzer` and text checks in `Judge`. Keep grading rules, cost data, and rules for matching locations to disclosure requirements separate from AI prompts so each can be updated and tested on its own.
 
 ## License
 
-Code is licensed under [MIT](LICENSE). Gemma weights are downloaded separately; consult the selected model's published license and usage requirements. Test photos retain their individual licenses and attribution requirements in [the manifest](assets/test_photos/test_photos.csv) and [Gate 0 attribution](assets/test_photos/ATTRIBUTION.md).
+Code is licensed under [MIT](LICENSE). Gemma model files are downloaded separately; check the selected model's license and usage requirements. Each test photo keeps its own license and credit requirements, listed in [the photo list](assets/test_photos/test_photos.csv) and [photo credits](assets/test_photos/ATTRIBUTION.md).
