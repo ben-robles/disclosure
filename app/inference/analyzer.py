@@ -34,8 +34,10 @@ def unclear_finding(reason: str, analysis_status: str) -> Finding:
 
 class DefectAnalyzer(ABC):
     @abstractmethod
-    def analyze(self, image_bytes: bytes) -> Finding:
-        """Never raises for model problems; returns an `unclear` Finding instead."""
+    def analyze(self, image_bytes: bytes, hint: str = None) -> Finding:
+        """Never raises for model problems; returns an `unclear` Finding instead.
+
+        hint: optional extra instruction for a second look at the same photo."""
 
     @abstractmethod
     def status(self) -> dict:

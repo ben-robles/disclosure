@@ -21,7 +21,8 @@ def clean_title(value) -> str:
     """A short plain-text name; anything unusable becomes empty (caller falls back)."""
     if not isinstance(value, str):
         return ""
-    return " ".join(value.replace("_", " ").split()[:6]).strip(" .")[:60]
+    title = " ".join(value.replace("_", " ").split()[:6]).strip(" .")[:60]
+    return title[:1].upper() + title[1:]  # readable: "mold on ceiling" -> "Mold on ceiling"
 
 
 def category_fits(value) -> bool:
@@ -123,7 +124,7 @@ class OllamaAnalyzer(DefectAnalyzer):
             }
         return {"ready": True, "message": "", "fix": ""}
 
-    def _chat_once(self, image_bytes: bytes) -> str:
+    def _chat_once(self, image_bytes: bytes, hint: str = None) -> str:
         payload = {
             "model": self.model,
             "stream": False,
@@ -131,7 +132,7 @@ class OllamaAnalyzer(DefectAnalyzer):
             "options": {"temperature": 0},
             "messages": [{
                 "role": "user",
-                "content": build_prompt(self.classify),
+                "content": build_prompt(self.classify) + (f"\n\n{hint}" if hint else ""),
                 "images": [base64.b64encode(image_bytes).decode("ascii")],
             }],
         }
@@ -147,10 +148,10 @@ class OllamaAnalyzer(DefectAnalyzer):
             body = self._request("/api/chat", payload, timeout=self.timeout_s)
         return body.get("message", {}).get("content", "")
 
-    def analyze(self, image_bytes: bytes) -> Finding:
+    def analyze(self, image_bytes: bytes, hint: str = None) -> Finding:
         for _attempt in range(2):
             try:
-                return parse_model_output(self._chat_once(image_bytes), self.classify)
+                return parse_model_output(self._chat_once(image_bytes, hint), self.classify)
             except ParseError:
                 continue
             except (socket.timeout, TimeoutError):

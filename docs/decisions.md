@@ -63,3 +63,12 @@
 ### Verify now moves the category (2026-10-24)
 
 When `label_matches` is below the no-threshold, verify asks the judge to pick a category from Gemma's text (one more call). If the pick is not `none_of_these`, differs from Gemma's type and has probability of at least 0.45, the finding moves to it: grade, cost, "pro", report section and the displayed label all follow, and confidence is capped at what the judge's probability supports (never raised). Otherwise the type stays and the model's own title is shown, as before. Limit: the judge only reads Gemma's sentence, so when the sentence describes the wrong thing (the mold photo, described as an HVAC fan) the move cannot fix it.
+
+### Second look, blurry wording, and the web app route (2026-10-24)
+
+- **Contradictions get a second look.** When verify finds that the label contradicts Gemma's sentence, Gemma sees the same photo again with a note naming the mismatched label. Its new answer replaces the first only if the judge then agrees with the new label; confidence is capped at medium. If not, the judge's text-only category pick is tried, then the model's own title is shown. One extra Gemma call per flagged photo.
+- **Mold photo still not fixed.** Forced live: on the second look Gemma again sees only the ceiling fan and answers `unclear`. The first answer stays, with the title shown instead of the category. That is a vision limit, not something text checks can repair.
+- **Titles are capitalised** (`clean_title`) so a title reads as a name, not a fragment.
+- **Blurry false positive (plumbing photo, sharp pipe on a soft background).** Prompt v3.1 added two sentences and fixed it, but dropped the test set from 12 to 10 of 17 on two runs (the water stains and brick crack changed category). Prompt v3.2 only adds "(a sharp subject with a blurred background is not blurry)": plumbing now passes, both truly blurry photos still read blurry, and the test set is back to 12 of 17. v3.2 is the default. The v4 (classify) prompt is unchanged.
+- **`/api/analyze`** (used by the React UI) now runs verify too when `DISCLOSURE_JUDGE_VERIFY=1`, including the second look.
+- **Categories** stay a data file: add or rename entries in `assets/defect_taxonomy.json` (`id`, `label`, `look_for`, `pro`), then give the new id a range in `assets/cost_table.json` and a section in `assets/jurisdiction_md.json`. The prompt, schema and category list pick them up with no code change.

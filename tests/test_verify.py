@@ -203,3 +203,93 @@ def test_good_label_never_asks_for_a_new_category():
     judge = FakeJudge(verdict=Verdict(OK, 0.9, 0.9, 0.0))
     verify_finding(judge, finding())
     assert [c[0] for c in judge.calls] == ["verify"]
+
+
+# ---- second look: Gemma sees the photo again --------------------------------------------
+
+def reasker(answer):
+    """A fake second look. Returns (callable, list of hints it was given)."""
+    hints = []
+
+    def reanalyze(hint):
+        hints.append(hint)
+        return answer
+    return reanalyze, hints
+
+
+def two_step_judge(second_label_p, **kw):
+    """Verifies the first answer as a mismatch, then the new answer with second_label_p."""
+    class Judge2(FakeJudge):
+        def __init__(self):
+            super().__init__(**kw)
+            self.verdicts = [MISFIT, Verdict(OK, second_label_p, 0.9, 0.0)]
+
+        def verify(self, state):
+            self.calls.append(("verify", state))
+            return self.verdicts.pop(0)
+    return Judge2()
+
+
+def unsure():
+    from app.inference.judge import TypeChoice
+    return TypeChoice(OK, [("hvac_heating", 0.2)])  # the text-only fallback cannot decide either
+
+
+MOLD = dict(defect_type="mold_mildew", reason="Dark mold growth spreads across the bathroom ceiling.",
+            title="mold on bathroom ceiling", severity=3, urgency="30_days", confidence="high")
+
+
+def test_second_look_replaces_the_answer_when_the_judge_now_agrees():
+    reanalyze, hints = reasker(finding(**MOLD))
+    f = verify_finding(two_step_judge(0.95), finding(defect_type="hvac_heating"), reanalyze=reanalyze)
+    assert (f.defect_type, f.category_fits, f.confidence) == ("mold_mildew", True, "medium")
+    assert f.reason == MOLD["reason"] and f.severity == 3 and f.judge_status == "ok"
+    assert f.judge_label_p == 0.95
+    assert "Heating system problem" in hints[0] and "Curling shingles" in hints[0]
+
+
+def test_second_look_state_sent_to_the_judge_is_the_new_answer():
+    judge = two_step_judge(0.95)
+    verify_finding(judge, finding(defect_type="hvac_heating"), reanalyze=reasker(finding(**MOLD))[0])
+    assert judge.calls[1][1]["defect_type_label"] == "Mold or mildew"
+
+
+def test_second_look_that_still_disagrees_falls_back_to_the_title():
+    reanalyze, _ = reasker(finding(**MOLD))
+    f = verify_finding(two_step_judge(0.1, choice=unsure()), finding(defect_type="hvac_heating"),
+                       reanalyze=reanalyze)
+    assert f.defect_type == "hvac_heating" and f.category_fits is False and f.title == "Curling shingles"
+
+
+def test_second_look_is_ignored_when_gemma_fails_or_says_blurry():
+    for answer in (unclear_finding("x", "unavailable"), finding(image_quality="blurry"), None):
+        f = verify_finding(two_step_judge(0.95, choice=unsure()), finding(defect_type="hvac_heating"),
+                           reanalyze=reasker(answer)[0])
+        assert f.defect_type == "hvac_heating" and f.category_fits is False
+
+
+def test_second_look_that_raises_is_ignored():
+    def boom(hint):
+        raise RuntimeError("model down")
+    f = verify_finding(two_step_judge(0.95, choice=unsure()), finding(defect_type="hvac_heating"),
+                       reanalyze=boom)
+    assert f.defect_type == "hvac_heating" and f.category_fits is False
+
+
+def test_no_second_look_when_the_label_matches():
+    reanalyze, hints = reasker(finding(**MOLD))
+    verify_finding(FakeJudge(verdict=Verdict(OK, 0.9, 0.9, 0.0)), finding(), reanalyze=reanalyze)
+    assert hints == []
+
+
+def test_worker_gives_gemma_a_second_look_with_the_same_photo(tmp_path):
+    db = Database(tmp_path / "w.sqlite3")
+    sid = db.create_session()
+    pid = db.add_photo(sid)
+    db.mark_pending(sid)
+    analyzer = FakeAnalyzer([finding(defect_type="hvac_heating"), finding(**MOLD)])
+    w = Worker(db, analyzer, lambda p: b"photo", judge=two_step_judge(0.95), verify=True, classify=False)
+    assert w.run_once()
+    row = db.get_finding(pid)
+    assert (row["defect_type"], row["category_fits"]) == ("mold_mildew", 1)
+    assert analyzer.calls == 2 and analyzer.hints[0] is None and "reviewer" in analyzer.hints[1]

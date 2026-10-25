@@ -18,6 +18,7 @@ from .inference.judge import Judge, build_judge
 from .inference.ollama_analyzer import OllamaAnalyzer
 from .inference.prompts import load_taxonomy
 from .queue import Worker
+from .verify import verify_finding
 from .report.pdf import build_pdf
 
 MAX_PHOTOS_PER_SESSION = 30
@@ -117,7 +118,14 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
             clean = sanitize(raw)
         except BadImage as exc:
             raise HTTPException(400, str(exc))
-        return vars(analyzer.analyze(clean))
+        finding = analyzer.analyze(clean)
+        if config.JUDGE_VERIFY:  # same second opinion the stored-session worker applies
+            try:
+                finding = verify_finding(judge, finding,
+                                         reanalyze=lambda hint: analyzer.analyze(clean, hint=hint))
+            except Exception:
+                finding.judge_status = "unavailable"
+        return vars(finding)
 
     # ---- sessions ---------------------------------------------------------
     @app.post("/api/session")

@@ -1,13 +1,13 @@
 """Prompt and output schema, both built from assets/defect_taxonomy.json.
 
-PROMPT_VERSION v3 - bump on every wording change; test-results.md logs it.
+PROMPT_VERSION v3.2 - bump on every wording change; test-results.md logs it.
 """
 import json
 
 from ..config import ASSETS_DIR
 from .analyzer import CONFIDENCES, QUALITIES, URGENCIES
 
-PROMPT_VERSION = "v3"
+PROMPT_VERSION = "v3.2"
 # v4 is used only with DISCLOSURE_JUDGE_CLASSIFY: Gemma describes, the text judge picks the type.
 PROMPT_VERSION_V4 = "v4"
 
@@ -47,7 +47,8 @@ def build_prompt(classify: bool = False) -> str:
         f"- urgency: one of {', '.join(URGENCIES)}\n"
         f"- confidence: one of {', '.join(CONFIDENCES)}. Use low if you are unsure.\n"
         f"- image_quality: one of {', '.join(QUALITIES)}. "
-        "Use blurry if the photo is too blurry to judge, "
+        "Use blurry if the photo is too blurry to judge "
+        "(a sharp subject with a blurred background is not blurry), "
         "not_a_house if it does not show part of a home.\n\n"
         "If you cannot tell, use defect_type unclear and confidence low."
     )
