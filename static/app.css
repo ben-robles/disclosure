@@ -139,7 +139,7 @@ input, select {
 
 /* progress */
 .bar { height: 14px; background: var(--soft); border: 1px solid var(--muted); border-radius: 7px; overflow: hidden; }
-.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.5s linear; }
+.bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.1s linear; }
 @media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
 
 /* finding cards */

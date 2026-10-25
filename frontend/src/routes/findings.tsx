@@ -130,7 +130,7 @@ function ProgressBar({ photos }: { photos: Photo[] }) {
         aria-valuenow={Math.round(pct)}
       >
         <div
-          className={`h-full rounded-full bg-primary transition-[width] duration-500 motion-reduce:transition-none ${analyzing ? "motion-safe:animate-pulse" : ""}`}
+          className={`h-full rounded-full bg-primary transition-[width] duration-100 motion-reduce:transition-none ${analyzing ? "motion-safe:animate-pulse" : ""}`}
           style={{ width: `${pct}%` }}
         />
       </div>

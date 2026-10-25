@@ -206,39 +206,29 @@ function startPolling() {
   stopPolling();
   tick();
   state.poll = setInterval(tick, 2000);
-  state.draw = setInterval(drawProgress, 500);
+  state.draw = setInterval(drawProgress, 100);
 }
 
-// The server only says how many photos are done. Between those counts the bar moves by an estimate
-// built from how long the finished photos took, so it keeps pace without ever claiming a photo is done.
-const DEFAULT_STEP_MS = 12000;
-
-function stepMs() {
-  const recent = state.prog.steps.slice(-5);
-  if (!recent.length) return DEFAULT_STEP_MS;
-  const mean = recent.reduce((a, b) => a + b, 0) / recent.length;
-  return Math.min(120000, Math.max(3000, mean));
-}
+// The server only says how many photos are done. Between those counts the bar fills on a fixed
+// 8 seconds per photo and waits at 99% of that photo if it takes longer.
+const PHOTO_MS = 8000;
 
 function drawProgress() {
   const p = state.prog;
   if (!p || !p.total) return;
-  const elapsed = Date.now() - p.since;
-  const part = elapsed <= 0 ? 0 : 0.95 * (1 - Math.exp((-2 * elapsed) / stepMs()));
+  const part = Math.min(0.99, Math.max(0, (Date.now() - p.since) / PHOTO_MS));
   const pct = ((p.done + part) / p.total) * 100;
   $("progress-fill").style.width = pct + "%";
   document.querySelector("#view-capture .bar").setAttribute("aria-valuenow", String(Math.round(pct)));
 }
 
 function trackProgress(st) {
-  const now = Date.now();
-  if (!state.prog) state.prog = { done: st.done, since: now, steps: [], total: st.analyzing_total };
+  if (!state.prog) state.prog = { done: st.done, since: Date.now(), total: st.analyzing_total };
   const p = state.prog;
   p.total = st.analyzing_total;
   if (st.done > p.done) {
-    p.steps.push((now - p.since) / (st.done - p.done));
     p.done = st.done;
-    p.since = now;
+    p.since = Date.now();
   }
 }
 
