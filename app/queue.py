@@ -7,11 +7,15 @@ import threading
 
 from . import config
 from .inference.analyzer import unclear_finding
+from .inference.judge import NullJudge
+from .verify import verify_finding
 
 
 class Worker:
-    def __init__(self, db, analyzer, read_image, poll_s=0.5, threads=None):
+    def __init__(self, db, analyzer, read_image, poll_s=0.5, threads=None, judge=None, verify=None):
         self.db, self.analyzer, self.read_image, self.poll_s = db, analyzer, read_image, poll_s
+        self.judge = judge or NullJudge()
+        self.verify = config.JUDGE_VERIFY if verify is None else verify
         self.threads = threads or config.WORKERS
         self._stop = threading.Event()
         self._threads = []
@@ -39,6 +43,11 @@ class Worker:
             finding = self.analyzer.analyze(self.read_image(pid))
         except Exception:  # guardrail 5: never crash on a bad analysis
             finding = unclear_finding("The model's answer could not be read.", "invalid")
+        if self.verify:
+            try:
+                finding = verify_finding(self.judge, finding)
+            except Exception:  # a judge problem never blocks a finding
+                finding.judge_status = "unavailable"
         self.db.save_finding(pid, finding)
         return True
 

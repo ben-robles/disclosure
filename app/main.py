@@ -14,6 +14,7 @@ from . import config, mailer, present
 from .db import Database
 from .images import BadImage, sanitize
 from .inference.analyzer import DefectAnalyzer
+from .inference.judge import Judge, build_judge
 from .inference.ollama_analyzer import OllamaAnalyzer
 from .inference.prompts import load_taxonomy
 from .queue import Worker
@@ -46,7 +47,7 @@ def _clean_zip(value):
 
 
 def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Path] = None,
-               start_worker: bool = True) -> FastAPI:
+               start_worker: bool = True, judge: Optional[Judge] = None) -> FastAPI:
     data_dir = Path(data_dir or config.DATA_DIR)
     photo_dir, report_dir = data_dir / "photos", data_dir / "reports"
     photo_dir.mkdir(parents=True, exist_ok=True)
@@ -57,7 +58,8 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
     def photo_path(pid: str) -> Path:
         return photo_dir / f"{pid}.jpg"
 
-    worker = Worker(db, analyzer, lambda pid: photo_path(pid).read_bytes())
+    worker = Worker(db, analyzer, lambda pid: photo_path(pid).read_bytes(),
+                    judge=judge or build_judge())
 
     @asynccontextmanager
     async def lifespan(_app):
