@@ -73,14 +73,14 @@ function Report() {
           Putting your report together…
         </p>
       )}
+      {blob && <EmailCard pdf={blob} />}
       {url && (
         <iframe
           src={url}
           title="Disclosure report PDF"
-          className="h-[65vh] w-full border bg-muted shadow-[var(--shadow-card)]"
+          className="mt-5 h-[65vh] w-full border bg-muted shadow-[var(--shadow-card)]"
         />
       )}
-      {blob && <EmailCard pdf={blob} />}
     </AppShell>
   );
 }
@@ -101,7 +101,7 @@ function EmailCard({ pdf }: { pdf: Blob }) {
   return (
     <form
       onSubmit={onSubmit}
-      className="mt-5 rounded-3xl border bg-card p-4 shadow-[var(--shadow-card)]"
+      className="rounded-3xl border bg-card p-4 shadow-[var(--shadow-card)]"
     >
       <h2 className="flex items-center gap-2 text-xl font-bold">
         <Mail className="size-5 text-primary" aria-hidden /> Email me a copy
