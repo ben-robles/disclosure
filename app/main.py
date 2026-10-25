@@ -100,6 +100,7 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
     def health():
         st = analyzer.status()
         st["model"] = config.MODEL
+        st["local"] = config.is_local_url(config.OLLAMA_URL)
         return st
 
     @app.get("/api/taxonomy")

@@ -7,6 +7,7 @@ import urllib.error
 import urllib.request
 
 from .. import config
+from . import cloudrun_auth
 from .analyzer import (
     CONFIDENCES, QUALITIES, URGENCIES, DefectAnalyzer, Finding, unclear_finding,
 )
@@ -94,8 +95,11 @@ class OllamaAnalyzer(DefectAnalyzer):
     def _request(self, path, payload=None, timeout=5):
         data = json.dumps(payload).encode("utf-8") if payload is not None else None
         headers = {"Content-Type": "application/json"}
-        if self.token:
-            headers["Authorization"] = f"Bearer {self.token}"
+        bearer = self.token
+        if not bearer and config.OLLAMA_AUTH == "cloudrun":
+            bearer = cloudrun_auth.identity_token(self.base_url)
+        if bearer:
+            headers["Authorization"] = f"Bearer {bearer}"
         req = urllib.request.Request(self.base_url + path, data=data, headers=headers)
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
@@ -104,6 +108,12 @@ class OllamaAnalyzer(DefectAnalyzer):
         try:
             tags = self._request("/api/tags", timeout=3)
         except (urllib.error.URLError, OSError, ValueError):
+            if config.OLLAMA_AUTH == "cloudrun":
+                return {
+                    "ready": False,
+                    "message": "The AI model is waking up or unavailable. Wait a minute, then check again.",
+                    "fix": "",
+                }
             if not config.is_local_url(self.base_url):
                 return {
                     "ready": False,
