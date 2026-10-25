@@ -152,4 +152,4 @@ PLACEHOLDER: see [`docs/user-interview.md`](docs/user-interview.md) and [`docs/p
 
 ## License
 
-Code: Apache-2.0 (see `LICENSE`). The Gemma 4 weights are not in this repository and are covered by Google's Gemma Terms of Use. Check them before you redistribute or deploy.
+Code: [MIT](LICENSE). Free to use, modify and redistribute. The Gemma 4 weights are not in this repository and are covered by Google's Gemma Terms of Use. Check them before you redistribute or deploy.
