@@ -53,6 +53,7 @@ Screenshots of each: PLACEHOLDER.
 - The server listens on `127.0.0.1` only. `.\run.ps1 -Lan` listens on all interfaces so a phone on the same Wi-Fi can open the app. Windows Firewall will ask: allow it on private networks only.
 - To open the app from your own devices away from home, use Tailscale Serve (tailnet only, not public): `tailscale serve --bg --https=8443 http://127.0.0.1:5173`. Photos travel encrypted between your devices and this computer, and the server still listens on `127.0.0.1`. Do not use Tailscale Funnel or a public tunnel: that sends photos from strangers to your model.
 - Outbound calls go to the model server named by `DISCLOSURE_OLLAMA_URL` (local Ollama, or the Cloud Run service through an authenticated proxy) and, only if you ask for the report by email, to the SMTP server you configure (copy `.env.example` to `.env` and fill it in; `.env` is git-ignored). The address and PDF are not stored. Leave those unset and email is disabled. The hosted model server does not store photos. A test (`tests/test_no_network.py`) still fails if any hardcoded external URL appears in the code.
+- Optional TypeSafe text judge, **off unless `DISCLOSURE_TYPESAFE_URL` and `TYPESAFE_API_KEY` are set**. When on, the TypeSafe API receives Gemma's one-sentence `reason`, its `title` and typed fields (defect type, severity, urgency) as text. Photos, ZIP codes and email addresses never leave this computer. Today the judge only scores the licensed public test photos in `scripts\run_test_set.py` (skip it with `--no-judge`).
 - Photo metadata (GPS, time, device) is stripped on upload. Photos are resized to 1024 px on the long edge, which also keeps analysis fast.
 - Data kept: photos, your confirmations and edits, and an optional 5-digit ZIP printed on the report. All of it lives in `data/` on this computer. "Delete this session" erases it.
 - No accounts, no analytics, no faces or addresses collected.
@@ -122,7 +123,7 @@ flowchart LR
   API --> PDF["ReportLab PDF"]
 ```
 
-Everything that touches the model is behind `DefectAnalyzer` (`app/inference/`). Swapping the runtime means writing one other class.
+Everything that touches the model is behind `DefectAnalyzer` (`app/inference/`). Swapping the runtime means writing one other class. `Judge` (`app/inference/judge.py`) is a second, text-only boundary to TypeSafe's Jev model. It never sees a photo, never writes user-visible text, and falls back to `NullJudge` (no network) when unconfigured or unreachable.
 
 ## Deployment path for a nonprofit
 
@@ -136,7 +137,7 @@ The report is a companion document organized by the numbered questions of the [M
 
 15 openly licensed photos from Wikimedia Commons in [`assets/test_photos/`](assets/test_photos/): 10 defects covering all 8 defect types, 2 blurry, 2 not a house (a cat, a road), 1 undamaged room. Source, author and license per file: [`test_photos.csv`](assets/test_photos/test_photos.csv). Two further Gate 0 photos have [attribution and expected visible details](assets/test_photos/ATTRIBUTION.md).
 
-Results: PLACEHOLDER. Run `scripts\run_test_set.py` on the Gemma machine; it writes `docs/test-results.md`. A two-photo Gate 0 run is not the full accuracy evaluation.
+Results: PLACEHOLDER. Run `scripts\run_test_set.py` on the Gemma machine; it writes `docs/test-results.md`. With a TypeSafe key it also adds judge scores (`mentions_expected_p`, `type_consistent_p`); `--no-judge` skips them. A two-photo Gate 0 run is not the full accuracy evaluation.
 
 ## The user
 
