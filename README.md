@@ -13,10 +13,10 @@ Disclosure helps home sellers turn photos of visible problems into a PDF report.
 
 ## Workflow
 
-1. **Capture:** take or upload a photo of a problem.
-2. **Analyze:** Gemma 4 suggests a description and problem type, how serious the problem is, how soon it needs attention, and how confident the AI is.
-3. **Review:** confirm, correct, or remove each finding. If enabled, TypeSafe checks the AI's text before you review it.
-4. **Export:** download a PDF with confirmed findings, photos, grades, repair cost ranges, and suggestions for professional help.
+1. **Capture:** take or upload a photo of a visible problem. Add more than one angle if you have it.
+2. **Analyze:** Gemma 4 suggests a description and problem type, how serious the problem is, how soon it needs attention, and how confident the AI is. A blue bar slides across the screen while it works, and the label shows which photo is being checked ("Looking at photo 2 of 3").
+3. **Review:** each finding shows its grade, a typical repair cost range, and the average cost. Confirm, correct, or remove each finding. If enabled, TypeSafe checks the AI's text before you review it.
+4. **Export:** download a PDF with confirmed findings, photos, grades, repair cost ranges with averages, a total, and suggestions for professional help.
 
 ## How we use Gemma 4
 
@@ -37,24 +37,33 @@ All requests to Gemma go through [`DefectAnalyzer`](app/inference/analyzer.py). 
 | Analyze photo| Gemma describes what it sees and suggests a category, severity, urgency, image quality, and confidence level |
 | Second guess | If enabled, TypeSafe checks whether the category and severity match Gemma's words and flags cost or legal language |
 | Calculate grades | The app applies the severity × urgency rule explained below |
-| Look up repair cost ranges | A separate table supplies example ranges; **these prices are demo data, not verified estimates** |
+| Look up repair cost ranges | A separate table supplies a low, high, and average price for each problem type and severity. The numbers come from public 2026 cost guides for the DC/MD/VA area, **not contractor quotes, so treat them as planning estimates** |
 | Decide what enters the report | The seller confirms each finding and can edit or remove it |
 
 The AI cannot certify that a home is safe or decide what the seller must disclose by law, and TypeSafe only checks text. The AI's confidence level helps guide review; it may be inaccurate.
 
 ## TypeSafe verification
 
-TypeSafe's Jev model can give an optional **second opinion on the text** through [`Judge`](app/inference/judge.py). It returns a second opinion on Gemma's analysis.
+Gemma sometimes writes a sentence that disagrees with its own label: "The wooden door trim shows rot near the base" filed under `siding_exterior`. The description is right, the category is wrong, and the grade, repair cost, and Maryland form section all follow the category. TypeSafe's Jev model is there to catch that.
 
-- **Check the category:** compare Gemma's category with its title and description. Inconsistencies cause the model to check again. After that, the app may correct the category or use a new title.
-- **Check the severity:** lower confidence when the severity does not match the description.
-- **Limit confidence after corrections:** a second-look result cannot have confidence above medium.
-- **Handle failed checks:** keep Gemma's finding and record the check's status if verification fails.
-- **Check photo test results:** the [photo test script](scripts/run_test_set.py) can ask TypeSafe whether Gemma's description is what would be expected.
+Jev is a small judgment model: give it text and a question, get back a probability. It never sees the photo. The app runs the loop through [`Judge`](app/inference/judge.py) and [`verify.py`](app/verify.py); Gemma never calls TypeSafe itself.
 
-These checks run in both the backend worker for saved sessions and `/api/analyze`, which the React interface uses. Jev does not write report text. The seller reviews and approves the findings.
+1. **Gemma reads the photo** and returns a title, description, category, severity, and confidence.
+2. **The app sends Gemma's title and description to Jev**, nothing else. Jev returns three probabilities: does the label match the description, is the severity plausible, and does the text contain a price or legal advice.
+3. **Label matches (probability ≥ 0.3):** the finding stays as Gemma wrote it. This is what happens to most findings.
+4. **Label contradicts the description (below 0.3):** the app asks Gemma to look at the same photo again with a note, for example "You labelled this `siding_exterior` but described rot in a door frame." The new answer replaces the old one only if Jev agrees with it, and its confidence is capped at medium.
+5. **If the second look fails,** Jev picks a category from Gemma's description. The finding moves only if the pick has probability ≥ 0.45 and is not `none_of_these`. Confidence is never raised by a fix.
+6. **If that also fails,** the finding keeps Gemma's own title, so the seller sees "Rotted door trim" instead of a wrong category name.
+7. **Severity does not fit the description (below 0.3):** confidence drops one step. A finding that drops to low becomes `unclear`.
+8. **Price or legal language (probability > 0.7):** the description is replaced with the taxonomy's neutral "look for" text and the title is cleared. A regex also catches `$` followed by a digit, whether or not Jev answered. Prices only ever come from our cost table.
 
-To enable these checks, add these settings to `.env` and restart the backend. Git ignores this file, so it is not committed to the repository.
+Jev does not write report text. If TypeSafe is down or times out, the app keeps Gemma's finding and records the check as skipped. The seller still reviews and approves every finding.
+
+### Off by default
+
+TypeSafe is **off unless you turn it on**, and the shipped app runs without it. This is deliberate: the app must work with Gemma alone, with no outside service in the path, and no finding text should leave the server unless the operator chose that. Leaving `DISCLOSURE_TYPESAFE_URL` empty keeps every check off.
+
+To enable the checks, add these settings to `.env` and restart the backend. Git ignores `.env`, so keys are never committed.
 
 ```dotenv
 DISCLOSURE_TYPESAFE_URL=<your TypeSafe API base URL>
@@ -64,7 +73,14 @@ DISCLOSURE_JUDGE_VERIFY=1
 DISCLOSURE_JUDGE_CLASSIFY=0
 ```
 
-Both the URL and API key are required. See [`.env.example`](.env.example) for settings, [verification tests](tests/test_verify.py) for the decision rules, and [experiment notes](docs/decisions.md#typesafe-text-judge-jev) for model comparisons and the score cutoffs used by the checks.
+- `DISCLOSURE_TYPESAFE_URL` and `TYPESAFE_API_KEY` are both required. With either missing, Jev is never called.
+- `DISCLOSURE_JUDGE_VERIFY=1` turns on the second opinion above. It costs one Jev call per finding and one extra Gemma call per contradiction.
+- `DISCLOSURE_JUDGE_CLASSIFY` lets Jev pick the category outright instead of Gemma (prompt v4). It scored worse on our test photos (10 / 17 against Gemma's 12 / 17), so leave it at `0`.
+- The cutoffs are `DISCLOSURE_JUDGE_YES=0.7` and `DISCLOSURE_JUDGE_NO=0.3`; the category pick needs `DISCLOSURE_JUDGE_CONF_MEDIUM=0.45`.
+
+On the 17-photo test set with verify on, Jev flagged the one real self-contradiction (a mold photo labelled `hvac_heating`, label match 0.07), left all seven correct findings alone, and did not catch three wrong labels where Gemma's sentence agreed with its wrong label. A text model cannot fix a description of the wrong thing; that is why the seller's review step exists. The [photo test script](scripts/run_test_set.py) can also ask Jev whether Gemma's description matches the expected visible details, as a scoring aid.
+
+See [`.env.example`](.env.example) for every setting, [verification tests](tests/test_verify.py) for the decision rules, and [experiment notes](docs/decisions.md#typesafe-text-judge-jev) for model comparisons and how the cutoffs were chosen.
 
 ## How the app works
 
@@ -72,7 +88,8 @@ Both the URL and API key are required. See [`.env.example`](.env.example) for se
 flowchart LR
   Photo["Upload photo"] --> Gemma["Gemma 4 analysis"]
   Gemma --> Check["TypeSafe check (optional)"]
-  Check --> Review["Seller review"]
+  Check --> Grade["Grade and repair cost lookup"]
+  Grade --> Review["Seller review"]
   Review --> PDF["PDF report"]
 ```
 
