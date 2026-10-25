@@ -1,4 +1,4 @@
-"""The only code that talks to a model. Only outbound call: local Ollama."""
+"""The only code that talks to a model. Only outbound call: the Ollama server named by DISCLOSURE_OLLAMA_URL (local Ollama or the Cloud Run proxy)."""
 import base64
 import json
 import re
@@ -15,6 +15,20 @@ from .prompts import build_prompt, output_schema, taxonomy_ids
 
 class ParseError(ValueError):
     pass
+
+
+def clean_title(value) -> str:
+    """A short plain-text name; anything unusable becomes empty (caller falls back)."""
+    if not isinstance(value, str):
+        return ""
+    return " ".join(value.replace("_", " ").split()[:6]).strip(" .")[:60]
+
+
+def category_fits(value) -> bool:
+    """Missing or unreadable means the model did not object to the category."""
+    if isinstance(value, str):
+        return value.strip().lower() not in ("false", "no", "0")
+    return value is not False
 
 
 def parse_model_output(text: str) -> Finding:
@@ -50,6 +64,8 @@ def parse_model_output(text: str) -> Finding:
         raise ParseError("missing reason")
 
     finding = Finding(
+        title=clean_title(data.get("title")),
+        category_fits=category_fits(data.get("category_fits")),
         defect_type=data["defect_type"],
         severity=severity,
         urgency=data["urgency"],
@@ -63,18 +79,20 @@ def parse_model_output(text: str) -> Finding:
 
 
 class OllamaAnalyzer(DefectAnalyzer):
-    def __init__(self, base_url=None, model=None, timeout_s=None):
+    def __init__(self, base_url=None, model=None, timeout_s=None, token=None):
         self.base_url = (base_url or config.OLLAMA_URL).rstrip("/")
         self.model = model or config.MODEL
         self.timeout_s = timeout_s or config.INFERENCE_TIMEOUT_S
+        self.token = (config.OLLAMA_TOKEN if token is None else token).strip()
         # Some tags (gemma4 on Ollama 0.40) reject `format` with HTTP 501; once seen, stop sending it.
         self._use_format = True
 
     def _request(self, path, payload=None, timeout=5):
         data = json.dumps(payload).encode("utf-8") if payload is not None else None
-        req = urllib.request.Request(
-            self.base_url + path, data=data, headers={"Content-Type": "application/json"},
-        )
+        headers = {"Content-Type": "application/json"}
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        req = urllib.request.Request(self.base_url + path, data=data, headers=headers)
         with urllib.request.urlopen(req, timeout=timeout) as resp:
             return json.loads(resp.read().decode("utf-8"))
 
@@ -82,6 +100,12 @@ class OllamaAnalyzer(DefectAnalyzer):
         try:
             tags = self._request("/api/tags", timeout=3)
         except (urllib.error.URLError, OSError, ValueError):
+            if not config.is_local_url(self.base_url):
+                return {
+                    "ready": False,
+                    "message": "The hosted AI model server is not reachable.",
+                    "fix": config.PROXY_FIX,
+                }
             return {
                 "ready": False,
                 "message": "The local AI model server (Ollama) is not running.",

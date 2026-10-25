@@ -15,12 +15,28 @@ if (-not (Test-Path $python)) {
 
 $bindHost = if ($Lan) { "0.0.0.0" } else { "127.0.0.1" }
 
-# Ollama check: the app also shows this in a banner, but say it here too.
+# Model server check: the app also shows this in a banner, but say it here too.
+# Local Ollama by default; .env can point DISCLOSURE_OLLAMA_URL at the Cloud Run proxy.
+$modelUrl = "http://127.0.0.1:11434"
+$envFile = Join-Path $PSScriptRoot ".env"
+if (Test-Path $envFile) {
+    foreach ($line in Get-Content $envFile) {
+        if ($line -match '^\s*DISCLOSURE_OLLAMA_URL\s*=\s*(.+)$') {
+            $modelUrl = $Matches[1].Trim().Trim('"', "'")
+        }
+    }
+}
+$isLocal = $modelUrl -match '^https?://(127\.0\.0\.1|localhost):11434/?$'
 try {
-    Invoke-RestMethod -Uri "http://127.0.0.1:11434/api/tags" -TimeoutSec 3 | Out-Null
-    Write-Host "Ollama: running"
+    Invoke-RestMethod -Uri "$($modelUrl.TrimEnd('/'))/api/tags" -TimeoutSec 3 | Out-Null
+    Write-Host ("Model server: " + $(if ($isLocal) { "local Ollama" } else { "hosted ($modelUrl)" }))
 } catch {
-    Write-Host "Ollama is not running. Start it from the Start menu, or run: ollama serve" -ForegroundColor Yellow
+    if ($isLocal) {
+        Write-Host "Ollama is not running. Start it from the Start menu, or run: ollama serve" -ForegroundColor Yellow
+    } else {
+        Write-Host "Hosted model server not reachable. In another terminal run:" -ForegroundColor Yellow
+        Write-Host "  gcloud run services proxy disclosure-gemma --region us-east4 --port 9090"
+    }
 }
 
 Write-Host ""

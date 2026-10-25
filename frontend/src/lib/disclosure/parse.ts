@@ -8,9 +8,28 @@ export const rawFindingSchema = z.object({
   confidence: z.enum(["high", "medium", "low"]),
   image_quality: z.enum(["ok", "blurry", "not_a_house"]),
   reason: z.string(),
+  // Model's own name for what it sees; used instead of the category label when the category does not fit.
+  title: z.string().optional(),
+  category_fits: z.union([z.boolean(), z.string()]).optional(),
 });
 
-export type RawFinding = Omit<z.infer<typeof rawFindingSchema>, "defect_type"> & { defect_type: DefectType };
+export type RawFinding = Omit<z.infer<typeof rawFindingSchema>, "defect_type" | "title" | "category_fits"> & {
+  defect_type: DefectType;
+  title?: string;
+  category_fits?: boolean;
+};
+
+/** Plain short name from the model; empty when unusable. */
+export function cleanTitle(v: unknown): string {
+  if (typeof v !== "string") return "";
+  return v.replace(/_/g, " ").split(/\s+/).filter(Boolean).slice(0, 6).join(" ").replace(/^[\s.]+|[\s.]+$/g, "").slice(0, 60);
+}
+
+/** Missing or unreadable means the model did not object to the category. */
+export function categoryFits(v: unknown): boolean {
+  if (typeof v === "string") return !["false", "no", "0"].includes(v.trim().toLowerCase());
+  return v !== false;
+}
 
 export const UNCLEAR_FALLBACK: RawFinding = {
   defect_type: "unclear",
@@ -34,7 +53,13 @@ export function parseModelOutput(text: string): RawFinding | null {
   if (!r.success) return null;
   const d = r.data;
   const type = (DEFECT_IDS as string[]).includes(d.defect_type) ? (d.defect_type as DefectType) : "unclear";
-  const out: RawFinding = { ...d, defect_type: type, reason: d.reason.split(/\s+/).slice(0, 20).join(" ") };
+  const out: RawFinding = {
+    ...d,
+    defect_type: type,
+    reason: d.reason.split(/\s+/).slice(0, 20).join(" "),
+    title: cleanTitle(d.title),
+    category_fits: categoryFits(d.category_fits),
+  };
   if (out.confidence === "low") out.defect_type = "unclear";
   return out;
 }

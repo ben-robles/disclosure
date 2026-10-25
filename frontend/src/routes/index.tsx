@@ -131,8 +131,8 @@ function Welcome() {
             Start your report
           </Button>
           <p className="mt-2.5 flex items-center justify-center gap-1.5 text-[0.8rem] font-medium text-muted-foreground">
-            <Lock className="size-3.5" aria-hidden /> Analyzed on this device. Nothing leaves it
-            unless you email your report. No account.
+            <Lock className="size-3.5" aria-hidden /> Location data stripped. Photos analyzed on our
+            private server, not stored. No account.
           </p>
         </div>
       }

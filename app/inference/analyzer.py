@@ -16,6 +16,10 @@ class Finding:
     image_quality: str
     reason: str
     analysis_status: str = "ok"  # ok | timeout | unavailable | invalid
+    # Model-written name for what is visible. Shown instead of the category label when
+    # category_fits is False (the closest category is only used for grading and cost).
+    title: str = ""
+    category_fits: bool = True
 
 
 def unclear_finding(reason: str, analysis_status: str) -> Finding:

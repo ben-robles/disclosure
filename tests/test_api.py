@@ -184,3 +184,57 @@ def test_analyze_one_returns_finding_and_stores_nothing(client, jpeg, analyzer):
 def test_analyze_one_rejects_non_image(client):
     r = client.post("/api/analyze", files={"file": ("x.jpg", b"not an image", "image/jpeg")})
     assert r.status_code == 400
+
+
+def test_label_uses_model_title_when_category_does_not_fit(tmp_path):
+    from app import present
+    from app.inference.analyzer import Finding
+    from app.db import Database
+    db = Database(tmp_path / "t.sqlite3")
+    sid = db.create_session()
+    pid = db.add_photo(sid)
+    db.save_finding(pid, Finding("water_intrusion", 4, "immediate", "high", "ok",
+                                 "A large tree branch rests on the roof.",
+                                 title="Fallen tree on roof", category_fits=False))
+    row = db.session_photos(sid)[0]
+    assert present.enrich(row)["label"] == "Fallen tree on roof"
+    db.edit_finding(pid, "roof", 4)  # a hand-picked category shows its own label again
+    assert present.enrich(db.session_photos(sid)[0])["label"] == "Roof damage"
+
+
+def test_label_falls_back_when_misfit_has_no_title(tmp_path):
+    from app import present
+    from app.inference.analyzer import Finding
+    from app.db import Database
+    db = Database(tmp_path / "t.sqlite3")
+    sid = db.create_session()
+    pid = db.add_photo(sid)
+    db.save_finding(pid, Finding("water_intrusion", 4, "immediate", "high", "ok", "x", category_fits=False))
+    assert present.enrich(db.session_photos(sid)[0])["label"] == "Other issue"
+
+
+def test_fitting_category_keeps_its_label(tmp_path):
+    from app import present
+    from app.inference.analyzer import Finding
+    from app.db import Database
+    db = Database(tmp_path / "t.sqlite3")
+    sid = db.create_session()
+    pid = db.add_photo(sid)
+    db.save_finding(pid, Finding("roof", 2, "1_year", "high", "ok", "x", title="Curling shingles"))
+    assert present.enrich(db.session_photos(sid)[0])["label"] == "Roof damage"
+
+
+def test_old_database_gets_new_columns(tmp_path):
+    import sqlite3
+    path = tmp_path / "old.sqlite3"
+    c = sqlite3.connect(path)
+    c.executescript("CREATE TABLE findings (photo_id TEXT PRIMARY KEY, defect_type TEXT NOT NULL,"
+                    " severity INTEGER NOT NULL, urgency TEXT NOT NULL, confidence TEXT NOT NULL,"
+                    " image_quality TEXT NOT NULL, reason TEXT NOT NULL,"
+                    " analysis_status TEXT NOT NULL DEFAULT 'ok',"
+                    " confirmed INTEGER NOT NULL DEFAULT 0, edited INTEGER NOT NULL DEFAULT 0);")
+    c.commit(); c.close()
+    from app.db import Database
+    Database(path)
+    cols = {r[1] for r in sqlite3.connect(path).execute("PRAGMA table_info(findings)")}
+    assert {"title", "category_fits"} <= cols

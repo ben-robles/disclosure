@@ -2,7 +2,7 @@
 
 Selling a home in Maryland means telling the buyer about problems you know of, and most sellers do not know how to document them. Disclosure is a seller-side tool: photograph a defect, get a first-pass classification from a local AI model, confirm or correct it, and produce a PDF disclosure report organized by the sections of Maryland's seller disclosure form.
 
-It is built for home sellers in the DC/Maryland/Virginia area. The AI runs on your own computer. Nothing is uploaded unless you choose to email yourself the finished report.
+It is built for home sellers in the DC/Maryland/Virginia area. The AI runs on a private GPU server we host on Google Cloud, or on your own computer if you run Ollama locally. Photos are stripped of location and device data before they leave.
 
 > **AI-assisted documentation aid. Not a home inspection and not legal advice.**
 
@@ -52,7 +52,7 @@ Screenshots of each: PLACEHOLDER.
 
 - The server listens on `127.0.0.1` only. `.\run.ps1 -Lan` listens on all interfaces so a phone on the same Wi-Fi can open the app. Windows Firewall will ask: allow it on private networks only.
 - To open the app from your own devices away from home, use Tailscale Serve (tailnet only, not public): `tailscale serve --bg --https=8443 http://127.0.0.1:5173`. Photos travel encrypted between your devices and this computer, and the server still listens on `127.0.0.1`. Do not use Tailscale Funnel or a public tunnel: that sends photos from strangers to your model.
-- The only outbound calls are to the local Ollama server and, only if you ask for the report by email, to the SMTP server you configure (copy `.env.example` to `.env` and fill it in; `.env` is git-ignored). The address and PDF are not stored. Leave those unset and email is disabled. A test (`tests/test_no_network.py`) fails if any other URL appears in the code.
+- Outbound calls go to the model server named by `DISCLOSURE_OLLAMA_URL` (local Ollama, or the Cloud Run service through an authenticated proxy) and, only if you ask for the report by email, to the SMTP server you configure (copy `.env.example` to `.env` and fill it in; `.env` is git-ignored). The address and PDF are not stored. Leave those unset and email is disabled. The hosted model server does not store photos. A test (`tests/test_no_network.py`) still fails if any hardcoded external URL appears in the code.
 - Photo metadata (GPS, time, device) is stripped on upload. Photos are resized to 1024 px on the long edge, which also keeps analysis fast.
 - Data kept: photos, your confirmations and edits, and an optional 5-digit ZIP printed on the report. All of it lives in `data/` on this computer. "Delete this session" erases it.
 - No accounts, no analytics, no faces or addresses collected.
@@ -105,7 +105,7 @@ After review, set `DISCLOSURE_MODEL` to the verified explicit tag and
 Tested Windows specs, model size and measured latency per photo: pending;
 see [Gate 0](docs/gate0.md) and [environment status](docs/environment.md).
 
-Settings (environment variables): `DISCLOSURE_MODEL`, `DISCLOSURE_WORKERS` (photos analyzed at once, default 1 pending Gate 0 measurements; match Ollama's `OLLAMA_NUM_PARALLEL`), `DISCLOSURE_KEEP_ALIVE`, `DISCLOSURE_TIMEOUT_S`, `DISCLOSURE_DATA_DIR`. Set the explicit verified model tag after reviewing Gate 0; the existing app model default is still unverified.
+Settings (environment variables): `DISCLOSURE_OLLAMA_URL` (default `http://127.0.0.1:11434`; set to `http://127.0.0.1:9090` with the Cloud Run proxy, see `cloud/README.md`), `DISCLOSURE_OLLAMA_TOKEN` (only for a direct IAM token), `DISCLOSURE_MODEL`, `DISCLOSURE_WORKERS` (photos analyzed at once, default 1 pending Gate 0 measurements; match Ollama's `OLLAMA_NUM_PARALLEL`), `DISCLOSURE_KEEP_ALIVE`, `DISCLOSURE_TIMEOUT_S`, `DISCLOSURE_DATA_DIR`. Set the explicit verified model tag after reviewing Gate 0; the existing app model default is still unverified.
 
 Tests: `.\.venv\Scripts\python -m pytest`. To try the UI without Gemma: `.\.venv\Scripts\python -m tests.dev_server` (canned fake answers, http://127.0.0.1:8001).
 
@@ -117,7 +117,7 @@ flowchart LR
   API --> DB[("SQLite + photos in data/")]
   API --> Q["Background worker threads"]
   Q --> DA["DefectAnalyzer (one interface)"]
-  DA --> OL["Local Ollama + Gemma 4"]
+  DA --> OL["Ollama + Gemma 4 (local or Cloud Run GPU)"]
   API --> G["grading.py + costs.py"]
   API --> PDF["ReportLab PDF"]
 ```

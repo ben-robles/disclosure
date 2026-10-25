@@ -35,8 +35,10 @@ function About() {
           follows the sections of the seller disclosure form.
         </p>
         <p>
-          The AI that looks at your photos runs on your own computer. Nothing is uploaded unless you
-          choose to email yourself your report, and there are no accounts.
+          Your photos are stripped of location and device data on this computer, then sent over an
+          encrypted connection to our AI server on Google Cloud, which looks at them and sends back
+          a finding. The server does not keep your photos. Everything else stays on this computer
+          until you choose to email yourself the report. There are no accounts.
         </p>
       </div>
 

@@ -29,7 +29,7 @@ const QUESTIONS: [string, string][] = [
   ],
   [
     "Where do my photos go?",
-    "Nowhere by default. The AI runs on this computer. Photos are resized and stripped of location and device data first, and you can delete everything with one button. The only time anything leaves is if you choose to email yourself your report.",
+    "Your photos are stripped of location and device data on this computer, then sent over an encrypted connection to our AI server on Google Cloud, which looks at them and sends back a finding. The server does not keep your photos. Everything else stays on this computer until you choose to email yourself the report.",
   ],
   [
     "How accurate is it?",

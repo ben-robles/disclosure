@@ -31,7 +31,7 @@ from app.images import sanitize  # noqa: E402
 from app.inference.ollama_analyzer import OllamaAnalyzer, parse_model_output  # noqa: E402
 from app.inference.prompts import PROMPT_VERSION, build_prompt, output_schema  # noqa: E402
 
-BASE_URL = "http://127.0.0.1:11434"
+BASE_URL = config.OLLAMA_URL
 QUESTION = "Describe the visible defect in one sentence and rate severity 1 to 5."
 
 

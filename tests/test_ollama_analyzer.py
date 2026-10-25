@@ -3,6 +3,7 @@ this checks the request shape, retry, timeout and status handling only."""
 import json
 import threading
 import time
+import urllib.request
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
@@ -102,7 +103,13 @@ def test_unreachable_server(tmp_path):
 
 
 def test_status_messages(stub):
-    down = OllamaAnalyzer("http://127.0.0.1:9", "gemma-x").status()
+    try:
+        urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=1)
+    except OSError:
+        pass
+    else:
+        pytest.skip("local Ollama is running")
+    down = OllamaAnalyzer("http://127.0.0.1:11434", "gemma-x").status()
     assert not down["ready"] and down["fix"] == "ollama serve"
 
     url = stub(lambda h, b: reply(h, {"models": [{"name": "other:latest"}]}))
@@ -111,3 +118,35 @@ def test_status_messages(stub):
 
     url2 = stub(lambda h, b: reply(h, {"models": [{"name": "gemma-x:latest"}]}))
     assert OllamaAnalyzer(url2, "gemma-x").status()["ready"]
+
+
+def test_bearer_header_sent_when_token_set(stub):
+    seen = {}
+
+    def fn(h, body):
+        seen["auth"] = h.headers.get("Authorization")
+        reply(h, {"message": {"content": GOOD}})
+
+    OllamaAnalyzer(stub(fn), "m", 5, token="abc123").analyze(b"x")
+    assert seen["auth"] == "Bearer abc123"
+
+
+def test_no_auth_header_when_token_empty_or_blank(stub):
+    seen = {}
+
+    def fn(h, body):
+        seen["auth"] = h.headers.get("Authorization")
+        reply(h, {"message": {"content": GOOD}})
+
+    OllamaAnalyzer(stub(fn), "m", 5, token="").analyze(b"x")
+    assert seen["auth"] is None
+    OllamaAnalyzer(stub(fn), "m", 5, token="   ").analyze(b"x")
+    assert seen["auth"] is None
+
+
+def test_status_hosted_unreachable_points_at_proxy():
+    # port 9 is not 11434, so this URL counts as hosted
+    down = OllamaAnalyzer("http://127.0.0.1:9", "gemma-x").status()
+    assert not down["ready"]
+    assert down["message"] == "The hosted AI model server is not reachable."
+    assert down["fix"] == "gcloud run services proxy disclosure-gemma --region us-east4 --port 9090"

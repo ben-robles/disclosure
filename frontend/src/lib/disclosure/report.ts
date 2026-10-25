@@ -285,7 +285,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
     font(9, "r", MUTED);
     doc.text(String(i + 1), cols[0]!.x, base);
     font(9, "s");
-    doc.text(clip(it.info.label, cols[1]!.w - 10), cols[1]!.x + 6, base);
+    doc.text(clip(it.title, cols[1]!.w - 10), cols[1]!.x + 6, base);
     font(9, "r", MUTED);
     doc.text(clip(it.section, cols[2]!.w - 10), cols[2]!.x + 6, base);
     tiles(cols[3]!.x + 6, y + 6, 18, it.range);
@@ -333,7 +333,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
       const m = /^(\d+)\.\s*(.*)$/.exec(section);
       label(m ? `Section ${m[1]} · ${m[2]}` : section, M, y + 8, BLUE, 7.9);
       font(25.5, "x");
-      const title = wrap(`Finding ${n}: ${it.info.label}`, CW - 130);
+      const title = wrap(`Finding ${n}: ${it.title}`, CW - 130);
       doc.text(title, M, y + 8 + 8 + 20, { lineHeightFactor: 1.1 });
       const titleBottom = y + 8 + 8 + 20 + (title.length - 1) * 28 + 7;
       const tileSize = 36;
