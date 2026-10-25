@@ -43,24 +43,15 @@ TypeSafe is **off unless you turn it on**, and the shipped app runs without it. 
 Gemma sometimes writes a sentence that disagrees with its own label: "The wooden door trim shows rot near the base" filed under `siding_exterior`. The grade, repair cost, and form section all follow the label, so a wrong label is a wrong report line. When TypeSafe is enabled, its Jev model checks Gemma's words. Jev is a small judgment model: give it text and a question, get back a probability. It never sees the photo.
 
 ```mermaid
-flowchart TD
-  Photo["Photo"] --> Gemma["Gemma 4: title, description, category, severity, confidence"]
-  Gemma --> Jev["Jev reads title + description only"]
-  Jev --> Match{"Label matches description?"}
-  Match -- "yes (≥ 0.3)" --> Keep["Keep Gemma's finding"]
-  Match -- "no (< 0.3)" --> Look["Gemma looks again, told which label contradicted its words"]
-  Look --> Agree{"Jev agrees with the new answer?"}
-  Agree -- yes --> Capped["Use new finding, confidence capped at medium"]
-  Agree -- no --> Pick["Jev picks a category from the description"]
-  Pick -- "≥ 0.45 and not none_of_these" --> Moved["Move finding to that category"]
-  Pick -- otherwise --> Title["Keep Gemma's own title instead of a category name"]
-  Keep & Capped & Moved & Title --> Sev{"Severity plausible?"}
-  Sev -- "no (< 0.3)" --> Demote["Confidence drops one step; low becomes unclear"]
-  Sev -- yes --> Guard
-  Demote --> Guard{"Price or legal language? (> 0.7 or $ regex)"}
-  Guard -- yes --> Neutral["Replace description with taxonomy text, clear title"]
-  Guard -- no --> Review["Grade, repair cost, seller review"]
-  Neutral --> Review
+flowchart LR
+  Photo["Photo"] --> Gemma["Gemma 4 finding"]
+  Gemma --> Jev{"Jev: label matches text?"}
+  Jev -- yes --> Checks["Severity and price/legal checks"]
+  Jev -- no --> Look["Gemma looks again"]
+  Look -- "Jev agrees" --> Checks
+  Look -- "still wrong" --> Pick["Jev picks category, or keep Gemma's title"]
+  Pick --> Checks
+  Checks --> Review["Grade, cost, seller review"]
 ```
 
 Each step is one function:
