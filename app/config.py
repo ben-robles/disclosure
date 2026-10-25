@@ -36,6 +36,8 @@ def is_local_url(url: str) -> bool:
 
 
 OLLAMA_IS_LOCAL = is_local_url(OLLAMA_URL)
+# "cloudrun" when this app runs on Cloud Run and calls the private model service directly.
+OLLAMA_AUTH = os.environ.get("DISCLOSURE_OLLAMA_AUTH", "").strip().lower()
 # Only for a direct IAM identity token; empty when going through the gcloud proxy.
 OLLAMA_TOKEN = os.environ.get("DISCLOSURE_OLLAMA_TOKEN", "").strip()
 PROXY_FIX = "gcloud run services proxy disclosure-gemma --region us-east4 --port 9090"

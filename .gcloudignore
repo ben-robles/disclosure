@@ -1,0 +1,14 @@
+#!include:.gitignore
+.git/
+docs/
+tests/
+scripts/
+assets/test_photos/
+frontend/node_modules/
+frontend/.output/
+frontend/.tanstack/
+frontend/.vinxi/
+cloud/Dockerfile
+cloud/deploy*.ps1
+cloud/README.md
+*.md

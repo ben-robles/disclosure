@@ -71,7 +71,8 @@ def test_full_flow_confirm_edit_delete(client, jpeg):
     assert wet["grade"]["text"] == "C–D"          # medium confidence -> range
     assert elec["grade"]["text"] == "F"           # severity 5 x immediate
     assert elec["evaluation"] == "Recommend evaluation by a licensed electrician."
-    assert roof["cost"]["text"] == "$300–$1,000"
+    assert roof["cost"]["text"] == "$350–$900"
+    assert roof["cost"]["avg"] == 650 and roof["cost"]["avg_text"] == "$650"
     assert wet["cost"] and "$" in wet["cost"]["text"]
 
     # nothing confirmed -> no overall, no report

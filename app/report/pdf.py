@@ -317,8 +317,9 @@ def _cover(p, zip_code, findings, items, overall):
     priced = [f["cost"] for f in items if f["cost"]]
     if priced and y + 32 <= p.BOTTOM:
         low, high = sum(c["low"] for c in priced), sum(c["high"] for c in priced)
+        avg = sum(c["avg"] for c in priced)
         p.font(9.75, "s")
-        p.text("Total estimated cost", M, y + 20)
+        p.text(f"Total estimated cost (avg {costs.format_avg({'avg': avg})})", M, y + 20)
         p.font(10, "b")
         p.text(costs.format_range({"low": low, "high": high}), W - M, y + 20, align="right")
         y += 32
@@ -400,6 +401,8 @@ def _finding_page(p, n, f, photo_path):
     p.font(11.25, "s")
     p.text(_price(f), M + 2 * c3 + 12, y + 37)
     p.font(7.5, "r", MUTED)
+    if f["cost"]:
+        p.text(f"avg {f['cost']['avg_text']}", M + 3 * c3 - 12, y + 37, align="right")
     p.text(p.clip(COST_CAPTION, c3 - 18), M + 2 * c3 + 12, y + 49)
     y += sh
 

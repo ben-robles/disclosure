@@ -21,7 +21,7 @@ def bucket_for(severity: int) -> str:
 
 
 def lookup(defect_type: str, severity: int):
-    """Return {'low': int, 'high': int} or None (e.g. for 'unclear')."""
+    """Return {'low': int, 'high': int, 'avg': int} or None (e.g. for 'unclear')."""
     row = _table()["ranges"].get(defect_type)
     if not row:
         return None
@@ -36,3 +36,9 @@ def format_range(rng) -> str:
     if not rng:
         return ""
     return f"${rng['low']:,}–${rng['high']:,}"
+
+
+def format_avg(rng) -> str:
+    if not rng:
+        return ""
+    return f"${rng['avg']:,}"

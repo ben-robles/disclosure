@@ -5,7 +5,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 URL = re.compile(r"https?://[^\s\"'<>)\]]+")
 # The \$\( branch is run.ps1 printing this computer's own LAN address for a phone (-Lan).
-ALLOWED = re.compile(r"^https?://((127\.0\.0\.1|localhost)(:(\d+|\$\w+))?([/?#].*)?|\$\(.*)$")
+# metadata.google.internal is the Cloud Run metadata server, reachable only from inside Google Cloud.
+ALLOWED = re.compile(
+    r"^https?://((127\.0\.0\.1|localhost)(:(\d+|\$\w+))?([/?#].*)?|\$\(.*"
+    r"|metadata\.google\.internal/.*)$")
 FOLDERS = ("app", "static", "scripts", "cloud")
 SUFFIXES = {".py", ".js", ".html", ".css", ".ps1"}
 EXTRA_FILES = ("run.ps1",)

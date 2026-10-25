@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { analyzer, type AnalyzeResult } from "./analyzer";
 import { gradeRange, type Letter, type Urgency } from "./grading";
+import { expectedPhotoMs } from "./progress";
 import { defectInfo, type DefectType } from "./taxonomy";
 
 export type PhotoStatus = "queued" | "analyzing" | "done";
@@ -108,6 +109,10 @@ export function retryPhoto(id: string) {
   void runQueue();
 }
 
+// How long each finished photo took, so the progress bar can match this model and this connection.
+const photoMs: number[] = [];
+export const getExpectedPhotoMs = () => expectedPhotoMs(photoMs);
+
 let running = false;
 export async function runQueue() {
   if (running) return;
@@ -117,7 +122,9 @@ export async function runQueue() {
       const next = session.photos.find((p) => p.status === "queued");
       if (!next) break;
       patchPhoto(next.id, { status: "analyzing" });
+      const started = Date.now();
       const result = await analyzer.analyze(next.dataUrl);
+      if (!result.timedOut) photoMs.push(Date.now() - started);
       if (!session?.photos.some((p) => p.id === next.id)) continue;
       patchPhoto(next.id, { status: "done", result, defect_type: result.defect_type, severity: result.severity });
     }

@@ -10,6 +10,10 @@ With a TypeSafe key (see .env.example) a text-only judge also scores whether Gem
 the expected details. Pass --no-judge to skip it. Only Gemma's text goes to the judge, never a photo.
 --classify runs prompt v4 (Gemma describes, the judge picks the defect type); results land in their
 own "Prompt v4" section next to the v3 one so the two can be compared.
+--verify applies the same second opinion the app does (label check, second look, category move), so the
+score matches what a user sees; its section is named "<version>+verify". It needs the judge.
+The first photo is analysed once and thrown away so a scaled-to-zero model service is warm, and a photo
+that times out is tried once more.
 """
 import argparse
 import csv
@@ -27,6 +31,7 @@ from app.images import sanitize  # noqa: E402
 from app.inference.judge import OK, SKIPPED, EvalVerdict, NullJudge, build_judge  # noqa: E402
 from app.inference.ollama_analyzer import OllamaAnalyzer  # noqa: E402
 from app.inference.prompts import load_taxonomy, prompt_version  # noqa: E402
+from app.verify import verify_finding  # noqa: E402
 
 PHOTOS = ROOT / "assets" / "test_photos"
 OUT = ROOT / "docs" / "test-results.md"
@@ -45,6 +50,14 @@ def matches(expected: str, f) -> bool:
     if expected == "normal":
         return f.defect_type == "unclear" or f.severity <= 1
     return f.defect_type == expected and f.image_quality == "ok"
+
+
+def analyze_photo(analyzer, image: bytes):
+    """One photo in, one finding out. A timeout gets one more try: a cold model service is slow once."""
+    f = analyzer.analyze(image)
+    if f.analysis_status == "timeout":
+        f = analyzer.analyze(image)
+    return f
 
 
 def judge_row(judge, r: dict, f) -> EvalVerdict:
@@ -81,33 +94,41 @@ def merge_section(existing: str, version: str, body: str) -> str:
 
 
 def run(analyzer, judge, csv_path=None, photos=PHOTOS, out=OUT, eval_dir=EVAL_DIR, now=None,
-        classify=False):
+        classify=False, verify=False, warm=False):
     now = now or time.time()
-    version = prompt_version(classify)
+    version = prompt_version(classify) + ("+verify" if verify else "")
     run_dir = Path(eval_dir) / f"{time.strftime('%Y%m%d-%H%M%S', time.localtime(now))}-{version}"
     run_dir.mkdir(parents=True, exist_ok=True)
     rows, hits, verdicts = [], 0, []
     with Path(csv_path or Path(photos) / "test_photos.csv").open(encoding="utf-8", newline="") as fh:
-        for r in csv.DictReader(fh):
-            image = sanitize((Path(photos) / r["file"]).read_bytes())
-            t0 = time.time()
-            f = analyzer.analyze(image)
-            if classify:  # v4: the judge picks the type from Gemma's words
-                f = classify_finding(judge, f)
-            dt = time.time() - t0
-            v = judge_row(judge, r, f)
-            ok = matches(r["expected"], f)
-            hits += ok
-            verdicts.append(v)
-            (run_dir / f"{Path(r['file']).stem}.json").write_text(json.dumps({
-                "file": r["file"], "expected": r["expected"],
-                "expected_details": r.get("expected_details", ""), "exact_match": ok,
-                "finding": vars(f), "judge": vars(v), "latency_s": round(dt, 2),
-            }, indent=2), encoding="utf-8")
-            rows.append(f"| {r['file']} | {r['expected']} | {f.defect_type} | {f.severity} | "
-                        f"{f.urgency} | {f.confidence} | {f.image_quality} | {dt:.1f} s | "
-                        f"{'yes' if ok else 'NO'} | {_p(v.mentions_expected)} | "
-                        f"{_p(v.type_consistent)} | {v.status} |")
+        records = list(csv.DictReader(fh))
+    if warm and records:  # load the model before the clock starts on photo 1
+        analyze_photo(analyzer, sanitize((Path(photos) / records[0]["file"]).read_bytes()))
+    for r in records:
+        image = sanitize((Path(photos) / r["file"]).read_bytes())
+        t0 = time.time()
+        f = analyze_photo(analyzer, image)
+        if classify:  # v4: the judge picks the type from Gemma's words
+            f = classify_finding(judge, f)
+        if verify:  # what the app does after Gemma answers
+            try:
+                f = verify_finding(judge, f, reanalyze=lambda hint, img=image: analyzer.analyze(img, hint=hint))
+            except Exception:
+                f.judge_status = "unavailable"
+        dt = time.time() - t0
+        v = judge_row(judge, r, f)
+        ok = matches(r["expected"], f)
+        hits += ok
+        verdicts.append(v)
+        (run_dir / f"{Path(r['file']).stem}.json").write_text(json.dumps({
+            "file": r["file"], "expected": r["expected"],
+            "expected_details": r.get("expected_details", ""), "exact_match": ok,
+            "finding": vars(f), "judge": vars(v), "latency_s": round(dt, 2),
+        }, indent=2), encoding="utf-8")
+        rows.append(f"| {r['file']} | {r['expected']} | {f.defect_type} | {f.severity} | "
+                    f"{f.urgency} | {f.confidence} | {f.image_quality} | {dt:.1f} s | "
+                    f"{'yes' if ok else 'NO'} | {_p(v.mentions_expected)} | "
+                    f"{_p(v.type_consistent)} | {v.status} |")
 
     scored = [v for v in verdicts if v.status == OK]
     raw = run_dir.relative_to(ROOT) if run_dir.is_relative_to(ROOT) else run_dir
@@ -137,9 +158,14 @@ def main(argv=None) -> int:
     ap.add_argument("--no-judge", action="store_true", help="skip the TypeSafe text judge")
     ap.add_argument("--classify", action="store_true",
                     help="prompt v4: Gemma describes, the judge picks the defect type")
+    ap.add_argument("--verify", action="store_true",
+                    help="apply the app's judge check, second look and category move to each finding")
     args = ap.parse_args(argv)
     if args.classify and args.no_judge:
         print("--classify needs the judge to pick the defect type; drop --no-judge.")
+        return 1
+    if args.verify and args.no_judge:
+        print("--verify needs the judge; drop --no-judge.")
         return 1
 
     csv_path = PHOTOS / "test_photos.csv"
@@ -154,10 +180,10 @@ def main(argv=None) -> int:
     judge = NullJudge() if args.no_judge else build_judge()
     if not args.no_judge and not judge.enabled:
         print("Judge off (set DISCLOSURE_TYPESAFE_URL and TYPESAFE_API_KEY, or pass --no-judge).")
-    if args.classify and not judge.enabled:
+    if (args.classify or args.verify) and not judge.enabled:
         return 1
 
-    hits, total, scored, out = run(analyzer, judge, classify=args.classify)
+    hits, total, scored, out = run(analyzer, judge, classify=args.classify, verify=args.verify, warm=True)
     print(f"Wrote {out} ({hits}/{total} matched, {scored} judged)")
     return 0
 

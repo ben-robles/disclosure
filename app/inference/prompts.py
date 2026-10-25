@@ -1,13 +1,13 @@
 """Prompt and output schema, both built from assets/defect_taxonomy.json.
 
-PROMPT_VERSION v3.2 - bump on every wording change; test-results.md logs it.
+PROMPT_VERSION v3.3 - bump on every wording change; test-results.md logs it.
 """
 import json
 
 from ..config import ASSETS_DIR
 from .analyzer import CONFIDENCES, QUALITIES, URGENCIES
 
-PROMPT_VERSION = "v3.2"
+PROMPT_VERSION = "v3.3"
 # v4 is used only with DISCLOSURE_JUDGE_CLASSIFY: Gemma describes, the text judge picks the type.
 PROMPT_VERSION_V4 = "v4"
 

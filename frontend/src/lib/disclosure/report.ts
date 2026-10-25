@@ -1,4 +1,4 @@
-import { formatCost, lookupCost, COST_TABLE_META } from "./costs";
+import { formatAvg, formatCost, lookupCost, COST_TABLE_META } from "./costs";
 import { worstEnd, GRADING_RULE, LETTER_WORD, LETTERS, needsPro, overallGrade, URGENCY_LABEL, type Letter } from "./grading";
 import { MD_SECTIONS, sectionNumber } from "./jurisdiction";
 import { DISCLAIMER, viewFinding, type Session } from "./store";
@@ -15,13 +15,14 @@ export function buildReport(session: Session) {
   return { items, sections: [...sections.entries()].sort((a, b) => sectionNumber(a[0]) - sectionNumber(b[0])), overall: overallGrade(items.map((i) => i.range)) };
 }
 
-/** Sum of the low and high ends over findings that have a cost estimate; null if none do. */
-export function totalCost(items: { cost: { low: number; high: number } | null }[]) {
+/** Sum of the low, high and average over findings that have a cost estimate; null if none do. */
+export function totalCost(items: { cost: { low: number; high: number; avg: number } | null }[]) {
   const priced = items.filter((i) => i.cost);
   if (!priced.length) return null;
   return {
     low: priced.reduce((n, i) => n + i.cost!.low, 0),
     high: priced.reduce((n, i) => n + i.cost!.high, 0),
+    avg: priced.reduce((n, i) => n + i.cost!.avg, 0),
   };
 }
 
@@ -304,7 +305,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
   const total = totalCost(items);
   if (total && y + 32 <= BOTTOM) {
     font(9.75, "s");
-    doc.text("Total estimated cost", M, y + 20);
+    doc.text(`Total estimated cost (avg ${formatAvg(total)})`, M, y + 20);
     font(10, "b");
     doc.text(range$(total), W - M, y + 20, { align: "right" });
     y += 32;
@@ -395,6 +396,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
       font(11.25, "s");
       doc.text(range$(it.cost), M + 2 * c3 + 12, y + 37);
       font(7.5, "r", MUTED);
+      if (it.cost) doc.text(`avg ${formatAvg(it.cost)}`, M + 3 * c3 - 12, y + 37, { align: "right" });
       doc.text(clip(COST_TABLE_META.caption, c3 - 18), M + 2 * c3 + 12, y + 49);
       y += sh;
 
