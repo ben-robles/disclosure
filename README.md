@@ -9,11 +9,11 @@ Disclosure helps home sellers turn photos of visible problems into a PDF report.
 
 **Gemma 4 analyzes the photos and provides information, but the final decision is up to the user.** The website connects to Gemma on a private Google Cloud server with a GPU. Developers can also run Gemma on their own computer using Ollama.
 
-> **This tool helps document visible problems. It does not provide a home inspection or legal advice.** Use the report alongside the official disclosure form; it does not replace that form.
+> **This tool helps document visible problems. It is not a home inspection or legal advice.** Use the report alongside an official disclosure form.
 
-## From photo to report
+## Workflow
 
-1. **Capture:** take or upload a photo of a visible problem.
+1. **Capture:** take or upload a photo of a problem.
 2. **Analyze:** Gemma 4 suggests a description and problem type, how serious the problem is, how soon it needs attention, and how confident the AI is.
 3. **Review:** confirm, correct, or remove each finding. If enabled, TypeSafe checks the AI's text before you review it.
 4. **Export:** download a PDF with confirmed findings, photos, grades, repair cost ranges, and suggestions for professional help.
