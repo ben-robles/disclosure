@@ -202,6 +202,24 @@
         transform: rotate(var(--sweep-from, -60deg));
       }
     }
+    /* Indeterminate progress: a blue segment, faded at both ends, loops across the whole track. */
+    @keyframes loading-slide {
+      from {
+        transform: translateX(-100%);
+      }
+      to {
+        transform: translateX(250%);
+      }
+    }
+    .loading-slide {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: 40%;
+      background: linear-gradient(90deg, transparent, var(--primary) 50%, transparent);
+      animation: loading-slide 1.6s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    }
     .rise {
       animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
       animation-delay: var(--d, 0s);
