@@ -36,3 +36,13 @@
 - Confirm the current Maryland form revision (the Commission announced a September 2026 update after the August 3 print on the PDF used here).
 - README screenshots, measured latency, model size, tested laptop specs.
 - Confirm with an organizer that Best Use of Gemma 4 is your one MLH track.
+
+## TypeSafe text judge (Jev)
+
+- **Off by default.** `DISCLOSURE_TYPESAFE_URL` empty means no network call. Verify and classify each have their own flag (`DISCLOSURE_JUDGE_VERIFY`, `DISCLOSURE_JUDGE_CLASSIFY`); classify also needs a key, otherwise Gemma keeps naming the type (prompt v3).
+- **Text only.** The judge receives Gemma's `reason`, `title` and typed fields. Photos, ZIP and email never go to TypeSafe. It returns probabilities and picks; `app/verify.py` and `app/classify.py` map them to states, so no judge-written text reaches a report.
+- **Thresholds are starting values, not tuned.** Yes 0.7, no 0.3 (TypeSafe's docs suggest these); confidence high at 0.75 and medium at 0.45 of the top choice. Nothing has been run against the live API yet. Tune on the test set with `scripts/run_test_set.py`, then record results here.
+- **Choice with a `none_of_these` option.** TypeSafe's Choice docs warn such options may work poorly and suggest a companion yes/no question instead. Not built; revisit if the test set shows `none_of_these` over- or under-firing.
+- **A dollar sign followed by a digit is also caught by regex**, independent of the judge, so a cost in model text is scrubbed even when the judge is down.
+- **Not wired:** the single-photo `/api/analyze` route used by the React UI still returns Gemma's raw finding. Verify and classify apply only to the stored-session worker.
+- **v4 vs v3:** run `run_test_set.py` and `run_test_set.py --classify`; both sections land in `docs/test-results.md`. If v4 scores lower on `exact_match`, keep v3 (leave the classify flag off) and note it here.

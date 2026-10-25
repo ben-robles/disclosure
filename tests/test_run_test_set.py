@@ -69,3 +69,28 @@ def test_no_judge_still_scores_exact_match(tmp_path):
 def test_judge_down_leaves_row_with_unavailable(tmp_path):
     (_, _, scored, _), text = run(tmp_path, ROWS, [ROOF, BLUR], FakeJudge(down=True))
     assert scored == 0 and UNAVAILABLE in text
+
+
+def test_classify_run_has_its_own_section_beside_v3(tmp_path):
+    from app.inference.judge import TypeChoice
+    photos = setup(tmp_path, ROWS[:1])
+    out = tmp_path / "results.md"
+    kw = dict(photos=photos, out=out, eval_dir=tmp_path / "eval")
+    rts.run(FakeAnalyzer([ROOF]), FakeJudge(), **kw)
+    described = Finding("unclear", 3, "1_year", "low", "ok", "Curling shingles on the roof.", title="Roof damage")
+    judge = FakeJudge(choice=TypeChoice(OK, [("plumbing", 0.9)]))
+    hits, *_ = rts.run(FakeAnalyzer([described]), judge, classify=True, **kw)
+    text = out.read_text(encoding="utf-8")
+    assert hits == 0  # the judge picked the wrong type, and the harness says so
+    assert text.count("## Prompt ") == 2 and text.index("## Prompt v3") < text.index("## Prompt v4")
+    assert text.count("# Test results") == 1 and text.count("regression harness") == 1
+    assert "(exact_match): 1 of 1" in text and "(exact_match): 0 of 1" in text
+
+
+def test_rerun_replaces_only_its_own_section(tmp_path):
+    photos = setup(tmp_path, ROWS[:1])
+    out = tmp_path / "results.md"
+    kw = dict(photos=photos, out=out, eval_dir=tmp_path / "eval")
+    rts.run(FakeAnalyzer([ROOF]), FakeJudge(), **kw)
+    rts.run(FakeAnalyzer([ROOF]), FakeJudge(), **kw)
+    assert out.read_text(encoding="utf-8").count("## Prompt v3") == 1

@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import config, mailer, present
+from . import classify, config, mailer, present
 from .db import Database
 from .images import BadImage, sanitize
 from .inference.analyzer import DefectAnalyzer
@@ -53,13 +53,14 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
     photo_dir.mkdir(parents=True, exist_ok=True)
     report_dir.mkdir(parents=True, exist_ok=True)
     db = Database(data_dir / "disclosure.sqlite3")
-    analyzer = analyzer or OllamaAnalyzer()
+    judge = judge or build_judge()
+    analyzer = analyzer or OllamaAnalyzer(classify=classify.active(judge))
 
     def photo_path(pid: str) -> Path:
         return photo_dir / f"{pid}.jpg"
 
     worker = Worker(db, analyzer, lambda pid: photo_path(pid).read_bytes(),
-                    judge=judge or build_judge())
+                    judge=judge)
 
     @asynccontextmanager
     async def lifespan(_app):
