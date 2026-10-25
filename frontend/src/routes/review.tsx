@@ -6,7 +6,7 @@ import { CostBar, GradeMix, GradeScale, OverallGrade } from "@/components/disclo
 import { formatAvg, formatCost } from "@/lib/disclosure/costs";
 import { needsPro, worstEnd, type Letter } from "@/lib/disclosure/grading";
 import { buildReport, totalCost } from "@/lib/disclosure/report";
-import { useSession } from "@/lib/disclosure/store";
+import { reachStep, useSession } from "@/lib/disclosure/store";
 
 export const Route = createFileRoute("/review")({
   head: () => ({
@@ -43,7 +43,9 @@ function Review() {
       footer={
         items.length ? (
           <Button asChild size="xl">
-            <Link to="/report">Create the PDF</Link>
+            <Link to="/report" onClick={() => reachStep(4)}>
+              Create the PDF
+            </Link>
           </Button>
         ) : (
           <div className="space-y-2">

@@ -26,6 +26,7 @@ import { TAXONOMY, type DefectType } from "@/lib/disclosure/taxonomy";
 import {
   GUARD_MESSAGE,
   patchPhoto,
+  reachStep,
   removePhoto,
   resizeImage,
   retryPhoto,
@@ -79,7 +80,9 @@ function Findings() {
           </div>
         ) : (
           <Button asChild size="xl">
-            <Link to="/review">Continue with {confirmed} confirmed</Link>
+            <Link to="/review" onClick={() => reachStep(3)}>
+              Continue with {confirmed} confirmed
+            </Link>
           </Button>
         )
       }

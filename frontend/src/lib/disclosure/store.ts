@@ -16,7 +16,7 @@ export type Photo = {
   confirmed: boolean;
 };
 
-export type Session = { id: string; zip: string; address?: string; sellerName?: string; photos: Photo[]; createdAt: number };
+export type Session = { id: string; zip: string; address?: string; sellerName?: string; photos: Photo[]; createdAt: number; maxStep?: number };
 
 const KEY = "disclosure.session.v1";
 let session: Session | null = null;
@@ -84,6 +84,11 @@ export function startSession(zip: string, extra: { address?: string; sellerName?
   ensureLoaded();
   session = { id: uid(), zip, ...extra, photos: [], createdAt: Date.now() };
   emit();
+}
+
+/** Unlock a step. Only called from Continue buttons, so URLs and the step bar cannot skip ahead. */
+export function reachStep(n: number) {
+  update((s) => ((s.maxStep ?? 1) >= n ? s : { ...s, maxStep: n }));
 }
 
 export function deleteSession() {

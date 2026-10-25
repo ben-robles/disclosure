@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { backendHealthy } from "@/lib/disclosure/analyzer";
 import { AppShell, NoSession } from "@/components/disclosure/AppShell";
 import { useInFlightFraction } from "@/components/disclosure/useInFlightFraction";
-import { addPhoto, removePhoto, resizeImage, runQueue, useSession } from "@/lib/disclosure/store";
+import { addPhoto, reachStep, removePhoto, resizeImage, runQueue, useSession } from "@/lib/disclosure/store";
 
 export const Route = createFileRoute("/capture")({
   head: () => ({
@@ -87,7 +87,9 @@ function Capture() {
           </div>
         ) : total > 0 && !busy ? (
           <Button asChild size="xl">
-            <Link to="/findings">See what we found</Link>
+            <Link to="/findings" onClick={() => reachStep(2)}>
+              See what we found
+            </Link>
           </Button>
         ) : (
           <Button

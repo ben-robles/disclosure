@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { useState, type CSSProperties, type ReactNode } from "react";
 import { Check, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +46,28 @@ const STEPS = [
   { to: "/report", label: "Report" },
 ] as const;
 
+/** Earlier steps are links. The current and later steps are plain, non-interactive. */
+function StepItem({
+  to,
+  canGo,
+  children,
+  ...rest
+}: {
+  to: (typeof STEPS)[number]["to"];
+  canGo: boolean;
+  children: ReactNode;
+  className?: string;
+  "aria-current"?: "step" | undefined;
+}) {
+  return canGo ? (
+    <Link to={to} {...rest}>
+      {children}
+    </Link>
+  ) : (
+    <div {...rest}>{children}</div>
+  );
+}
+
 function Steps({ current }: { current: number }) {
   return (
     <nav aria-label="Progress" className="px-5 pb-3 pt-1">
@@ -55,8 +77,9 @@ function Steps({ current }: { current: number }) {
           const state = n < current ? "done" : n === current ? "current" : "todo";
           return (
             <li key={s.to} className="flex-1">
-              <Link
+              <StepItem
                 to={s.to}
+                canGo={state === "done"}
                 aria-current={state === "current" ? "step" : undefined}
                 className="group flex min-h-9 flex-col justify-end gap-1.5"
               >
@@ -79,7 +102,7 @@ function Steps({ current }: { current: number }) {
                   )}
                   aria-hidden
                 />
-              </Link>
+              </StepItem>
             </li>
           );
         })}
@@ -156,6 +179,8 @@ export function AppShell({
   const [info, setInfo] = useState(false);
   const session = useSession();
   const navigate = useNavigate();
+  const reached = session?.maxStep ?? 1;
+  if (step && session && step > reached) return <Navigate to={(STEPS[reached - 1] ?? STEPS[0]).to} replace />;
   return (
     <div className="mx-auto flex min-h-screen w-full max-w-[430px] flex-col bg-canvas shadow-[0_0_0_1px_var(--border),0_20px_60px_-20px_oklch(0.25_0.05_258/0.3)]">
       <div className="sticky top-0 z-10 bg-canvas/90 backdrop-blur supports-[backdrop-filter]:bg-canvas/80">
