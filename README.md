@@ -1,26 +1,24 @@
 # Disclosure
 
 **Photograph a home's problems. Review the AI's findings. Create a disclosure report.**
-
-**GDG Build with AI x Hacktoberfest 2026: AI for Housing**
 Disclosure helps home sellers turn photos of visible problems into a PDF report.
 
-**[Try Disclosure](https://disclosure-app-jyruvsvlxa-uk.a.run.app/)** — hosted on Google Cloud Run.
+**[Try Disclosure](https://disclosure-app-jyruvsvlxa-uk.a.run.app/)** — hosted on Google Cloud.
 
-**Gemma 4 analyzes the photos and provides information, but the final decision is up to the user.** The website connects to Gemma on a private Google Cloud server with a GPU. Developers can also run Gemma on their own computer using Ollama.
+**Gemma 4 analyzes the photos and provides information, but the final decision is up to the user.** The website connects to Gemma on a private Google Cloud server with a GPU. Gemma can also be ran locally using Ollama.
 
 > **This tool helps document visible problems. It is not a home inspection or legal advice.** Use the report alongside an official disclosure form.
 
 ## The problem
 
-Home sellers may notice cracks, water stains, or other damage but struggle to describe these problems clearly. Photos and scattered notes can leave buyers with an incomplete picture of what the seller has seen. Sellers need a simple way to organize photos and descriptions into a clear report they can review and share.
+Home sellers may notice damage but struggle to identify these problems. Photos with inaccurate descriptions can leave buyers unsure over the condition of the home, so sellers need a simple way to organize photos and descriptions into a report they can share.
 
 ## Workflow
 
-1. **Capture:** take or upload a photo of a visible problem. Add more than one angle if you have it.
-2. **Analyze:** Gemma 4 suggests a description and problem type, how serious the problem is, how soon it needs attention, and how confident the AI is. A blue bar slides across the screen while it works, and the label shows which photo is being checked ("Looking at photo 2 of 3").
-3. **Review:** each finding shows its grade, a typical repair cost range, and the average cost. Confirm, correct, or remove each finding. If enabled, TypeSafe checks the AI's text before you review it.
-4. **Export:** download a PDF with confirmed findings, photos, grades, repair cost ranges with averages, a total, and suggestions for professional help.
+1. **Capture:** take or upload a photo of a problem.
+2. **Analyze:** Gemma 4 suggests a description and problem type, how serious the problem is, how soon it needs attention, and how confident the AI is.
+3. **Review:** each finding shows its grade and a typical repair cost range. Confirm or correct each finding before continuing. TypeSafe can also check the AI's text before you review it.
+4. **Export:** view or download the PDF report with findings, photos, grades & more.
 
 ## How we use Gemma 4
 
@@ -53,8 +51,6 @@ TypeSafe is **off unless you turn it on**, and the shipped app runs without it. 
 | 16–20 | F | Critical |
 
 The AI's confidence affects how the grade appears: **high** shows one letter, **medium** shows that letter and the next worse grade, and **low** shows no grade and recommends a licensed home inspector.
-
-> The overall grade is the worst grade among findings instead of an average.
 
 ## Privacy
 
