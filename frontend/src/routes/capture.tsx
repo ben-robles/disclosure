@@ -25,6 +25,24 @@ export const Route = createFileRoute("/capture")({
   component: Capture,
 });
 
+const EXPECTED_PHOTO_S = 40;
+
+/** The model reports no partial progress, so the bar for the photo in flight eases toward the
+ *  next step (never reaching it) until that photo is really done. */
+function useAnalysisProgress(done: number, total: number, active: boolean) {
+  const [part, setPart] = useState(0);
+  useEffect(() => {
+    setPart(0);
+    if (!active) return;
+    const start = Date.now();
+    const id = setInterval(() => {
+      setPart(0.95 * (1 - Math.exp(-(Date.now() - start) / 1000 / EXPECTED_PHOTO_S)));
+    }, 250);
+    return () => clearInterval(id);
+  }, [done, active]);
+  return total > 0 ? ((done + part) / total) * 100 : 0;
+}
+
 function Capture() {
   const session = useSession();
   const input = useRef<HTMLInputElement>(null);
@@ -48,14 +66,14 @@ function Capture() {
       window.removeEventListener("drop", block);
     };
   }, []);
-  if (!session) return <NoSession />;
-
-  const photos = session.photos;
+  const photos = session?.photos ?? [];
   const total = photos.length;
   const done = photos.filter((p) => p.status === "done").length;
   const busy = photos.some((p) => p.status !== "done");
   const analyzing = (started || photos.some((p) => p.status === "analyzing")) && busy;
   const current = Math.min(done + 1, total);
+  const progress = useAnalysisProgress(done, total, analyzing);
+  if (!session) return <NoSession />;
 
   async function onFiles(files: ArrayLike<File> | null) {
     if (!files) return;
@@ -76,10 +94,7 @@ function Capture() {
             <p className="mb-2 font-semibold">
               Looking at photo {current} of {total}
             </p>
-            <Progress
-              value={(done / total) * 100}
-              aria-label={`Looking at photo ${current} of ${total}`}
-            />
+            <Progress value={progress} aria-label={`Looking at photo ${current} of ${total}`} />
           </div>
         ) : total > 0 && !busy ? (
           <Button asChild size="xl">
