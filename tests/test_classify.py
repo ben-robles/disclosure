@@ -84,7 +84,7 @@ def test_active_needs_flag_and_real_judge(monkeypatch):
 def test_v4_prompt_has_no_type_or_confidence_fields():
     p = build_prompt(classify=True)
     assert "defect_type" not in p and "confidence" not in p and "category_fits" not in p
-    assert "defect_type" in build_prompt() and prompt_version(True) == "v4" and prompt_version() == "v3.2"
+    assert "defect_type" in build_prompt() and prompt_version(True) == "v4" and prompt_version() == "v3.3"
 
 
 def test_v4_schema_drops_three_fields_and_v3_is_untouched():
