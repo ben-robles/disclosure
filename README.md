@@ -20,6 +20,16 @@ Home sellers may notice damage but struggle to identify these problems. Photos w
 3. **Review:** each finding shows its grade and a typical repair cost range. Confirm or correct each finding before continuing. TypeSafe can also check the AI's text before you review it.
 4. **Export:** view or download the PDF report with findings, photos, grades & more.
 
+## Architecture
+
+![Photo to Gemma 4, an optional TypeSafe text check, one Gemma retry for a category conflict, a TypeSafe recheck, grading, seller review, and PDF export.](assets/diagrams/architecture.png)
+
+[SVG version](assets/diagrams/architecture.svg)
+
+TypeSafe is optional and off by default. It checks text for findings that can be graded. If the category conflicts with Gemma's description, the app sends the same photo back to Gemma with feedback, once. TypeSafe checks the new answer before it is used; a successful second look has confidence capped at medium. If that fails, the app tries a category correction from the original text or uses the original title.
+
+The app controls this loop in [the verification code](app/verify.py); Gemma does not call TypeSafe directly.
+
 ## How we use Gemma 4
 
 **Gemma 4 analyzes photos for Disclosure.** It receives a photo and instructions about housing problems, then returns a finding in a format the app can read.

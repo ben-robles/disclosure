@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1720" height="1100" viewBox="0 0 1720 1100" role="img" aria-labelledby="title description">
+<title id="title">Disclosure: photo to report architecture</title>
+<desc id="description">A photo goes to Gemma 4. If enabled, TypeSafe checks the finding text. A category conflict triggers one more Gemma analysis of the same photo with feedback, followed by another TypeSafe check. A failed second look uses a text category correction or the original title. The app calculates grades and repair costs, the seller reviews the findings, and confirmed findings enter the PDF. TypeSafe is off by default.</desc>
+<rect width="1720" height="1100" fill="white"/>
+<text x="80" y="56" fill="#182638" font-family="Arial, Helvetica, sans-serif" font-size="44" font-weight="700" text-anchor="start" dominant-baseline="central">From photo to reviewed report</text>
+<text x="80" y="105" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="27" font-weight="400" text-anchor="start" dominant-baseline="central">Gemma analyzes the image. TypeSafe can ask it to look again.</text>
+<polyline points="300,292 400,292" fill="none" stroke="#748296" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="400.00,292.00 387.00,298.00 387.00,286.00" fill="#748296"/>
+<polyline points="680,292 870,292" fill="none" stroke="#2455a8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="870.00,292.00 857.00,298.00 857.00,286.00" fill="#2455a8"/>
+<text x="775" y="267" fill="#2455a8" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">If enabled</text>
+<polyline points="1170,292 1330,292" fill="none" stroke="#748296" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1330.00,292.00 1317.00,298.00 1317.00,286.00" fill="#748296"/>
+<text x="1250" y="267" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="400" text-anchor="middle" dominant-baseline="central">Continue*</text>
+<polyline points="540,230 540,165 1485,165 1485,230" fill="none" stroke="#748296" stroke-width="3" stroke-linejoin="round" stroke-linecap="round" stroke-dasharray="10 9"/>
+<polygon points="1485.00,230.00 1479.00,217.00 1491.00,217.00" fill="#748296"/>
+<text x="1012" y="143" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">TypeSafe off or check skipped</text>
+<polyline points="1020,354 1020,430 540,430 540,530" fill="none" stroke="#7543a2" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="540.00,530.00 534.00,517.00 546.00,517.00" fill="#7543a2"/>
+<text x="780" y="405" fill="#7543a2" font-family="Arial, Helvetica, sans-serif" font-size="25" font-weight="400" text-anchor="middle" dominant-baseline="central">Category conflicts with description</text>
+<polyline points="680,592 870,592" fill="none" stroke="#2455a8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="870.00,592.00 857.00,598.00 857.00,586.00" fill="#2455a8"/>
+<text x="775" y="567" fill="#2455a8" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">New answer</text>
+<polyline points="1250,902 1250,292" fill="none" stroke="#748296" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1250.00,292.00 1256.00,305.00 1244.00,305.00" fill="#748296"/>
+<polyline points="1170,592 1250,592" fill="none" stroke="#7543a2" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1250.00,592.00 1237.00,598.00 1237.00,586.00" fill="#7543a2"/>
+<text x="1210" y="567" fill="#7543a2" font-family="Arial, Helvetica, sans-serif" font-size="21" font-weight="400" text-anchor="middle" dominant-baseline="central">Matches</text>
+<polyline points="1020,654 1020,840" fill="none" stroke="#7543a2" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1020.00,840.00 1014.00,827.00 1026.00,827.00" fill="#7543a2"/>
+<text x="1050" y="727" fill="#7543a2" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="start" dominant-baseline="central">Still conflicts</text>
+<text x="1050" y="759" fill="#7543a2" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="start" dominant-baseline="central">or check fails</text>
+<polyline points="540,654 540,902 800,902" fill="none" stroke="#2455a8" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="800.00,902.00 787.00,908.00 787.00,896.00" fill="#2455a8"/>
+<text x="563" y="746" fill="#2455a8" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="start" dominant-baseline="central">Retry fails</text>
+<polyline points="1170,902 1250,902" fill="none" stroke="#748296" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1250.00,902.00 1237.00,908.00 1237.00,896.00" fill="#748296"/>
+<polyline points="1485,354 1485,530" fill="none" stroke="#236c55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1485.00,530.00 1479.00,517.00 1491.00,517.00" fill="#236c55"/>
+<polyline points="1485,654 1485,840" fill="none" stroke="#236c55" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>
+<polygon points="1485.00,840.00 1479.00,827.00 1491.00,827.00" fill="#236c55"/>
+<text x="1510" y="744" fill="#236c55" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="start" dominant-baseline="central">Confirmed only</text>
+<rect x="80" y="230" width="220" height="124" rx="18" fill="#f5f7fa" stroke="#ccd5e1" stroke-width="2"/>
+<text x="190.0" y="275" fill="#182638" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">Upload photo</text>
+<text x="190.0" y="316" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Phone or computer</text>
+<rect x="400" y="230" width="280" height="124" rx="18" fill="#edf4ff" stroke="#a9c3ed" stroke-width="2"/>
+<text x="540.0" y="275" fill="#2455a8" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">Gemma 4</text>
+<text x="540.0" y="316" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Analyze the photo</text>
+<rect x="870" y="230" width="300" height="124" rx="18" fill="#f6effb" stroke="#cbb1df" stroke-width="2"/>
+<text x="1020.0" y="275" fill="#7543a2" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">TypeSafe</text>
+<text x="1020.0" y="316" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Optional text check</text>
+<rect x="1330" y="230" width="310" height="124" rx="18" fill="#f5f7fa" stroke="#ccd5e1" stroke-width="2"/>
+<text x="1485.0" y="275" fill="#182638" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">App</text>
+<text x="1485.0" y="316" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Grade + repair costs</text>
+<rect x="400" y="530" width="280" height="124" rx="18" fill="#edf4ff" stroke="#a9c3ed" stroke-width="2"/>
+<text x="540.0" y="575" fill="#2455a8" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">Gemma 4</text>
+<text x="540.0" y="616" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Look again, once</text>
+<rect x="870" y="530" width="300" height="124" rx="18" fill="#f6effb" stroke="#cbb1df" stroke-width="2"/>
+<text x="1020.0" y="575" fill="#7543a2" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">TypeSafe</text>
+<text x="1020.0" y="616" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Check revised text</text>
+<rect x="800" y="840" width="370" height="124" rx="18" fill="#f5f7fa" stroke="#ccd5e1" stroke-width="2"/>
+<text x="985.0" y="870" fill="#182638" font-family="Arial, Helvetica, sans-serif" font-size="29" font-weight="700" text-anchor="middle" dominant-baseline="central">Fallback</text>
+<text x="985.0" y="905" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Correct category from text</text>
+<text x="985.0" y="936" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">or use original title</text>
+<rect x="1330" y="530" width="310" height="124" rx="18" fill="#eef7f2" stroke="#a9cdbb" stroke-width="2"/>
+<text x="1485.0" y="575" fill="#236c55" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">Seller review</text>
+<text x="1485.0" y="616" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Confirm, edit, or remove</text>
+<rect x="1330" y="840" width="310" height="124" rx="18" fill="#eef7f2" stroke="#a9cdbb" stroke-width="2"/>
+<text x="1485.0" y="885" fill="#236c55" font-family="Arial, Helvetica, sans-serif" font-size="32" font-weight="700" text-anchor="middle" dominant-baseline="central">PDF report</text>
+<text x="1485.0" y="926" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="middle" dominant-baseline="central">Approved findings</text>
+<text x="80" y="1024" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="400" text-anchor="start" dominant-baseline="central">* Continue when the category matches or TypeSafe is unavailable.</text>
+<text x="80" y="1062" fill="#526174" font-family="Arial, Helvetica, sans-serif" font-size="23" font-weight="400" text-anchor="start" dominant-baseline="central">TypeSafe reads text only. A successful second look has confidence capped at medium.</text>
+</svg>

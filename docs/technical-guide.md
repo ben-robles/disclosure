@@ -68,14 +68,11 @@ See [`.env.example`](../.env.example) for every setting, [verification tests](..
 
 ## How the app works
 
-```mermaid
-flowchart LR
-  Photo["Upload photo"] --> Gemma["Gemma 4 analysis"]
-  Gemma --> Check["TypeSafe check (optional)"]
-  Check --> Grade["Grade and repair cost lookup"]
-  Grade --> Review["Seller review"]
-  Review --> PDF["PDF report"]
-```
+![Photo to Gemma 4, an optional TypeSafe text check, one Gemma retry for a category conflict, a TypeSafe recheck, grading, seller review, and PDF export.](../assets/diagrams/architecture.png)
+
+[SVG version](../assets/diagrams/architecture.svg)
+
+TypeSafe is optional and off by default. It checks text for findings that can be graded. If the category conflicts with Gemma's description, the app sends the same photo back to Gemma with feedback, once. TypeSafe checks the new answer before it is used; a successful second look has confidence capped at medium. If that fails, the app tries a category correction from the original text or uses the original title.
 
 The **website runs on Google Cloud Run**. Its Python backend uses FastAPI and connects to Gemma 4 through Ollama. TypeSafe can check Gemma's text. The app calculates grades and looks up repair costs, and the user confirms details.
 
