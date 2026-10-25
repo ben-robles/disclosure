@@ -63,3 +63,25 @@ SMTP_PORT = int(os.environ.get("DISCLOSURE_SMTP_PORT", "587"))
 SMTP_USER = os.environ.get("DISCLOSURE_SMTP_USER", "")
 SMTP_PASSWORD = os.environ.get("DISCLOSURE_SMTP_PASSWORD", "")
 SMTP_FROM = os.environ.get("DISCLOSURE_SMTP_FROM", SMTP_USER)
+
+# Optional TypeSafe (Jev) text judge. Empty URL means the whole feature is off.
+# Only Gemma's short text (reason, title, typed fields) is ever sent; never photos.
+TYPESAFE_URL = os.environ.get("DISCLOSURE_TYPESAFE_URL", "").strip()
+TYPESAFE_API_KEY = os.environ.get("TYPESAFE_API_KEY", "").strip()
+TYPESAFE_MODEL = os.environ.get("DISCLOSURE_TYPESAFE_MODEL", "jev-latest").strip() or "jev-latest"
+TYPESAFE_TIMEOUT_S = float(os.environ.get("DISCLOSURE_TYPESAFE_TIMEOUT_S", "10"))
+
+
+def _flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+# Feature 2: second opinion on each finding. Feature 3: Jev picks the defect type and sets confidence.
+JUDGE_VERIFY = _flag("DISCLOSURE_JUDGE_VERIFY")
+JUDGE_CLASSIFY = _flag("DISCLOSURE_JUDGE_CLASSIFY")
+# Noul answers above YES count as yes, below NO as no; in between is left alone.
+JUDGE_YES = float(os.environ.get("DISCLOSURE_JUDGE_YES", "0.7"))
+JUDGE_NO = float(os.environ.get("DISCLOSURE_JUDGE_NO", "0.3"))
+# Feature 3: top-choice probability at or above HIGH is high confidence, at or above MEDIUM medium.
+JUDGE_CONF_HIGH = float(os.environ.get("DISCLOSURE_JUDGE_CONF_HIGH", "0.75"))
+JUDGE_CONF_MEDIUM = float(os.environ.get("DISCLOSURE_JUDGE_CONF_MEDIUM", "0.45"))
