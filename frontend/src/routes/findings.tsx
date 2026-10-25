@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Check, Pencil, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/select";
 import { AppShell, Disclaimer, NoSession } from "@/components/disclosure/AppShell";
 import { GradeBadge } from "@/components/disclosure/GradeBadge";
+import { useInFlightFraction } from "@/components/disclosure/useInFlightFraction";
 import {
   ConfidenceBars,
   CostBar,
@@ -19,7 +20,7 @@ import {
   RiskMatrix,
   SeverityDots,
 } from "@/components/disclosure/RiskViz";
-import { COST_TABLE_META, formatCost, lookupCost } from "@/lib/disclosure/costs";
+import { COST_TABLE_META, formatAvg, formatCost, lookupCost } from "@/lib/disclosure/costs";
 import { URGENCY_LABEL, risk } from "@/lib/disclosure/grading";
 import { TAXONOMY, type DefectType } from "@/lib/disclosure/taxonomy";
 import {
@@ -101,28 +102,13 @@ function Findings() {
   );
 }
 
-// Analysis of one photo takes about a minute with no real progress signal, so the
-// photo being analyzed counts as a fraction that creeps toward (never reaches) done.
-const ANALYZE_TAU_MS = 45_000;
-
 /** Shows analysis progress while photos are being analyzed, then confirmation progress. */
 function ProgressBar({ photos }: { photos: Photo[] }) {
   const total = photos.length;
   const done = photos.filter((p) => p.status === "done").length;
   const confirmed = photos.filter((p) => p.confirmed).length;
   const analyzingId = photos.find((p) => p.status === "analyzing")?.id;
-  const [partial, setPartial] = useState(0);
-
-  useEffect(() => {
-    setPartial(0);
-    if (!analyzingId) return;
-    const start = Date.now();
-    const timer = setInterval(
-      () => setPartial(0.95 * (1 - Math.exp(-(Date.now() - start) / ANALYZE_TAU_MS))),
-      500,
-    );
-    return () => clearInterval(timer);
-  }, [analyzingId]);
+  const partial = useInFlightFraction(analyzingId, Boolean(analyzingId));
 
   const analyzing = done < total;
   const pct = total ? ((analyzing ? done + partial : confirmed) / total) * 100 : 0;
@@ -185,7 +171,6 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
             ref={retake}
             type="file"
             accept="image/*"
-            capture="environment"
             className="sr-only"
             onChange={async (e) => {
               const file = e.target.files?.[0];
@@ -279,6 +264,12 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
           <p className="text-sm text-muted-foreground">Typical repair</p>
           <p className="text-lg font-bold tabular-nums">{formatCost(cost)}</p>
         </div>
+        {cost && (
+          <div className="mt-0.5 flex items-baseline justify-between">
+            <p className="text-sm text-muted-foreground">Average</p>
+            <p className="text-sm font-semibold tabular-nums">{formatAvg(cost)}</p>
+          </div>
+        )}
         {cost && (
           <div className="mt-2">
             <CostBar low={cost.low} high={cost.high} />

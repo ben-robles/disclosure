@@ -61,6 +61,9 @@ async function checkHealth() {
   const banner = $("banner");
   let h;
   try { h = await api("/api/health"); } catch (e) { h = { ready: false, message: "The Disclosure server is not responding.", fix: "" }; }
+  if (h.local === false) {
+    $("info-privacy").textContent = "Gemma 4 runs on a private Google Cloud service. Your photos are sent there for analysis and are not kept after you delete the session or the server restarts.";
+  }
   banner.replaceChildren();
   if (h.ready) { show(banner, false); return; }
   banner.append(el("strong", { text: h.message }));
@@ -190,17 +193,53 @@ async function analyze() {
   await api(`/api/session/${state.sid}/analyze`, { method: "POST" });
   await refresh();
   show($("progress-wrap"), true);
+  state.prog = null;
   startPolling();
 }
 
 function stopPolling() {
   if (state.poll) { clearInterval(state.poll); state.poll = null; }
+  if (state.draw) { clearInterval(state.draw); state.draw = null; }
 }
 
 function startPolling() {
   stopPolling();
   tick();
   state.poll = setInterval(tick, 2000);
+  state.draw = setInterval(drawProgress, 500);
+}
+
+// The server only says how many photos are done. Between those counts the bar moves by an estimate
+// built from how long the finished photos took, so it keeps pace without ever claiming a photo is done.
+const DEFAULT_STEP_MS = 12000;
+
+function stepMs() {
+  const recent = state.prog.steps.slice(-5);
+  if (!recent.length) return DEFAULT_STEP_MS;
+  const mean = recent.reduce((a, b) => a + b, 0) / recent.length;
+  return Math.min(120000, Math.max(3000, mean));
+}
+
+function drawProgress() {
+  const p = state.prog;
+  if (!p || !p.total) return;
+  const elapsed = Date.now() - p.since;
+  const part = elapsed <= 0 ? 0 : 0.95 * (1 - Math.exp((-2 * elapsed) / stepMs()));
+  const pct = ((p.done + part) / p.total) * 100;
+  $("progress-fill").style.width = pct + "%";
+  document.querySelector("#view-capture .bar").setAttribute("aria-valuenow", String(Math.round(pct)));
+}
+
+function trackProgress(st) {
+  const now = Date.now();
+  if (!state.prog) state.prog = { done: st.done, since: now, steps: [], total: st.analyzing_total };
+  const p = state.prog;
+  p.total = st.analyzing_total;
+  if (st.done > p.done) {
+    p.steps.push((now - p.since) / (st.done - p.done));
+    p.done = st.done;
+    p.since = now;
+  }
 }
 
 async function tick() {
@@ -208,16 +247,16 @@ async function tick() {
   try { st = await api(`/api/session/${state.sid}/status`); } catch (e) { return; }
   const total = st.analyzing_total;
   const current = Math.min(st.done + 1, total);
-  const pct = total ? Math.round((st.done / total) * 100) : 0;
   if (st.active) {
     const text = `Analyzing ${current} of ${total}`;
     if ($("progress-text").textContent !== text) announce(text);
     $("progress-text").textContent = text;
-    $("progress-fill").style.width = pct + "%";
-    document.querySelector("#view-capture .bar").setAttribute("aria-valuenow", String(pct));
+    trackProgress(st);
+    drawProgress();
     show($("progress-wrap"), true);
   } else {
     stopPolling();
+    state.prog = null;
     announce("Analysis finished.");
     go("findings");
   }
@@ -254,7 +293,7 @@ function card(p, i) {
     node.append(dl([
       ["Urgency", p.urgency_label],
       ["What we see", p.reason],
-      ["Estimated cost", p.cost ? p.cost.text : ""],
+      ["Estimated cost", p.cost ? `${p.cost.text} (avg ${p.cost.avg_text})` : ""],
       ["Recommended pro", p.pro],
     ]));
     node.append(el("p", { class: "small", text: "Estimate — varies by region and contractor." }));

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { AppShell, Disclaimer, NoSession } from "@/components/disclosure/AppShell";
 import { GradeBadge } from "@/components/disclosure/GradeBadge";
 import { CostBar, GradeMix, GradeScale, OverallGrade } from "@/components/disclosure/RiskViz";
-import { formatCost } from "@/lib/disclosure/costs";
+import { formatAvg, formatCost } from "@/lib/disclosure/costs";
 import { GRADING_RULE, needsPro, worstEnd, type Letter } from "@/lib/disclosure/grading";
 import { buildReport, totalCost } from "@/lib/disclosure/report";
 import { useSession } from "@/lib/disclosure/store";
@@ -95,6 +95,7 @@ function Review() {
             <div className="rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
               <p className="text-sm text-muted-foreground">Estimated repairs, all findings</p>
               <p className="text-2xl font-extrabold tabular-nums">{formatCost(total)}</p>
+              <p className="text-sm text-muted-foreground tabular-nums">Average {formatAvg(total)}</p>
               <div className="mt-2">
                 <CostBar low={total.low} high={total.high} />
               </div>
@@ -127,6 +128,7 @@ function Review() {
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground tabular-nums">
                     {formatCost(it.cost)}
+                    {it.cost && ` · avg ${formatAvg(it.cost)}`}
                   </p>
                   {needsPro(it.range) && it.info.pro && (
                     <p className="mt-1 text-sm font-medium text-grade-f">

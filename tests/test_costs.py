@@ -25,7 +25,7 @@ def test_ranges_are_ordered_and_grow_with_severity():
             continue
         rows = [costs.lookup(defect, s) for s in (1, 3, 5)]
         for r in rows:
-            assert 0 < r["low"] < r["high"]
+            assert 0 < r["low"] < r["avg"] < r["high"]
         assert rows[0]["high"] <= rows[2]["high"]
 
 
@@ -37,3 +37,4 @@ def test_table_is_labelled_placeholder():
 
 def test_format():
     assert costs.format_range({"low": 1000, "high": 4000}) == "$1,000–$4,000"
+    assert costs.format_avg({"avg": 2500}) == "$2,500"

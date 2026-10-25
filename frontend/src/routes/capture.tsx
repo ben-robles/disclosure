@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { backendHealthy } from "@/lib/disclosure/analyzer";
 import { AppShell, NoSession } from "@/components/disclosure/AppShell";
+import { useInFlightFraction } from "@/components/disclosure/useInFlightFraction";
 import { addPhoto, removePhoto, resizeImage, runQueue, useSession } from "@/lib/disclosure/store";
 
 export const Route = createFileRoute("/capture")({
@@ -25,21 +26,9 @@ export const Route = createFileRoute("/capture")({
   component: Capture,
 });
 
-const EXPECTED_PHOTO_S = 40;
-
-/** The model reports no partial progress, so the bar for the photo in flight eases toward the
- *  next step (never reaching it) until that photo is really done. */
+/** Finished photos plus an estimate of the one in flight, as a percentage of all photos. */
 function useAnalysisProgress(done: number, total: number, active: boolean) {
-  const [part, setPart] = useState(0);
-  useEffect(() => {
-    setPart(0);
-    if (!active) return;
-    const start = Date.now();
-    const id = setInterval(() => {
-      setPart(0.95 * (1 - Math.exp(-(Date.now() - start) / 1000 / EXPECTED_PHOTO_S)));
-    }, 250);
-    return () => clearInterval(id);
-  }, [done, active]);
+  const part = useInFlightFraction(done, active);
   return total > 0 ? ((done + part) / total) * 100 : 0;
 }
 
@@ -118,7 +107,6 @@ function Capture() {
         ref={input}
         type="file"
         accept="image/*"
-        capture="environment"
         multiple
         className="sr-only"
         id="photo-input"

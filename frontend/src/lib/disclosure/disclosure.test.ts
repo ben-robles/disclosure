@@ -34,9 +34,9 @@ describe("overall grade", () => {
 
 describe("cost lookup", () => {
   it("uses severity buckets", () => {
-    expect(lookupCost("roof", 2)).toEqual({ low: 300, high: 1500 });
-    expect(lookupCost("roof", 3)).toEqual({ low: 1000, high: 5000 });
-    expect(lookupCost("roof", 5)).toEqual({ low: 5000, high: 20000 });
+    expect(lookupCost("roof", 2)).toEqual({ low: 350, high: 900, avg: 650 });
+    expect(lookupCost("roof", 3)).toEqual({ low: 1500, high: 4000, avg: 2500 });
+    expect(lookupCost("roof", 5)).toEqual({ low: 9000, high: 18000, avg: 12000 });
   });
   it("unclear has no cost", () => expect(lookupCost("unclear", 3)).toBeNull());
 });
@@ -64,9 +64,9 @@ describe("Maryland sections", () => {
 
 describe("totalCost", () => {
   it("sums low and high ends", () =>
-    expect(totalCost([{ cost: { low: 100, high: 500 } }, { cost: { low: 200, high: 1000 } }])).toEqual({ low: 300, high: 1500 }));
+    expect(totalCost([{ cost: { low: 100, high: 500, avg: 250 } }, { cost: { low: 200, high: 1000, avg: 600 } }])).toEqual({ low: 300, high: 1500, avg: 850 }));
   it("skips findings without an estimate", () =>
-    expect(totalCost([{ cost: null }, { cost: { low: 100, high: 500 } }])).toEqual({ low: 100, high: 500 }));
+    expect(totalCost([{ cost: null }, { cost: { low: 100, high: 500, avg: 250 } }])).toEqual({ low: 100, high: 500, avg: 250 }));
   it("is null when nothing has an estimate", () => expect(totalCost([{ cost: null }])).toBeNull());
 });
 

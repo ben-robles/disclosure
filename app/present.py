@@ -63,7 +63,8 @@ def enrich(row: dict) -> dict:
             "text": gr.text, "word": gr.word, "aria": gr.aria, "worst": gr.worst,
         },
         "cost": None if cost is None else {
-            "low": cost["low"], "high": cost["high"], "text": costs.format_range(cost),
+            "low": cost["low"], "high": cost["high"], "avg": cost["avg"],
+            "text": costs.format_range(cost), "avg_text": costs.format_avg(cost),
         },
         "pro": pro,
         # only graded or can't-tell findings may be confirmed into the report
