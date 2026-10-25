@@ -54,3 +54,8 @@
 - v4 fixed the brick crack and the door rot but lost the ceiling stain, mold, open switches, the plumbing leak (Gemma called the photo blurry) and the chimney (judge `none_of_these`).
 - Most v4 misses start in Gemma's sentence, not the judge: the judge scored those sentences low against the expected details too (for example `mentions_expected_p` 0.14 on the ceiling stain). A single run each, 15 photos, so differences of a few photos are noise. Rerun before drawing more from it.
 - Judge mean scores are close: `mentions_expected_p` 0.52 (v3) and 0.51 (v4), `type_consistent_p` 0.67 and 0.63.
+
+### Rerun and verify check (2026-10-24, second run of each prompt)
+
+- **Same totals on rerun: v3 12 of 17, v4 10 of 17.** Per photo, v4 reliably fails the chimney and plumbing photos (Gemma's v4 sentence or the judge's `none_of_these`) and wobbles on the ceiling stains, electrical switches and termites. v3 is steadier. **Decision: drop classify (leave `DISCLOSURE_JUDGE_CLASSIFY` off); keep v3.**
+- **Verify on the 11 gradable v3 findings from the rerun:** it flagged the mold photo that Gemma labelled `hvac_heating` (`label_matches` 0.07, so the UI shows the model's title) and changed nothing on the 7 correct ones. It missed 3 wrong types (door frame, termites, window frame) because Gemma's sentence agreed with its own wrong label. Severity and the cost/legal guard never fired. **Decision: keep verify on.** It catches some self-contradictions; it is not a second pair of eyes on the photo.
