@@ -20,16 +20,6 @@ Home sellers may notice damage but struggle to identify these problems. Photos w
 3. **Review:** each finding shows its grade and a typical repair cost range. Confirm or correct each finding before continuing. TypeSafe can also check the AI's text before you review it.
 4. **Export:** view or download the PDF report with findings, photos, grades & more.
 
-## Architecture
-
-![Photo to Gemma 4, an optional TypeSafe text check, one Gemma retry for a category conflict, a TypeSafe recheck, grading, seller review, and PDF export.](assets/diagrams/architecture.png)
-
-[SVG version](assets/diagrams/architecture.svg)
-
-TypeSafe is optional and off by default. It checks text for findings that can be graded. If the category conflicts with Gemma's description, the app sends the same photo back to Gemma with feedback, once. TypeSafe checks the new answer before it is used; a successful second look has confidence capped at medium. If that fails, the app tries a category correction from the original text or uses the original title.
-
-The app controls this loop in [the verification code](app/verify.py); Gemma does not call TypeSafe directly.
-
 ## How we use Gemma 4
 
 **Gemma 4 analyzes photos for Disclosure.** It receives a photo and instructions about housing problems, then returns a finding in a format the app can read.
@@ -40,7 +30,7 @@ The app controls this loop in [the verification code](app/verify.py); Gemma does
 |---|---|
 | Analyze photo| Gemma describes what it sees and suggests a category, severity, urgency, image quality, and confidence level |
 | Second guess | If enabled, TypeSafe checks whether the category and severity match Gemma's words and flags cost or legal language |
-| Calculate grades | The app applies the severity × urgency rule explained below |
+| Calculate grades | The app applies a severity × urgency rule, described in the [technical guide](docs/technical-guide.md#the-grading-rule) |
 | Look up repair cost ranges | A separate table supplies a low, high, and average price for each problem type and severity. The numbers come from public 2026 cost guides for the DC/MD/VA area, **not contractor quotes, so treat them as planning estimates** |
 | Decide what enters the report | The seller confirms each finding and can edit or remove it |
 
@@ -48,19 +38,44 @@ The AI cannot certify that a home is safe or decide what the seller must disclos
 
 TypeSafe is **off unless you turn it on**, and the shipped app runs without it. This is deliberate: the app must work with Gemma alone, with no outside service in the path, and no finding text should leave the server unless the operator chose that. Leaving `DISCLOSURE_TYPESAFE_URL` empty keeps every check off.
 
-## The grading rule
+## Gemma to Jev workflow
 
-**Risk = severity × urgency.** Severity ranges from **1–5**. Urgency is scored as follows: needs immediate attention **4**, within 30 days **3**, within a year **2**, and appearance only **1**.
+Gemma sometimes writes a sentence that disagrees with its own label: "The wooden door trim shows rot near the base" filed under `siding_exterior`. The grade, repair cost, and form section all follow the label, so a wrong label is a wrong report line. When TypeSafe is enabled, its Jev model checks Gemma's words. Jev is a small judgment model: give it text and a question, get back a probability. It never sees the photo.
 
-| Risk | Letter | Label |
+```mermaid
+flowchart TD
+  Photo["Photo"] --> Gemma["Gemma 4: title, description, category, severity, confidence"]
+  Gemma --> Jev["Jev reads title + description only"]
+  Jev --> Match{"Label matches description?"}
+  Match -- "yes (≥ 0.3)" --> Keep["Keep Gemma's finding"]
+  Match -- "no (< 0.3)" --> Look["Gemma looks again, told which label contradicted its words"]
+  Look --> Agree{"Jev agrees with the new answer?"}
+  Agree -- yes --> Capped["Use new finding, confidence capped at medium"]
+  Agree -- no --> Pick["Jev picks a category from the description"]
+  Pick -- "≥ 0.45 and not none_of_these" --> Moved["Move finding to that category"]
+  Pick -- otherwise --> Title["Keep Gemma's own title instead of a category name"]
+  Keep & Capped & Moved & Title --> Sev{"Severity plausible?"}
+  Sev -- "no (< 0.3)" --> Demote["Confidence drops one step; low becomes unclear"]
+  Sev -- yes --> Guard
+  Demote --> Guard{"Price or legal language? (> 0.7 or $ regex)"}
+  Guard -- yes --> Neutral["Replace description with taxonomy text, clear title"]
+  Guard -- no --> Review["Grade, repair cost, seller review"]
+  Neutral --> Review
+```
+
+Each step is one function:
+
+| Step | Function | What it does |
 |---|---|---|
-| 1–3 | A | Minor |
-| 4–6 | B | Moderate |
-| 7–10 | C | Serious |
-| 11–15 | D | Urgent |
-| 16–20 | F | Critical |
+| Gemma reads the photo | `OllamaAnalyzer.analyze()` in [`app/inference/ollama_analyzer.py`](app/inference/ollama_analyzer.py) | Sends the sanitized photo and prompt to Ollama, parses the JSON finding |
+| Jev checks the finding | `Judge.verify()` in [`app/inference/judge.py`](app/inference/judge.py) | Returns three probabilities: label matches, severity plausible, cost or legal language |
+| Second look | `verify._second_look()` in [`app/verify.py`](app/verify.py) | Reanalyzes the same photo with a hint naming the contradiction; kept only if Jev agrees |
+| Category pick | `Judge.classify()` and `verify._recategorize()` | Jev scores every taxonomy category from the text; moves the finding only when sure |
+| Apply the rules | `verify.verify_finding()` | Runs the loop above and never raises; a TypeSafe outage keeps Gemma's finding and marks the check skipped |
 
-The AI's confidence affects how the grade appears: **high** shows one letter, **medium** shows that letter and the next worse grade, and **low** shows no grade and recommends a licensed home inspector.
+Confidence is never raised by a fix. Jev never writes report text. Prices only ever come from our cost table.
+
+TypeSafe is **off unless you turn it on**. Set `DISCLOSURE_TYPESAFE_URL`, `TYPESAFE_API_KEY`, and `DISCLOSURE_JUDGE_VERIFY=1` in `.env` to enable the loop. Thresholds and the full rule list are in the [technical guide](docs/technical-guide.md#typesafe-verification).
 
 ## Privacy
 
