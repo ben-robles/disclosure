@@ -17,6 +17,20 @@ class ParseError(ValueError):
     pass
 
 
+def clean_title(value) -> str:
+    """A short plain-text name; anything unusable becomes empty (caller falls back)."""
+    if not isinstance(value, str):
+        return ""
+    return " ".join(value.replace("_", " ").split()[:6]).strip(" .")[:60]
+
+
+def category_fits(value) -> bool:
+    """Missing or unreadable means the model did not object to the category."""
+    if isinstance(value, str):
+        return value.strip().lower() not in ("false", "no", "0")
+    return value is not False
+
+
 def parse_model_output(text: str) -> Finding:
     """Defensive parse: strip code fences, find the JSON object, validate every field."""
     if not isinstance(text, str) or not text.strip():
@@ -50,6 +64,8 @@ def parse_model_output(text: str) -> Finding:
         raise ParseError("missing reason")
 
     finding = Finding(
+        title=clean_title(data.get("title")),
+        category_fits=category_fits(data.get("category_fits")),
         defect_type=data["defect_type"],
         severity=severity,
         urgency=data["urgency"],

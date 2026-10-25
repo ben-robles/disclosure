@@ -137,7 +137,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
     if (i % 2) { fill([247, 248, 249]); doc.rect(M, y, CW, 26, "F"); }
     font(9.5, false);
     doc.text(String(i + 1), cols[0]!.x + 6, y + 16);
-    doc.text(clip(it.info.label, cols[1]!.w - 10), cols[1]!.x + 6, y + 16);
+    doc.text(clip(it.title, cols[1]!.w - 10), cols[1]!.x + 6, y + 16);
     doc.text(clip(it.section, cols[2]!.w - 10), cols[2]!.x + 6, y + 16);
     const g = it.range ? formatRange(it.range) : "None";
     fill(toneFor(it.range)); doc.roundedRect(cols[3]!.x + 4, y + 5, 44, 16, 3, 3, "F");
@@ -173,7 +173,7 @@ export async function generatePdf(session: Session): Promise<Blob> {
 
       // Section label + heading
       font(9, true, TEAL); doc.text(section.toUpperCase(), M, top + 4);
-      font(15, true); doc.text(clip(`Finding ${n} — ${it.info.label}`, CW - 110), M, top + 24);
+      font(15, true); doc.text(clip(`Finding ${n} — ${it.title}`, CW - 110), M, top + 24);
       const gl = it.range ? formatRange(it.range) : "No grade";
       badge(W - M - 96, top + 8, 96, 26, gl, null, c, 13);
 

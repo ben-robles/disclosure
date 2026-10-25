@@ -19,7 +19,8 @@ CREATE TABLE IF NOT EXISTS findings (
   defect_type TEXT NOT NULL, severity INTEGER NOT NULL, urgency TEXT NOT NULL,
   confidence TEXT NOT NULL, image_quality TEXT NOT NULL, reason TEXT NOT NULL,
   analysis_status TEXT NOT NULL DEFAULT 'ok',
-  confirmed INTEGER NOT NULL DEFAULT 0, edited INTEGER NOT NULL DEFAULT 0
+  confirmed INTEGER NOT NULL DEFAULT 0, edited INTEGER NOT NULL DEFAULT 0,
+  title TEXT NOT NULL DEFAULT '', category_fits INTEGER NOT NULL DEFAULT 1
 );
 """
 # photos.status: uploaded | pending | processing | done
@@ -32,6 +33,11 @@ class Database:
         with self.conn() as c:
             c.execute("PRAGMA journal_mode=WAL")  # readers don't block the workers' writes
             c.executescript(SCHEMA)
+            have = {r["name"] for r in c.execute("PRAGMA table_info(findings)")}
+            if "title" not in have:  # database made before model-written titles
+                c.execute("ALTER TABLE findings ADD COLUMN title TEXT NOT NULL DEFAULT ''")
+            if "category_fits" not in have:
+                c.execute("ALTER TABLE findings ADD COLUMN category_fits INTEGER NOT NULL DEFAULT 1")
 
     @contextmanager
     def conn(self):
@@ -98,7 +104,7 @@ class Database:
             rows = c.execute(
                 "SELECT p.id, p.status, p.created_at, f.defect_type, f.severity, f.urgency,"
                 " f.confidence, f.image_quality, f.reason, f.analysis_status,"
-                " f.confirmed, f.edited"
+                " f.confirmed, f.edited, f.title, f.category_fits"
                 " FROM photos p LEFT JOIN findings f ON f.photo_id = p.id"
                 " WHERE p.session_id=? ORDER BY p.created_at, p.rowid", (sid,)).fetchall()
         return [dict(r) for r in rows]
@@ -143,10 +149,12 @@ class Database:
                 return False
             c.execute(
                 "INSERT OR REPLACE INTO findings(photo_id, defect_type, severity, urgency,"
-                " confidence, image_quality, reason, analysis_status, confirmed, edited)"
-                " VALUES(?,?,?,?,?,?,?,?,0,0)",
+                " confidence, image_quality, reason, analysis_status, confirmed, edited,"
+                " title, category_fits)"
+                " VALUES(?,?,?,?,?,?,?,?,0,0,?,?)",
                 (pid, f.defect_type, f.severity, f.urgency, f.confidence,
-                 f.image_quality, f.reason, f.analysis_status))
+                 f.image_quality, f.reason, f.analysis_status, f.title,
+                 int(f.category_fits)))
             c.execute("UPDATE photos SET status='done' WHERE id=?", (pid,))
         return True
 

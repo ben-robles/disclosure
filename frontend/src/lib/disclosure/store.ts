@@ -126,6 +126,15 @@ export async function runQueue() {
   }
 }
 
+export const OTHER_ISSUE = "Other issue";
+
+/** Category label, unless the model said the category does not fit what it saw. Then its own title
+ *  is shown (the category list never changes). A hand-picked category always shows its own label. */
+export function findingTitle(label: string, r: AnalyzeResult, untouched: boolean): string {
+  if (!untouched || r.category_fits !== false) return label;
+  return r.title?.trim() || OTHER_ISSUE;
+}
+
 /** Derived view of a finding with edits applied. */
 export type GuardKind = "blurry" | "not_a_house" | "low_confidence" | "timeout" | "unavailable" | null;
 
@@ -147,7 +156,7 @@ export function viewFinding(p: Photo) {
   const range: Letter[] | null =
     guard || type === "unclear" ? null : gradeRange(severity, r.urgency as Urgency, r.confidence);
   const info = defectInfo(guard ? "unclear" : type);
-  return { type: guard ? ("unclear" as DefectType) : type, severity, urgency: r.urgency as Urgency, confidence: r.confidence, reason: r.reason, guard, range, info };
+  return { type: guard ? ("unclear" as DefectType) : type, severity, urgency: r.urgency as Urgency, confidence: r.confidence, reason: r.reason, guard, range, info, title: findingTitle(info.label, r, !guard && p.defect_type === r.defect_type) };
 }
 
 export const GUARD_MESSAGE: Record<Exclude<GuardKind, null>, string> = {

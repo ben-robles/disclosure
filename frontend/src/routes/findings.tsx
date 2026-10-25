@@ -228,13 +228,13 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
   const cost = lookupCost(f.type, f.severity);
   return (
     <article
-      aria-label={`Photo ${index + 1}, ${f.info.label}`}
+      aria-label={`Photo ${index + 1}, ${f.title}`}
       className="rounded-3xl border bg-card p-3 shadow-[var(--shadow-card)]"
     >
       <div className="relative overflow-hidden rounded-2xl">
         <img
           src={photo.dataUrl}
-          alt={`Photo ${index + 1}: ${f.info.label}`}
+          alt={`Photo ${index + 1}: ${f.title}`}
           className="aspect-[4/3] w-full object-cover"
         />
         <div className="absolute bottom-3 left-3">
@@ -247,7 +247,7 @@ function FindingCard({ photo, index }: { photo: Photo; index: number }) {
         )}
       </div>
 
-      <h2 className="mt-3.5 px-1 text-xl font-extrabold leading-tight">{f.info.label}</h2>
+      <h2 className="mt-3.5 px-1 text-xl font-extrabold leading-tight">{f.title}</h2>
       <p className="mt-1 px-1 text-base text-foreground/85">{f.reason}</p>
 
       <div className="mt-4">

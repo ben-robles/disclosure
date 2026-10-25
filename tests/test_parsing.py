@@ -53,3 +53,37 @@ def test_prompt_and_schema_come_from_taxonomy():
     prompt = build_prompt()
     assert all(i in prompt for i in ids)
     assert output_schema()["properties"]["defect_type"]["enum"] == ids
+
+
+def test_title_and_fit_flag_are_read():
+    f = parse_model_output(good(title="Fallen tree on roof", category_fits=False))
+    assert (f.title, f.category_fits) == ("Fallen tree on roof", False)
+
+
+def test_missing_title_and_flag_default_to_category():
+    f = parse_model_output(good())
+    assert (f.title, f.category_fits) == ("", True)
+
+
+@pytest.mark.parametrize("raw, expected", [
+    (False, False), ("false", False), ("No", False), (True, True), ("true", True), (None, True), (7, True),
+])
+def test_fit_flag_parsing(raw, expected):
+    assert parse_model_output(good(category_fits=raw)).category_fits is expected
+
+
+@pytest.mark.parametrize("raw, expected", [
+    ("  Fallen tree on roof. ", "Fallen tree on roof"),
+    ("water_intrusion", "water intrusion"),
+    (None, ""), (5, ""), ("", ""),
+    ("one two three four five six seven eight", "one two three four five six"),
+])
+def test_title_is_cleaned(raw, expected):
+    assert parse_model_output(good(title=raw)).title == expected
+
+
+def test_prompt_schema_ask_for_title_and_fit_flag_with_reason_first():
+    props = list(output_schema()["properties"])
+    assert props[:2] == ["reason", "title"]
+    assert "category_fits" in output_schema()["required"] and "title" in output_schema()["required"]
+    assert "category_fits" in build_prompt()

@@ -18,6 +18,20 @@ def _taxonomy() -> dict:
     return {d["id"]: d for d in load_taxonomy()}
 
 
+OTHER_ISSUE = "Other issue"
+
+
+def display_label(row: dict, entry: dict) -> str:
+    """Category label, unless the model said the category does not fit what it saw.
+
+    Then the model's own title is shown (the category list itself never changes).
+    An inspector's edit picks a category by hand, so the category label wins again.
+    """
+    if row.get("edited") or row.get("category_fits", 1):
+        return entry["label"]
+    return (row.get("title") or "").strip() or OTHER_ISSUE
+
+
 def enrich(row: dict) -> dict:
     """row = one item from Database.session_photos()."""
     out = {"id": row["id"], "status": row["status"], "analyzed": row["defect_type"] is not None}
@@ -36,7 +50,7 @@ def enrich(row: dict) -> dict:
         "section_key": sec_key,
         "section": sec_heading,
         "defect_type": row["defect_type"],
-        "label": entry["label"] if state == "graded" else "Cannot determine",
+        "label": display_label(row, entry) if state == "graded" else "Cannot determine",
         "severity": row["severity"],
         "urgency": row["urgency"],
         "urgency_label": grading.URGENCY_LABEL[row["urgency"]],

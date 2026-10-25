@@ -114,12 +114,12 @@ function Review() {
               <li key={it.photo.id} className="flex gap-3 py-4">
                 <img
                   src={it.photo.dataUrl}
-                  alt={it.info.label}
+                  alt={it.title}
                   className="size-20 shrink-0 rounded-2xl object-cover"
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="font-semibold leading-snug">{it.info.label}</p>
+                    <p className="font-semibold leading-snug">{it.title}</p>
                     <GradeBadge range={it.range} />
                   </div>
                   <div className="mt-2">

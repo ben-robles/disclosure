@@ -5,6 +5,7 @@ import { parseModelOutput } from "./parse";
 import { MD_SECTIONS, sectionNumber } from "./jurisdiction";
 import { totalCost } from "./report";
 import { TAXONOMY } from "./taxonomy";
+import { findingTitle } from "./store";
 
 describe("risk → letter boundaries", () => {
   it.each([
@@ -67,4 +68,23 @@ describe("totalCost", () => {
   it("skips findings without an estimate", () =>
     expect(totalCost([{ cost: null }, { cost: { low: 100, high: 500 } }])).toEqual({ low: 100, high: 500 }));
   it("is null when nothing has an estimate", () => expect(totalCost([{ cost: null }])).toBeNull());
+});
+
+describe("finding title when the category does not fit", () => {
+  const base = { defect_type: "water_intrusion", severity: 4, urgency: "immediate", confidence: "high", image_quality: "ok", reason: "A tree branch rests on the roof." };
+  const parse = (extra: object) => parseModelOutput(JSON.stringify({ ...base, ...extra }))!;
+  const label = "Water intrusion";
+  it("shows the model title when category_fits is false", () =>
+    expect(findingTitle(label, parse({ title: "Fallen tree on roof", category_fits: false }), true)).toBe("Fallen tree on roof"));
+  it("treats the string 'false' as false", () =>
+    expect(findingTitle(label, parse({ title: "Fallen tree on roof", category_fits: "false" }), true)).toBe("Fallen tree on roof"));
+  it("falls back to a neutral title when the model gave none", () =>
+    expect(findingTitle(label, parse({ category_fits: false }), true)).toBe("Other issue"));
+  it("keeps the category label when it fits or the flag is missing", () => {
+    expect(findingTitle(label, parse({ title: "x", category_fits: true }), true)).toBe(label);
+    expect(findingTitle(label, parse({}), true)).toBe(label);
+  });
+  it("a hand-picked category shows its own label", () =>
+    expect(findingTitle("Roof damage", parse({ title: "Fallen tree on roof", category_fits: false }), false)).toBe("Roof damage"));
+  it("cleans the title", () => expect(parse({ title: "  water_intrusion. " }).title).toBe("water intrusion"));
 });
