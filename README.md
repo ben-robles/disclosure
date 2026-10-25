@@ -123,7 +123,7 @@ flowchart LR
   API --> PDF["ReportLab PDF"]
 ```
 
-Everything that touches the model is behind `DefectAnalyzer` (`app/inference/`). Swapping the runtime means writing one other class. `Judge` (`app/inference/judge.py`) is a second, text-only boundary to TypeSafe's Jev model. It never sees a photo, never writes user-visible text (`app/classify.py` and `app/verify.py` map its probabilities to existing states: category does not fit, one step lower confidence, or the taxonomy text instead of a model sentence that names a cost or legal conclusion; if it is unreachable while classifying, the photo shows Retry instead of a guessed grade), and falls back to `NullJudge` (no network) when unconfigured or unreachable.
+Everything that touches the model is behind `DefectAnalyzer` (`app/inference/`). Swapping the runtime means writing one other class. `Judge` (`app/inference/judge.py`) is a second, text-only boundary to TypeSafe's Jev model. It never sees a photo, never writes user-visible text (`app/classify.py` and `app/verify.py` map its probabilities to existing states: a better category when the label does not match (or the model's title when none is sure), one step lower confidence, or the taxonomy text instead of a model sentence that names a cost or legal conclusion; if it is unreachable while classifying, the photo shows Retry instead of a guessed grade), and falls back to `NullJudge` (no network) when unconfigured or unreachable.
 
 ## Deployment path for a nonprofit
 

@@ -59,3 +59,7 @@
 
 - **Same totals on rerun: v3 12 of 17, v4 10 of 17.** Per photo, v4 reliably fails the chimney and plumbing photos (Gemma's v4 sentence or the judge's `none_of_these`) and wobbles on the ceiling stains, electrical switches and termites. v3 is steadier. **Decision: drop classify (leave `DISCLOSURE_JUDGE_CLASSIFY` off); keep v3.**
 - **Verify on the 11 gradable v3 findings from the rerun:** it flagged the mold photo that Gemma labelled `hvac_heating` (`label_matches` 0.07, so the UI shows the model's title) and changed nothing on the 7 correct ones. It missed 3 wrong types (door frame, termites, window frame) because Gemma's sentence agreed with its own wrong label. Severity and the cost/legal guard never fired. **Decision: keep verify on.** It catches some self-contradictions; it is not a second pair of eyes on the photo.
+
+### Verify now moves the category (2026-10-24)
+
+When `label_matches` is below the no-threshold, verify asks the judge to pick a category from Gemma's text (one more call). If the pick is not `none_of_these`, differs from Gemma's type and has probability of at least 0.45, the finding moves to it: grade, cost, "pro", report section and the displayed label all follow, and confidence is capped at what the judge's probability supports (never raised). Otherwise the type stays and the model's own title is shown, as before. Limit: the judge only reads Gemma's sentence, so when the sentence describes the wrong thing (the mold photo, described as an HVAC fan) the move cannot fix it.

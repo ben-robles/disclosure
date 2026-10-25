@@ -2,7 +2,7 @@ import sqlite3
 
 from app.db import Database
 from app.inference.analyzer import Finding, unclear_finding
-from app.inference.judge import OK, NullJudge, Verdict
+from app.inference.judge import OK, UNAVAILABLE, NullJudge, Verdict
 from app.queue import Worker
 from app.verify import verify_finding
 from tests.fake_analyzer import FakeAnalyzer
@@ -141,3 +141,65 @@ def test_old_database_gets_judge_columns(tmp_path):
         c.row_factory = sqlite3.Row
         row = c.execute("SELECT * FROM findings").fetchone()
     assert row["judge_status"] == "skipped" and row["judge_label_p"] is None and row["judge_top"] == "[]"
+
+
+# ---- label mismatch: the judge moves the finding to a better category ---------------------
+
+MISFIT = Verdict(OK, 0.05, 0.9, 0.0)
+
+
+def moved(top, **kw):
+    from app.inference.judge import TypeChoice
+    judge = FakeJudge(verdict=MISFIT, choice=TypeChoice(OK, top))
+    return verify_finding(judge, finding(**kw)), judge
+
+
+def test_mismatch_moves_to_the_judges_category_and_it_displays_as_that_category():
+    f, judge = moved([("plumbing", 0.9), ("roof", 0.05)])
+    assert (f.defect_type, f.category_fits, f.confidence) == ("plumbing", True, "high")
+    assert f.judge_top[0] == ["plumbing", 0.9]
+    assert [c[0] for c in judge.calls] == ["verify", "classify"]
+    from app import present
+    row = dict(vars(f), edited=0)
+    assert present.display_label(row, {"label": "Plumbing problem"}) == "Plumbing problem"
+
+
+def test_move_lowers_confidence_when_the_judge_is_less_sure():
+    f, _ = moved([("plumbing", 0.6)])
+    assert (f.defect_type, f.confidence) == ("plumbing", "medium")
+
+
+def test_move_never_raises_confidence():
+    f, _ = moved([("plumbing", 0.95)], confidence="medium")
+    assert (f.defect_type, f.confidence) == ("plumbing", "medium")
+
+
+def test_unsure_judge_keeps_the_type_and_shows_the_title():
+    f, _ = moved([("plumbing", 0.3), ("roof", 0.2)])
+    assert (f.defect_type, f.category_fits) == ("roof", False)
+
+
+def test_none_of_these_keeps_the_type_and_shows_the_title():
+    from app.inference.judge import NONE_OF_THESE
+    f, _ = moved([(NONE_OF_THESE, 0.95)])
+    assert (f.defect_type, f.category_fits) == ("roof", False)
+
+
+def test_judge_agreeing_with_gemmas_type_still_shows_the_title():
+    f, _ = moved([("roof", 0.95)])  # the two judge questions disagree: do not trust either
+    assert (f.defect_type, f.category_fits) == ("roof", False)
+
+
+def test_classify_failure_falls_back_to_the_title():
+    class HalfDown(FakeJudge):
+        def classify(self, reason, title):
+            from app.inference.judge import TypeChoice
+            return TypeChoice(UNAVAILABLE)
+    f = verify_finding(HalfDown(verdict=MISFIT), finding())
+    assert (f.defect_type, f.category_fits) == ("roof", False)
+
+
+def test_good_label_never_asks_for_a_new_category():
+    judge = FakeJudge(verdict=Verdict(OK, 0.9, 0.9, 0.0))
+    verify_finding(judge, finding())
+    assert [c[0] for c in judge.calls] == ["verify"]
