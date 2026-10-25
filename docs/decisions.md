@@ -46,3 +46,11 @@
 - **A dollar sign followed by a digit is also caught by regex**, independent of the judge, so a cost in model text is scrubbed even when the judge is down.
 - **Not wired:** the single-photo `/api/analyze` route used by the React UI still returns Gemma's raw finding. Verify and classify apply only to the stored-session worker.
 - **v4 vs v3:** run `run_test_set.py` and `run_test_set.py --classify`; both sections land in `docs/test-results.md`. If v4 scores lower on `exact_match`, keep v3 (leave the classify flag off) and note it here.
+
+### v3 vs v4 on the test set (2026-10-24, gemma4:e4b, TypeSafe `jev-latest`, one run each)
+
+- **v3 (Gemma names the type): 12 of 17 exact_match. v4 (judge picks the type): 10 of 17.** Per the rule above, v3 stays and `DISCLOSURE_JUDGE_CLASSIFY` stays off.
+- v3 misses: mold photo (called `unclear`), brick crack (`siding_exterior`), window and door rot (`pest_wood_damage`, `siding_exterior`), termites (`water_intrusion`).
+- v4 fixed the brick crack and the door rot but lost the ceiling stain, mold, open switches, the plumbing leak (Gemma called the photo blurry) and the chimney (judge `none_of_these`).
+- Most v4 misses start in Gemma's sentence, not the judge: the judge scored those sentences low against the expected details too (for example `mentions_expected_p` 0.14 on the ceiling stain). A single run each, 15 photos, so differences of a few photos are noise. Rerun before drawing more from it.
+- Judge mean scores are close: `mentions_expected_p` 0.52 (v3) and 0.51 (v4), `type_consistent_p` 0.67 and 0.63.
