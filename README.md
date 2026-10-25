@@ -2,9 +2,10 @@
 
 **Photograph a home's problems. Review the AI's findings. Create a disclosure report.**
 
-Built for **GDG Build with AI x Hacktoberfest 2026: AI for Housing**, Disclosure helps home sellers turn photos of visible problems into a PDF report they review and approve.
+**GDG Build with AI x Hacktoberfest 2026: AI for Housing**
+Disclosure helps home sellers turn photos of visible problems into a PDF report.
 
-**[Try Disclosure](https://disclosure-app-jyruvsvlxa-uk.a.run.app/)** — hosted on Google Cloud Run. No installation required.
+**[Try Disclosure](https://disclosure-app-jyruvsvlxa-uk.a.run.app/)** — hosted on Google Cloud Run.
 
 **Gemma 4 analyzes the photos and provides information, but the final decision is up to the user.** The website connects to Gemma on a private Google Cloud server with a GPU. Developers can also run Gemma on their own computer using Ollama.
 
