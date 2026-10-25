@@ -86,3 +86,10 @@ def test_classify_ranks_and_shuffles_options():
 def test_classify_rejects_unknown_option():
     client = FakeClient({"defect_type": NS(probabilities={"made_up": 1.0})})
     assert TypeSafeJudge(client).classify("r", "t").status == UNAVAILABLE
+
+
+def test_missing_sdk_is_unavailable_not_raised(monkeypatch):
+    import sys
+    monkeypatch.setitem(sys.modules, "typesafe_sdk", None)  # `import typesafe_sdk` now raises
+    j = TypeSafeJudge(FakeClient({}))
+    assert j.verify({}).status == j.evaluate({}).status == j.classify("r", "t").status == UNAVAILABLE

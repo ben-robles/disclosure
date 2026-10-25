@@ -87,9 +87,14 @@ class TypeSafeJudge(Judge):
         self.model = model or config.TYPESAFE_MODEL
         self.rng = rng or random.Random()
 
-    def _ask(self, state, questions):
-        """Run one request; return the answers dict, or None on any failure."""
+    def _ask(self, state, build_questions):
+        """Run one request; return the answers dict, or None on any failure.
+
+        build_questions is called inside the try so an SDK import or question error is a
+        judge failure, not a crash.
+        """
         try:
+            questions = build_questions()
             if self._client is None:
                 from typesafe_sdk import RetryPolicy, TypeSafeClient
                 self._client = TypeSafeClient(
@@ -106,8 +111,9 @@ class TypeSafeJudge(Judge):
         return float(answers[key].noul)
 
     def verify(self, state):
-        from typesafe_sdk import Noul
-        answers = self._ask(state, {
+        def questions():
+            from typesafe_sdk import Noul
+            return {
             "label_matches": Noul(instructions=(
                 "Does the description in `reason` and `title` show the problem named by "
                 "`defect_type_label` (things to look for: `defect_type_look_for`)?")),
@@ -117,7 +123,8 @@ class TypeSafeJudge(Judge):
             "has_cost_or_legal": Noul(instructions=(
                 "Does `reason` or `title` state a dollar amount, a legal conclusion, or "
                 "liability language?")),
-        })
+            }
+        answers = self._ask(state, questions)
         try:
             return Verdict(OK, self._noul(answers, "label_matches"),
                            self._noul(answers, "severity_plausible"),
@@ -126,14 +133,16 @@ class TypeSafeJudge(Judge):
             return Verdict(UNAVAILABLE)
 
     def evaluate(self, state):
-        from typesafe_sdk import Noul
-        answers = self._ask(state, {
+        def questions():
+            from typesafe_sdk import Noul
+            return {
             "mentions_expected": Noul(instructions=(
                 "Does `model_reason` or `model_title` describe `expected_details`?")),
             "type_consistent": Noul(instructions=(
                 "Does `model_reason` describe damage of the kind named by "
                 "`expected_defect_type`?")),
-        })
+            }
+        answers = self._ask(state, questions)
         try:
             return EvalVerdict(OK, self._noul(answers, "mentions_expected"),
                                self._noul(answers, "type_consistent"))
@@ -141,15 +150,17 @@ class TypeSafeJudge(Judge):
             return EvalVerdict(UNAVAILABLE)
 
     def classify(self, reason, title):
-        from typesafe_sdk import Choice
         options = list(_taxonomy_options().items())
         self.rng.shuffle(options)  # Jev leans toward the first option; vary it per request
         criteria = dict(options)
         criteria[NONE_OF_THESE] = "The description does not match any other option."
-        answers = self._ask({"reason": reason, "title": title}, {
-            "defect_type": Choice(
+
+        def questions():
+            from typesafe_sdk import Choice
+            return {"defect_type": Choice(
                 instructions="Which problem does the description in `reason` and `title` name?",
-                criteria=criteria)})
+                criteria=criteria)}
+        answers = self._ask({"reason": reason, "title": title}, questions)
         try:
             probs = answers["defect_type"].probabilities
             ranked = sorted(probs.items(), key=lambda kv: kv[1], reverse=True)[:3]
