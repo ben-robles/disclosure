@@ -18,7 +18,6 @@ def _load_dotenv(path: Path) -> None:
 
 _load_dotenv(ROOT / ".env")
 ASSETS_DIR = ROOT / "assets"
-STATIC_DIR = ROOT / "static"
 DATA_DIR = Path(os.environ.get("DISCLOSURE_DATA_DIR", ROOT / "data"))
 
 # Ollama on this computer, or the Cloud Run proxy on port 9090 (see cloud/README.md).

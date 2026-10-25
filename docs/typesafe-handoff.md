@@ -12,7 +12,7 @@ Read first, in this order:
 3. `app/grading.py`, `app/present.py` (how a Finding becomes a grade and display row).
 4. `scripts/run_test_set.py`, `docs/gate0.md`, `assets/test_photos/ATTRIBUTION.md`,
    `assets/test_photos/test_photos.csv` (the eval surface).
-5. `tests/test_no_network.py` (hard rule: no external URL literal in `app/`, `static/`,
+5. `tests/test_no_network.py` (hard rule: no external URL literal in `app/`,
    `scripts/`, `cloud/`, `run.ps1`).
 6. The `/typesafe-ai` skill, then live docs: `https://docs.typesafe.ai/sdk/python.md`,
    `https://docs.typesafe.ai/primitives/noul.md`,

@@ -13,7 +13,7 @@ Neither has been validated for Disclosure on the Windows demo laptop yet.
 The app asks for a fixed defect category and a short JSON finding. That makes a
 smaller model a reasonable candidate, but does not establish that it will identify
 defects reliably. Do not promise a speedup factor or acceptable accuracy before
-measuring them. Keep Gemma 4 and local inference as required by `PLAN.md`.
+measuring them. Keep Gemma 4 and local inference as required by `planning/PLAN.md`.
 
 | Model | Role in the comparison |
 |---|---|
@@ -55,10 +55,9 @@ DISCLOSURE_WORKERS=1
 ```
 
 Restart the backend after changing the settings. On Windows, use `.\run.ps1`;
-use `.\run.ps1 -Lan` for the phone demo. This starts the plain JavaScript app in
-`static/`. The separate React app uses the same analyzer through `/api/analyze`,
-but owns its queue in the browser; the server worker setting does not control
-that browser queue.
+use `.\run.ps1 -Lan` for the phone demo. This starts the API. The React app in
+`frontend/` uses the analyzer through `/api/analyze`, but owns its queue in the
+browser; the server worker setting does not control that browser queue.
 
 ## Work order for the next session
 
@@ -150,7 +149,7 @@ that browser queue.
   `ready` value. Verify the actual configured model and successful inference;
   do not treat either readiness indicator as certification.
 - If both small variants fail Gate 0, follow the runtime ladder and human-input
-  requirements in `PLAN.md`; do not silently use hosted inference.
+  requirements in `planning/PLAN.md`; do not silently use hosted inference.
 
 ## Verification at handoff
 

@@ -32,3 +32,6 @@ dist-ssr
 *.sw?
 
 .superdesign/tmp/
+
+# Lovable tool internals
+.lovable/

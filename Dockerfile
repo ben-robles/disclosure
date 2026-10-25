@@ -18,7 +18,6 @@ COPY --from=web /usr/local/bin/node /usr/local/bin/node
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app app
-COPY static static
 COPY assets assets
 COPY --from=web /web/.output web
 COPY cloud/gateway.mjs cloud/start.sh ./

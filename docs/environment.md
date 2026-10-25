@@ -1,6 +1,6 @@
 # Environment — Windows demo measurements pending
 
-Certification target: the Windows demo laptop specified in PLAN.md.
+Certification target: the Windows demo laptop specified in planning/PLAN.md.
 The current development session is on an Apple Silicon Mac; its specifications
 and test timings do not represent the certification machine.
 

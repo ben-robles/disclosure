@@ -175,13 +175,13 @@ DISCLOSURE_MODEL=gemma4:e4b .venv/bin/python -m uvicorn app.main:create_app --fa
 .venv/bin/python -m tests.dev_server
 ```
 
-On Windows, use `.\.venv\Scripts\python -m tests.dev_server`. Open **http://localhost:8001**. This mode runs the real app with preset AI responses so you can try the interface and reports.
+On Windows, use `.\.venv\Scripts\python -m tests.dev_server`. This runs the real API on **http://localhost:8001** with preset AI responses, for API and PDF checks. To try the React interface without a model, use `VITE_MOCK_ANALYZER=1` (below).
 
 ### React interface
 
-Python serves the default HTML/CSS/JavaScript app in `static/`; it does not require Node.js. To run the separate React interface, start the Python backend, then run `npm install` and `npm run dev` from `frontend/`.
+The Python backend serves the API only. The web app is the React interface in `frontend/`: start the Python backend, then run `npm install` and `npm run dev` from `frontend/`.
 
-Vite forwards `/api` requests to port 8000. The React interface stores sessions in browser `localStorage`, queues photos for analysis, and creates PDFs. Use `VITE_MOCK_ANALYZER=1` for preset AI responses. Both interfaces use the backend's TypeSafe checks.
+Vite forwards `/api` requests to port 8000. The React interface stores sessions in browser `localStorage`, queues photos for analysis, and creates PDFs. Use `VITE_MOCK_ANALYZER=1` for preset AI responses. The backend's TypeSafe checks apply to every analysis.
 
 ### Configuration
 

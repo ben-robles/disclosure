@@ -97,7 +97,7 @@ If E2B fails image specificity or latency, retain its evidence and try once:
 .\scripts\gate0_windows.ps1 -Model gemma4:e4b
 ```
 
-If both variants fail, leave Gate 0 failed. Follow PLAN.md's runtime ladder:
+If both variants fail, leave Gate 0 failed. Follow planning/PLAN.md's runtime ladder:
 request a Hugging Face account/terms acceptance before LiteRT-LM, and ask before
 llama.cpp. Do not use hosted inference. The full adversarial dataset and accuracy
 study remain separate work; these two photos only establish the initial vision gate.

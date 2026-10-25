@@ -40,9 +40,9 @@ try {
 }
 
 Write-Host ""
-Write-Host "This port serves the API and the OLD plain-HTML page in static/. The current site is the React app:" -ForegroundColor Yellow
+Write-Host "This port serves the API only. The site is the React app:" -ForegroundColor Yellow
 Write-Host "  cd frontend; npm run dev   ->  http://127.0.0.1:5173  (proxies /api to this port)" -ForegroundColor Yellow
-Write-Host "Open on this computer:  http://127.0.0.1:$Port  (old page)"
+Write-Host "API on this computer:  http://127.0.0.1:$Port"
 if ($Lan) {
     $ips = Get-NetIPAddress -AddressFamily IPv4 |
         Where-Object { $_.IPAddress -notmatch "^(127|169\.254)\." -and $_.PrefixOrigin -ne "WellKnown" }

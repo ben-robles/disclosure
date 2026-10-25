@@ -9,7 +9,7 @@ URL = re.compile(r"https?://[^\s\"'<>)\]]+")
 ALLOWED = re.compile(
     r"^https?://((127\.0\.0\.1|localhost)(:(\d+|\$\w+))?([/?#].*)?|\$\(.*"
     r"|metadata\.google\.internal/.*)$")
-FOLDERS = ("app", "static", "scripts", "cloud")
+FOLDERS = ("app", "scripts", "cloud")
 SUFFIXES = {".py", ".js", ".html", ".css", ".ps1"}
 EXTRA_FILES = ("run.ps1",)
 
@@ -45,7 +45,7 @@ def test_scanner_covers_cloud_and_powershell(tmp_path, monkeypatch):
     (tmp_path / "cloud").mkdir()
     (tmp_path / "cloud" / "deploy.ps1").write_text('Write-Host "https://evil.example"', encoding="utf-8")
     (tmp_path / "cloud" / "Dockerfile").write_text("FROM x\n# https://evil2.example\n", encoding="utf-8")
-    for f in ("app", "static", "scripts"):
+    for f in ("app", "scripts"):
         (tmp_path / f).mkdir()
     monkeypatch.setattr(mod, "ROOT", tmp_path)
     offenders = mod.find_offenders()

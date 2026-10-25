@@ -7,7 +7,6 @@ from typing import Optional
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, Response
-from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from . import classify, config, mailer, present
@@ -283,11 +282,10 @@ def create_app(analyzer: Optional[DefectAnalyzer] = None, data_dir: Optional[Pat
             raise HTTPException(502, "We couldn't send the email. Try again, or download the PDF.")
         return {"ok": True}
 
-    # ---- static -----------------------------------------------------------
-    @app.get("/")
+    @app.get("/", include_in_schema=False)
     def index():
-        return FileResponse(config.STATIC_DIR / "index.html",
-                            headers={"Content-Security-Policy": CSP, "Cache-Control": "no-cache"})
+        return Response("Disclosure API. The web app is the React front end in frontend/ "
+                        "(npm run dev, or the Cloud Run deployment).\n",
+                        media_type="text/plain", headers={"Content-Security-Policy": CSP})
 
-    app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
     return app
